@@ -1,0 +1,71 @@
+#Uncomment the "servlet" and "context-path" lines below to make the fhir endpoint available at /example/path/fhir instead of the default value of /fhir
+server:
+#  servlet:
+#    context-path: /noges
+  port: 8080
+#Adds the option to go to eg. http://localhost:8080/actuator/health for seeing the running configuration
+#see https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+#spring:
+#  main:
+#    allow-circular-references: true
+#    #allow-bean-definition-overriding: true
+#  flyway:
+#    enabled: false
+#    baselineOnMigrate: true
+#    fail-on-missing-locations: false
+  #datasource:
+    #url: 'jdbc:h2:file:./target/database/h2'
+  #  url: "jdbc:postgresql://localhost:5432/ssntei"
+  #  username: postgres
+  #  password: admin
+  #  driverClassName: org.postgresql.Driver
+  #  max-active: 15
+
+    # database connection pool size
+  #  hikari:
+  #    maximum-pool-size: 10
+  #jpa:
+  #  properties:
+  #    hibernate.format_sql: false
+  #    hibernate.show_sql: false
+
+      #Hibernate dialect is automatically detected except Postgres and H2.
+      #If using H2, then supply the value of ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect
+      #If using postgres, then supply the value of ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect
+  #    hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  #    hibernate.hbm2ddl.auto: update
+  #      hibernate.jdbc.batch_size: 20
+  #      hibernate.cache.use_query_cache: false
+  #      hibernate.cache.use_second_level_cache: false
+  #      hibernate.cache.use_structured_entries: false
+  #      hibernate.cache.use_minimal_puts: false
+
+  ###    These settings will enable fulltext search with lucene or elastic
+  #    hibernate.search.enabled: true
+  ### lucene parameters
+#      hibernate.search.backend.type: lucene
+#      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers$HapiLuceneAnalysisConfigurer
+#      hibernate.search.backend.directory.type: local-filesystem
+#      hibernate.search.backend.directory.root: target/lucenefiles
+#      hibernate.search.backend.lucene_version: lucene_current
+  ### elastic parameters ===> see also elasticsearch section below <===
+#      hibernate.search.backend.type: elasticsearch
+#      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers$HapiElasticAnalysisConfigurer
+
+  #rabbitmq:
+#    host: 34.176.137.105
+  #  host: localhost
+  #  port: 5673
+    #username: admin
+    #password: g8Fm01Hie7QlVlTceyoCpNIOIQHmTdHDq
+  #  username: admin
+  #  password: admin
+
