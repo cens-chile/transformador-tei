@@ -34,12 +34,6 @@ public class StructureMapResourceProvider implements IResourceProvider{
     
     BundleIniciarTransformer bundleIniciarTransformer;
 
-    public StructureMapResourceProvider() {
-    }
-
-    
-    
-    
     public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.bundleIniciarTransformer = iniciarTransformer;
@@ -74,7 +68,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
         
         if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetIniciarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-            res = bundleIniciarTransformer.buildBundleIniciar(data);
+            res = bundleIniciarTransformer.buildBundle(data);
             
         }
        

@@ -8,6 +8,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -95,6 +98,16 @@ public class HapiFhirUtils {
         JsonNode get = node.get(value);
         if(get!=null && !get.asText().isBlank())
             return get.asText();
+        return null;
+    }
+    
+    public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException{
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        JsonNode get = node.get(value);
+        if(get!=null && !get.asText().isBlank()){
+            System.out.println("get = " + get.asText());
+            return formatter.parse(get.asText());
+        }
         return null;
     }
 }
