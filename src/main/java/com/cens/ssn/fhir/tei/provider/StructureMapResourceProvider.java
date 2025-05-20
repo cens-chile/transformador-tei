@@ -72,9 +72,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
             
         }
         else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
-            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-            
-            
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));  
         }
        
         else{

@@ -13,9 +13,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Type;
 
 /**
  *
@@ -93,10 +96,19 @@ public class HapiFhirUtils {
     }
     
     
+    public static String readIntValueFromJsonNode(String value, JsonNode node){
+        
+        JsonNode get = node.get(value);
+        if(get!=null && get.isInt())
+            return get.asText();
+        return null;
+    }
+    
+    
     public static String readStringValueFromJsonNode(String value, JsonNode node){
         
         JsonNode get = node.get(value);
-        if(get!=null && !get.asText().isBlank())
+        if(get!=null && !get.asText().isBlank() && get.isTextual())
             return get.asText();
         return null;
     }
@@ -109,5 +121,25 @@ public class HapiFhirUtils {
             return formatter.parse(get.asText());
         }
         return null;
+    }
+    
+    public static Boolean readBooleanValueFromJsonNode(String value, JsonNode node){
+        
+        JsonNode get = node.get(value);
+        if(get!=null )
+            return get.asBoolean();
+        return null;
+    }
+    
+    public static Extension buildBooleanExt(String url,boolean value){
+        Extension ex =  new Extension(url);
+        ex.setValue(new BooleanType(value));
+        return ex;
+    }
+    
+    public static Extension buildExtension(String url, Type t){
+        Extension ex =  new Extension(url);
+        ex.setValue(t);
+        return ex;
     }
 }
