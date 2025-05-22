@@ -17,24 +17,50 @@ import java.util.Date;
  * @author Juan F. <jfanasco@cens.cl>
  */
 @Component
-public class PrestadorProfesionalTransformer {
+public class PrestadorTransformer {
 
-    private static final String PROFILE = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE";
 
-    public Practitioner transform(JsonNode node, OperationOutcome oo) throws ParseException {
+
+    public Practitioner transform( String profile, JsonNode node, OperationOutcome oo){
+
+        String prestadorPro = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE";
+        String prestadorAdm = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE";
+
         Practitioner practitioner = new Practitioner();
-        practitioner.getMeta().addProfile(PROFILE);
+        practitioner.getMeta().addProfile(profile);
         practitioner.getMeta().setLastUpdated(new Date());
 
         // ID
+
         practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
+
+
+        String idGen = HapiFhirUtils.readStringValueFromJsonNode("identidadDeGenero", node);
+
+        if(idGen != null){
+            Extension idGeneroExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-IdentidadDeGenero.html", new StringType(idGen));
+            practitioner.addExtension(idGeneroExt);
+        }
+
+
+        if(profile.equals(prestadorPro)) {
+            String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
+            if (idGen != null) {
+                Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-CodigoPaises.html", new StringType(nacionalidad));
+                practitioner.addExtension(nacionalidadExt);
+            }
+        }
 
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
         if (identificadores != null) {
             addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-            addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
+            if(profile.equals(prestadorPro)) {
+                addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
+            }
         }
+
+
 
         // Activo
         if (HapiFhirUtils.readBooleanValueFromJsonNode("activo", node) != null){
@@ -67,18 +93,28 @@ public class PrestadorProfesionalTransformer {
         }
 
         // Género
-        String genero = HapiFhirUtils.readStringValueFromJsonNode("sexo", node);
+        String genero = HapiFhirUtils.readStringValueFromJsonNode("genero", node);
         if ("masculino".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.MALE);
         } else if ("femenino".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);
+        } else if ("otro".equalsIgnoreCase(genero)) {
+            practitioner.setGender(Enumerations.AdministrativeGender.OTHER);
         } else {
             practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
         }
 
         // Fecha de nacimiento
-        if(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
-            practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
+        try {
+            if(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
+                try {
+                    practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
         // Contacto
         JsonNode contacto = node.get("contacto");
@@ -127,28 +163,15 @@ public class PrestadorProfesionalTransformer {
             practitioner.addAddress(address);
         }
 
-        // Calificaciones (títulos, especialidades, subespecialidades, etc.)
-        addQualifications(practitioner, node.get("titulosProfesionales"), "MEDICO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTitulosProfesionales", "cert");
-        addQualifications(practitioner, node.get("especialidadesMedicas"), "CARDIOLOGIA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadesMedicas", "esp");
-        addQualifications(practitioner, node.get("subespecialidadesMedicas"), "SUBESP", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSSubespecialidadesMedicas", "subesp");
-        addQualifications(practitioner, node.get("especialidadesOdontologicas"), "ODO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadesOdontologicas", "odo");
-        addQualifications(practitioner, node.get("especialidadesBioquimicas"), "BIOQ", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadesBioquimicas", "bioq");
-        addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "FARMA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadesFarmacologicas", "farma");
-
-        // Idiomas
-        JsonNode idiomas = node.get("idiomas");
-        if (idiomas != null && idiomas.isArray()) {
-            for (JsonNode idioma : idiomas) {
-                CodeableConcept cc = new CodeableConcept();
-                Coding coding = new Coding()
-                        .setSystem("urn:ietf:bcp:47")
-                        .setCode(HapiFhirUtils.readStringValueFromJsonNode("codigo", idioma))
-                        .setDisplay(HapiFhirUtils.readStringValueFromJsonNode("nombre", idioma));
-                cc.addCoding(coding);
-                practitioner.addCommunication(cc);
-            }
+        if(profile.equals(prestadorPro)) {
+            // Calificaciones (títulos, especialidades, subespecialidades, etc.)
+            addQualifications(practitioner, node.get("titulosProfesionales"), "MEDICO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
+            addQualifications(practitioner, node.get("especialidadesMedicas"), "CARDIOLOGIA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
+            addQualifications(practitioner, node.get("subespecialidadesMedicas"), "SUBESP", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
+            addQualifications(practitioner, node.get("especialidadesOdontologicas"), "ODO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
+            addQualifications(practitioner, node.get("especialidadesBioquimicas"), "BIOQ", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca", "EspBioQ");
+            addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "FARMA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma", "EspFarma");
         }
-
         return practitioner;
     }
 
@@ -165,9 +188,9 @@ public class PrestadorProfesionalTransformer {
         }
     }
 
-    private void addQualifications(Practitioner p, JsonNode arrayNode, String defaultCode, String system, String identifierValue) {
-        if (arrayNode != null && arrayNode.isArray()) {
-            for (JsonNode q : arrayNode) {
+    private void addQualifications(Practitioner p, JsonNode node, String defaultCode, String system, String identifierValue) {
+        if (node != null && node.isArray()) {
+            for (JsonNode q : node) {
                 Practitioner.PractitionerQualificationComponent qual = new Practitioner.PractitionerQualificationComponent();
                 qual.addIdentifier().setValue(identifierValue);
                 qual.setCode(new CodeableConcept().addCoding(
@@ -178,7 +201,13 @@ public class PrestadorProfesionalTransformer {
                 ).setText(HapiFhirUtils.readStringValueFromJsonNode("nombre", q)));
 
                 // Periodo
-                String start = HapiFhirUtils.readStringValueFromJsonNode("fechaEmision", q);
+                String start = null;
+                try {
+                    start = HapiFhirUtils.transformarFecha(HapiFhirUtils.readStringValueFromJsonNode("fechaEmision", q));
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
                 if (start != null) {
                     Period period = new Period();
                     period.setStartElement(new DateTimeType(start));

@@ -10,42 +10,39 @@ import com.cens.ssn.fhir.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.json.Json;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.*;
+import org.springframework.stereotype.Component;
+
 import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MessageHeader;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.PractitionerRole;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author José <jose.m.andrade@gmail.com>
+ * @author Juan F. <jfanasco@cens.cl>
  */
 @Component
-public class BundleIniciarTransformer {
-    
+public class BundleTerminarTransformer {
+
     FhirServerConfig fhirServerConfig;
-    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
-    
+    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleTerminarLE";
+
     MessageHeaderTransformer messageHeaderTransformer;
-    
-    
-    public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
-            MessageHeaderTransformer messageHeaderTransformer) {
+    PrestadorTransformer prestadorTransformer;
+
+
+    public BundleTerminarTransformer(FhirServerConfig fhirServerConfig,
+                                     MessageHeaderTransformer messageHeaderTransformer, PrestadorTransformer prestadorTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
+        this.prestadorTransformer = prestadorTransformer;
     }
     
     
-    public String buildBundle(String cmd){
+    public String buildBundle(String cmd) {
         ObjectMapper mapper = new ObjectMapper();
         
         String res;
@@ -59,29 +56,45 @@ public class BundleIniciarTransformer {
         JsonNode node;
         try {
             node = mapper.readTree(cmd);
-            String toString = node.toString();
 
         } catch (JsonProcessingException ex) {
-            java.util.logging.Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             throw new FHIRException(ex.getMessage());
         }
+
+
+
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
         if(get!=null)
             messageHeader = 
-                messageHeaderTransformer.coreDataSetTEIToMessageHeader(node.get("datosSistema"), out);
+                messageHeaderTransformer.coreDataSetTEIToMessageHeader(get, out);
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
+
 
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
         if(get!=null)
-            sr = buildServiceRequest(get, out);  
+            sr = buildServiceRequest(get, out);
         else
-             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
+            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
-        
+
+
+        get = node.get("prestadorAdministrativo");
+        Practitioner practitioner = null;
+        if(get!=null){
+            practitioner = prestadorTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE",get, out);
+        }
+        else if((get = node.get("prestadorProfesional")) != null){
+            practitioner = prestadorTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE",get, out);
+        }
+        else {
+            HapiFhirUtils.addNotFoundIssue("Prestador", out);
+        }
+
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
@@ -90,13 +103,17 @@ public class BundleIniciarTransformer {
         IdType mHId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(mHId.getIdPart())
                 .setResource(messageHeader);
-        
+
         IdType sRId = IdType.newRandomUuid();
-        
+
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
-        
-        setMessageHeaderReferences(messageHeader, new Reference(sr), null);
+
+        IdType pAId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(pAId.getIdPart())
+                .setResource(practitioner);
+
+        setMessageHeaderReferences(messageHeader, null, null);
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -124,9 +141,8 @@ public class BundleIniciarTransformer {
         try {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
-            //System.out.println("d = " + d.toString());
         } catch (ParseException ex) {
-            Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
         String moadalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);

@@ -13,9 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 
 /**
  *
@@ -91,7 +89,29 @@ public class HapiFhirUtils {
         issue.setDiagnostics(value+" have errors in definition ["+message+"]");
         out.getIssue().add(issue);
     }
-    
+
+    public static String transformarFecha(String fechaOriginal) throws ParseException {
+        if (fechaOriginal == null || fechaOriginal.isBlank()) {
+            return fechaOriginal;
+        }
+
+        // Validar si ya está en formato yyyy-MM-dd
+        if (fechaOriginal.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return fechaOriginal;
+        }
+
+        // Intentar transformar desde dd-MM-yyyy a yyyy-MM-dd
+        SimpleDateFormat formatoEntrada = new SimpleDateFormat("dd-MM-yyyy");
+        formatoEntrada.setLenient(false);
+
+        SimpleDateFormat formatoSalida = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date fecha = formatoEntrada.parse(fechaOriginal); // lanza ParseException si es inválido
+        return formatoSalida.format(fecha);
+
+    }
+
+
     
     public static String readStringValueFromJsonNode(String value, JsonNode node){
         
@@ -100,14 +120,79 @@ public class HapiFhirUtils {
             return get.asText();
         return null;
     }
+
+
     
-    public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException{
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException {
         JsonNode get = node.get(value);
-        if(get!=null && !get.asText().isBlank()){
-            System.out.println("get = " + get.asText());
-            return formatter.parse(get.asText());
+        if (get != null && !get.asText().isBlank()) {
+            String dateText = get.asText();
+            ParseException lastException = null;
+
+            for (String pattern : new String[]{"dd-MM-yyyy HH:mm:ss", "dd-MM-yyyy"}) {
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+                    //formatter.setLenient(false); // Para evitar que Java acepte fechas inválidas
+                    return formatter.parse(dateText);
+                } catch (ParseException e) {
+                    lastException = e;
+                }
+            }
+
+            // Si no se pudo parsear con ninguno de los formatos
+            throw lastException;
+        }
+
+        return null;
+    }
+
+    public static Boolean readBooleanValueFromJsonNode(String fieldName, JsonNode node) {
+        JsonNode field = node.get(fieldName);
+        if (field != null && field.isBoolean()) {
+            return field.booleanValue();
+        } else if (field != null && field.isTextual()) {
+            return Boolean.parseBoolean(field.textValue());
         }
         return null;
+    }
+
+    /**
+     * Agrega una extensión a un campo de tipo String en Address, con un CodeableConcept como valor.
+     *
+     * @param address El objeto Address al cual se le quiere agregar la extensión.
+     * @param fieldName El nombre del campo (por ejemplo: "city", "district", "state", "country").
+     * @param extensionUrl La URL de la estructura de la extensión (ej: RegionesCl, ComunasCl, etc.).
+     * @param system El sistema de codificación (ej: CodeSystem oficial).
+     * @param code El código del valor a agregar.
+     * @param display El valor textual que representa al código.
+     */
+    public static void addCodigoExtension(Address address, String fieldName, String extensionUrl,
+                                          String system, String code, String display) {
+        Extension extension = new Extension();
+        extension.setUrl(extensionUrl);
+
+        CodeableConcept concept = new CodeableConcept();
+        concept.addCoding(new Coding(system, code, display));
+        extension.setValue(concept);
+
+        switch (fieldName) {
+            case "ciudad":
+                address.getCityElement().addExtension(extension);
+                break;
+            case "provincia":
+                address.getDistrictElement().addExtension(extension);
+                break;
+            case "region":
+                address.getStateElement().addExtension(extension);
+                break;
+            case "pais":
+                address.getCountryElement().addExtension(extension);
+                break;
+            default:
+                throw new IllegalArgumentException("Campo de dirección no soportado para extensión: " + fieldName);
+        }
+    }
+
+    public static void addCodigoExtension(StringType cityElement, String extensionUrl, String system, JsonNode direccion, String s) {
     }
 }
