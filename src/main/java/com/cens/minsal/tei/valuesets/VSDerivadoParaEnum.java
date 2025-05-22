@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.cens.ssn.fhir.tei.valuesets;
+package com.cens.minsal.tei.valuesets;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +12,16 @@ import org.hl7.fhir.r4.model.Coding;
  *
  * @author José <jose.m.andrade@gmail.com>
  */
-public enum VSModalidadAtencionEnum {
+public enum VSDerivadoParaEnum {
     
-    PRESENCIAL("1"),REMOTA("2"),TELEMEDICINA("3");
+    CONFIRMACION("1"),CONTROL_ESPECIALISTA("2"),REALIZA_TRATAMIENTO("3"),
+    SEGUIMIENTO("4"),OTRO("5");
     
     private String code;
-    private static Map<String, VSModalidadAtencionEnum> VSModalidadAtencionEnum = null;
-    private static String system = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+    private static Map<String, VSDerivadoParaEnum> vsDerivadoParaEnum = null;
+    private static String system = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDerivadoParaCodigo";
 
-    VSModalidadAtencionEnum(String code) {
+    VSDerivadoParaEnum(String code) {
         this.code = code;
     }
 
@@ -30,13 +31,19 @@ public enum VSModalidadAtencionEnum {
     public String toDisplay() {
         switch (this.code) {
             case "1" -> {
-                return "Presencial";
+                return "Confirmación";
             }
             case "2" -> {
-                return "Remota";
+                return "Control especialista";
             }
             case "3" -> {
-                return "Telemedicina";
+                return "Realiza tratamiento";
+            }
+            case "4" -> {
+                return "Seguimiento";
+            }
+            case "5" -> {
+                return "Otro";
             }
             default -> {
             }
@@ -44,28 +51,34 @@ public enum VSModalidadAtencionEnum {
         return null;
     }
 
-    public static VSModalidadAtencionEnum fromCode(String theCode) {
-        Map<String, VSModalidadAtencionEnum> c2s = VSModalidadAtencionEnum;
+    public static VSDerivadoParaEnum fromCode(String theCode) {
+        Map<String, VSDerivadoParaEnum> c2s = vsDerivadoParaEnum;
         if (c2s == null) {
             c2s = new HashMap<>();
-            for (VSModalidadAtencionEnum next : values()) {
+            for (VSDerivadoParaEnum next : values()) {
                 c2s.put(next.getCode(), next);
             }
-            VSModalidadAtencionEnum = c2s;
+            vsDerivadoParaEnum = c2s;
         }
         return c2s.get(theCode);
     }
 
     public static String toCode(String entry) {
         switch (entry) {
-            case "Presencial" -> {
+            case "Confirmación" -> {
                 return "1";
             }
-            case "Remota" -> {
+            case "Control especialista" -> {
                 return "2";
             }
-            case "Telemedicina" -> {
+            case "Realiza tratamiento" -> {
                 return "3";
+            }
+            case "Seguimiento" -> {
+                return "4";
+            }
+            case "Otro" -> {
+                return "5";
             }
             default -> {
             }

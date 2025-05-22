@@ -6,7 +6,9 @@ package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.ssn.fhir.tei.valuesets.VSModalidadAtencionEnum;
+import com.cens.minsal.tei.valuesets.VSDerivadoParaEnum;
+import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
+import com.cens.minsal.tei.valuesets.VSEstadoInterconsultaEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,13 +18,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,7 +40,7 @@ public class BundleIniciarTransformer {
     
     FhirServerConfig fhirServerConfig;
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
-    
+    static final String snomedSystem = "http://snomed.info/sct";
     MessageHeaderTransformer messageHeaderTransformer;
     
     
@@ -79,7 +85,7 @@ public class BundleIniciarTransformer {
         if(get!=null)
             sr = buildServiceRequest(get, out);  
         else
-             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
+            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
         
         if (!out.getIssue().isEmpty()) {
@@ -102,6 +108,13 @@ public class BundleIniciarTransformer {
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         
         
+        //Contruir Indice Comorbilidad
+        if(node.get("indiceComorbilidad")!=null){
+            Observation buildIndiceComporbilidad = ObservationTransformer.buildIndiceComporbilidad(node);
+        IdType iCId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(iCId.getIdPart())
+                .setResource(buildIndiceComporbilidad);
+        }
         
         return res;
     }
@@ -129,9 +142,109 @@ public class BundleIniciarTransformer {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
-        String moadalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
-        Coding coding = VSModalidadAtencionEnum.fromCode(moadalidadAtencion).getCoding();
-        sr.getCategoryFirstRep().addCoding(coding);
+        String moadalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
+        if(moadalidadAtencion!=null){
+            VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(moadalidadAtencion);
+            if(fromCode!=null){
+                Coding coding = VSModalidadAtencionEnum.fromCode(moadalidadAtencion).getCoding();
+                sr.getCategoryFirstRep().addCoding(coding);
+            } 
+            else
+                HapiFhirUtils.addErrorIssue("modalidadAtencion","código no encontrado", oo);
+        }
+        else
+             HapiFhirUtils.addNotFoundIssue("modalidadAtencion", oo);
+        
+        String derivadoPara = HapiFhirUtils.readIntValueFromJsonNode("derivadoPara", node);
+        if(derivadoPara!=null){
+            VSDerivadoParaEnum fromCode = VSDerivadoParaEnum.fromCode(derivadoPara);
+            if(fromCode!=null){
+                Coding coding = VSDerivadoParaEnum.fromCode(derivadoPara).getCoding();
+                sr.getReasonCodeFirstRep().addCoding(coding);
+            } 
+            else
+                HapiFhirUtils.addErrorIssue("derivadoPara","código no encontrado", oo);
+        }
+        else
+             HapiFhirUtils.addNotFoundIssue("derivadoPara", oo);
+        
+        
+        
+        Coding c = new Coding(snomedSystem,"103696004","Patient referral to specialist");
+        sr.getCode().addCoding(c);
+        
+        String prioridadIc = HapiFhirUtils.readStringValueFromJsonNode("prioridadIc", node);
+        if(prioridadIc!=null){
+            
+            if(prioridadIc.equals("routine")){
+                sr.setPriority(ServiceRequest.ServiceRequestPriority.ROUTINE);
+            } 
+            else if(prioridadIc.equals("urgent")){
+                sr.setPriority(ServiceRequest.ServiceRequestPriority.URGENT);
+            } 
+            else
+                HapiFhirUtils.addErrorIssue("prioridadIc","código no encontrado", oo);
+        }
+        else
+             HapiFhirUtils.addNotFoundIssue("prioridadIc", oo);
+        
+        
+        
+        
+        Boolean atPreferente = HapiFhirUtils.readBooleanValueFromJsonNode("atencionPreferente", node);
+        if(atPreferente!=null){
+            if(!node.get("atencionPreferente").isBoolean())
+                HapiFhirUtils.addInvalidIssue("atencionPreferente", oo);
+            
+            Extension extAtPreferente = 
+                HapiFhirUtils.buildBooleanExt(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionBoolAtencionPreferente",
+                 atPreferente);
+            sr.addExtension(extAtPreferente);
+            
+        }
+        
+        Boolean resolutividadAPS = HapiFhirUtils.readBooleanValueFromJsonNode("resolutividadAPS", node);
+        if(atPreferente!=null){
+            if(!node.get("resolutividadAPS").isBoolean())
+                HapiFhirUtils.addInvalidIssue("resolutividadAPS", oo);
+            
+            Extension extResolutividadAPS = 
+                HapiFhirUtils.buildBooleanExt(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionBoolResolutividadAPS",
+                 resolutividadAPS);
+            sr.addExtension(extResolutividadAPS);
+            
+        }
+        
+        c = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSorigenInterconsulta"
+                ,"1","APS");
+        Extension origenIC = HapiFhirUtils.buildExtension(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionOrigenInterconsulta"
+                , c);
+        sr.addExtension(origenIC);
+        
+        String fundamentoPri = HapiFhirUtils.readStringValueFromJsonNode("fundamentoPriorizacion", node);
+        
+        Extension ext = HapiFhirUtils.buildExtension(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionStringFundamentoPriorizacion"
+                , new StringType(fundamentoPri));
+        sr.addExtension(ext);
+        
+        
+        ext = HapiFhirUtils.buildExtension(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE", 
+                new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_REFERENCIA.getCoding()));
+        
+        sr.addExtension(ext);
+        
+        
+        
+        
+        
         return sr;
     }
+    
+    
+    
 }

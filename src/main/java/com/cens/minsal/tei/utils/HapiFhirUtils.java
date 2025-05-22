@@ -113,16 +113,25 @@ public class HapiFhirUtils {
 
 
     
-    public static String readStringValueFromJsonNode(String value, JsonNode node){
-        
+    public static String readIntValueFromJsonNode(String value, JsonNode node){
+
         JsonNode get = node.get(value);
-        if(get!=null && !get.asText().isBlank())
+        if(get!=null && get.isInt())
             return get.asText();
         return null;
     }
 
 
-    
+    public static String readStringValueFromJsonNode(String value, JsonNode node){
+        
+        JsonNode get = node.get(value);
+        if(get!=null && !get.asText().isBlank() && get.isTextual())
+            return get.asText();
+        return null;
+    }
+
+
+
     public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException {
         JsonNode get = node.get(value);
         if (get != null && !get.asText().isBlank()) {
@@ -144,6 +153,19 @@ public class HapiFhirUtils {
         }
 
         return null;
+    }
+
+
+    public static Extension buildBooleanExt(String url,boolean value){
+        Extension ex =  new Extension(url);
+        ex.setValue(new BooleanType(value));
+        return ex;
+    }
+
+    public static Extension buildExtension(String url, Type t){
+        Extension ex =  new Extension(url);
+        ex.setValue(t);
+        return ex;
     }
 
     public static Boolean readBooleanValueFromJsonNode(String fieldName, JsonNode node) {
