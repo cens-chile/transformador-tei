@@ -6,7 +6,7 @@ package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.ssn.fhir.tei.valuesets.VSModalidadAtencionEnum;
+import com.cens.minsal.tei.valuesets.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

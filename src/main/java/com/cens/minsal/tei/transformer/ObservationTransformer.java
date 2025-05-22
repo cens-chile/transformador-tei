@@ -35,8 +35,7 @@ public class ObservationTransformer {
         
         
         VSIndiceComorbilidadValuexEnum fromCode = VSIndiceComorbilidadValuexEnum.fromCode(indice.asText());
-        
-        ob.setValue((new CodeableConcept()).addCoding(fromCode.getCoding()));
+        if(fromCode!=null)  ob.setValue((new CodeableConcept()).addCoding(fromCode.getCoding()));
         
         
         return ob;

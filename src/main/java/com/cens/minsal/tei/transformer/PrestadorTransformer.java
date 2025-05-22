@@ -165,12 +165,12 @@ public class PrestadorTransformer {
 
         if(profile.equals(prestadorPro)) {
             // Calificaciones (títulos, especialidades, subespecialidades, etc.)
-            addQualifications(practitioner, node.get("titulosProfesionales"), "MEDICO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
-            addQualifications(practitioner, node.get("especialidadesMedicas"), "CARDIOLOGIA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
-            addQualifications(practitioner, node.get("subespecialidadesMedicas"), "SUBESP", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
-            addQualifications(practitioner, node.get("especialidadesOdontologicas"), "ODO", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
-            addQualifications(practitioner, node.get("especialidadesBioquimicas"), "BIOQ", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca", "EspBioQ");
-            addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "FARMA", "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma", "EspFarma");
+            addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
+            addQualifications(practitioner, node.get("especialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
+            addQualifications(practitioner, node.get("subespecialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
+            addQualifications(practitioner, node.get("especialidadesOdontologicas"),  "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
+            addQualifications(practitioner, node.get("especialidadesBioquimicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca", "EspBioQ");
+            addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma", "EspFarma");
         }
         return practitioner;
     }
@@ -188,7 +188,7 @@ public class PrestadorTransformer {
         }
     }
 
-    private void addQualifications(Practitioner p, JsonNode node, String defaultCode, String system, String identifierValue) {
+    private void addQualifications(Practitioner p, JsonNode node, String system, String identifierValue) {
         if (node != null && node.isArray()) {
             for (JsonNode q : node) {
                 Practitioner.PractitionerQualificationComponent qual = new Practitioner.PractitionerQualificationComponent();
