@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 /**
  *
@@ -19,7 +20,7 @@ public class ObservationTransformer {
     
     static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIndiceComorbilidadLE";
     
-    public static Observation buildIndiceComporbilidad(JsonNode indice){
+    public static Observation buildIndiceComporbilidad(JsonNode indice, OperationOutcome oo){
         
         
         Observation ob = new Observation();
@@ -35,7 +36,10 @@ public class ObservationTransformer {
         
         
         VSIndiceComorbilidadValuexEnum fromCode = VSIndiceComorbilidadValuexEnum.fromCode(indice.asText());
-        
+        if(fromCode==null){
+            HapiFhirUtils.addErrorIssue("indiceComorbilidad","código no encontrado", oo);
+            return null;
+        }
         ob.setValue((new CodeableConcept()).addCoding(fromCode.getCoding()));
         
         

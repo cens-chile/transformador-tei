@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -88,6 +89,25 @@ public class BundleIniciarTransformer {
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
         
+        
+        //Construir Organización que inicia la IC
+        get = node.get("establecimientoAPS");
+        Organization org = null;
+        if(get!=null)
+            org = OrganizationTransformer.buildOrganization(get, out);
+        else
+            HapiFhirUtils.addNotFoundIssue("establecimientoAPS", out);
+        
+        //Contruir Indice Comorbilidad
+        Observation buildIndiceComorbilidad  = null;
+        if(node.get("indiceComorbilidad")!=null){
+           buildIndiceComorbilidad = ObservationTransformer.buildIndiceComporbilidad(node.get("indiceComorbilidad"),out); 
+            sr.getSupportingInfo().add(new Reference(buildIndiceComorbilidad));
+        }
+        
+        
+        
+        
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
@@ -105,16 +125,18 @@ public class BundleIniciarTransformer {
         setMessageHeaderReferences(messageHeader, new Reference(sr), null);
         
         
+        IdType iCId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(iCId.getIdPart())
+                .setResource(buildIndiceComorbilidad);
+            
+        IdType orgId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(orgId.getIdPart())
+                .setResource(org);
+        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         
         
-        //Contruir Indice Comorbilidad
-        if(node.get("indiceComorbilidad")!=null){
-            Observation buildIndiceComporbilidad = ObservationTransformer.buildIndiceComporbilidad(node);
-        IdType iCId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(iCId.getIdPart())
-                .setResource(buildIndiceComporbilidad);
-        }
+        
         
         return res;
     }
