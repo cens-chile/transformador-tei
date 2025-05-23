@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.transformer.BundleIniciarTransformer;
+import com.cens.minsal.tei.transformer.BundleTerminarTransformer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,10 +34,18 @@ public class StructureMapResourceProvider implements IResourceProvider{
     FhirServerConfig fhirServerConfig;
     
     BundleIniciarTransformer bundleIniciarTransformer;
+    BundleTerminarTransformer bundleTerminarTransformer;
 
-    public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer) {
+
+    public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer, BundleTerminarTransformer terminarTransformer) {
+
+        if (iniciarTransformer == null && terminarTransformer == null) {
+            throw new IllegalArgumentException("Debe proporcionar al menos iniciarTransformer o terminarTransformer");
+        }
+
         this.fhirServerConfig = fhirServerConfig;
         this.bundleIniciarTransformer = iniciarTransformer;
+        this.bundleTerminarTransformer = terminarTransformer;
     }
     
     
@@ -65,11 +74,14 @@ public class StructureMapResourceProvider implements IResourceProvider{
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         String res = "";
-        
         if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetIniciarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleIniciarTransformer.buildBundle(data);
             
+        } else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            res = bundleTerminarTransformer.buildBundle(data);
+
         }
         else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));  
