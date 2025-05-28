@@ -65,7 +65,6 @@ public class BundleIniciarTransformer {
         JsonNode node;
         try {
             node = mapper.readTree(cmd);
-            String toString = node.toString();
 
         } catch (JsonProcessingException ex) {
             java.util.logging.Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
@@ -103,8 +102,6 @@ public class BundleIniciarTransformer {
                 .setResource(sr);
         
         setMessageHeaderReferences(messageHeader, new Reference(sr), null);
-        
-        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         
         
@@ -142,11 +139,13 @@ public class BundleIniciarTransformer {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
-        String moadalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
-        if(moadalidadAtencion!=null){
-            VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(moadalidadAtencion);
+        String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
+        System.out.println("modalidadAtencion::::::::::::::::::::::::"+ modalidadAtencion);
+        if(modalidadAtencion!=null){
+            VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
+            System.out.println("aaaaaaaaaaaa:"+fromCode.getCode());
             if(fromCode!=null){
-                Coding coding = VSModalidadAtencionEnum.fromCode(moadalidadAtencion).getCoding();
+                Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
                 sr.getCategoryFirstRep().addCoding(coding);
             } 
             else

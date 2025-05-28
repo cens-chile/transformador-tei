@@ -17,7 +17,7 @@ import java.util.Date;
  * @author Juan F. <jfanasco@cens.cl>
  */
 @Component
-public class PrestadorTransformer {
+public class PractitionerTransformer {
 
 
 

@@ -6,7 +6,7 @@ package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.minsal.tei.valuesets.*;
+import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,28 +24,30 @@ import java.util.logging.Logger;
  * @author Juan F. <jfanasco@cens.cl>
  */
 @Component
-public class BundleTerminarTransformer {
+public class BundleAtenderTransformer {
 
     FhirServerConfig fhirServerConfig;
-    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleTerminarLE";
+    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleAtenderLE";
 
     MessageHeaderTransformer messageHeaderTransformer;
     PractitionerTransformer practitionerTransformer;
     PractitionerRoleTransformer practitionerRoleTransformer;
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
+    CarePlanTransformer carePlanTransformer;
 
 
-    public BundleTerminarTransformer(FhirServerConfig fhirServerConfig,
-                                     MessageHeaderTransformer messageHeaderTransformer,
-                                     PractitionerTransformer practitionerTransformer,
-                                     PatientTransformer patientTransformer,
-                                     OrganizationTransformer organizationTransformer) {
+    public BundleAtenderTransformer(FhirServerConfig fhirServerConfig,
+                                    MessageHeaderTransformer messageHeaderTransformer,
+                                    PractitionerTransformer practitionerTransformer,
+                                    PatientTransformer patientTransformer,
+                                    OrganizationTransformer organizationTransformer,CarePlanTransformer carePlanTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
+        this.carePlanTransformer = carePlanTransformer;
     }
     
     
@@ -65,7 +67,7 @@ public class BundleTerminarTransformer {
             node = mapper.readTree(cmd);
 
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundleAtenderTransformer.class.getName()).log(Level.SEVERE, null, ex);
             throw new FHIRException(ex.getMessage());
         }
 
@@ -90,12 +92,9 @@ public class BundleTerminarTransformer {
 
 
         // Prestador
-        get = node.get("prestadorAdministrativo");
+        get = node.get("prestadorProfesional");
         Practitioner practitioner = null;
         if(get!=null){
-            practitioner = practitionerTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE",get, out);
-        }
-        else if((get = node.get("prestadorProfesional")) != null){
             practitioner = practitionerTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE",get, out);
         }
         else {
@@ -110,16 +109,6 @@ public class BundleTerminarTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
         }
-
-
-        get = node.get("paciente");
-        Patient patient = null;
-        if(get != null){
-            patient = patientTransformer.transform(get, out);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del paciente", out);
-        }
-
         get = node.get("establecimiento");
         Organization organization = null;
         if(get != null){
@@ -127,6 +116,94 @@ public class BundleTerminarTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
         }
+
+        /***********Encuentro
+        get = node.get("encuentro");
+        Encounter encounter = null;
+        if(get != null){
+            encounter = EncounterTransformer.transform(get, out);
+        } else {
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
+        }
+
+         */
+
+        get = node.get("planDeAtencion");
+        CarePlan  careplan = null;
+        if(get != null){
+            careplan = carePlanTransformer.transform(get, out);
+        } else {
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención", out);
+        }
+
+
+        /***********Condición
+         get = node.get("condicion");
+         Condition condition = null;
+         if(get != null){
+         condition = ConditionTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Condición del paciente", out);
+         }
+
+         */
+
+
+        /***********
+         get = node.get("alergiaIntolerancia");
+         AllergyIntolerance allergyIntolerance = null;
+         if(get != null){
+         allergyIntolerance = AllergyIntoleranceTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la AlergiaIntolerancia del paciente", out);
+         }
+
+         */
+
+        /*********** Observación Resultados Exámen
+         get = node.get("");
+         Observation observation = null;
+         if(get != null){
+         observation = ObservationTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         }
+
+         */
+
+        /*********** Solicitud de Medicamentos
+         get = node.get("");
+         Observation observation = null;
+         if(get != null){
+         observation = ObservationTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         }
+
+         */
+
+        /*********** Solicitud Exámen
+         get = node.get("");
+         Observation observation = null;
+         if(get != null){
+         observation = ObservationTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         }
+
+         */
+
+
+        /*********** Anamnesis
+         get = node.get("");
+         Anamnesis anamnesis = null;
+         if(get != null){
+         anamnesis = AnamnesisTransformer.transform(get, out);
+         } else {
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de la Anamnesis del paciente", out);
+         }
+
+         */
 
 
         if (!out.getIssue().isEmpty()) {
@@ -153,9 +230,6 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(pracRolId.getIdPart())
                 .setResource(practitionerRole);
 
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
 
         IdType orgId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(orgId.getIdPart())
@@ -187,7 +261,7 @@ public class BundleTerminarTransformer {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
         } catch (ParseException ex) {
-            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundleAtenderTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
