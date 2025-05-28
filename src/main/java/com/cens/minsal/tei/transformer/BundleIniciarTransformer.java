@@ -66,7 +66,6 @@ public class BundleIniciarTransformer {
         JsonNode node;
         try {
             node = mapper.readTree(cmd);
-            String toString = node.toString();
 
         } catch (JsonProcessingException ex) {
             java.util.logging.Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
@@ -91,13 +90,14 @@ public class BundleIniciarTransformer {
         
         
         //Construir Organización que inicia la IC
-        get = node.get("establecimientoAPS");
         Organization org = null;
-        if(get!=null)
-            org = OrganizationTransformer.buildOrganization(get, out);
-        else
+        try{
+            get = node.get("establecimiento").get("origen");
+            if(get!=null)
+                org = OrganizationTransformer.transform(get, out,"establecimiento.origen");
+        }catch(NullPointerException ex){
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS", out);
-        
+        }
         //Contruir Indice Comorbilidad
         Observation buildIndiceComorbilidad  = null;
         if(node.get("indiceComorbilidad")!=null){
@@ -164,11 +164,13 @@ public class BundleIniciarTransformer {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
-        String moadalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
-        if(moadalidadAtencion!=null){
-            VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(moadalidadAtencion);
+        String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
+        System.out.println("modalidadAtencion::::::::::::::::::::::::"+ modalidadAtencion);
+        if(modalidadAtencion!=null){
+            VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
+            System.out.println("aaaaaaaaaaaa:"+fromCode.getCode());
             if(fromCode!=null){
-                Coding coding = VSModalidadAtencionEnum.fromCode(moadalidadAtencion).getCoding();
+                Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
                 sr.getCategoryFirstRep().addCoding(coding);
             } 
             else

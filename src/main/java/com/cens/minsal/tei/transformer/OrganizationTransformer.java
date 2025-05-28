@@ -21,16 +21,18 @@ public class OrganizationTransformer {
     
     static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/OrganizationLE";
     
-    public static Organization buildOrganization(JsonNode node, OperationOutcome oo){
+    public static Organization transform(JsonNode node, OperationOutcome oo,String parentPath){
         
         
         Organization org = new Organization();
         org.getMeta().addProfile(profile);
+        
         String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", node);
+        
         if(nombre!=null)
             org.setName(nombre);
         else 
-            HapiFhirUtils.addNotFoundIssue("establecimientoAPS->nombre", oo);
+            HapiFhirUtils.addNotFoundIssue(parentPath+".nombre", oo);
         String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
         if(codigoDEIS!=null)
             org.getIdentifierFirstRep().setValue(codigoDEIS);

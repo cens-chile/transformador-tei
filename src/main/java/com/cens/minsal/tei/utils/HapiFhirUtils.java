@@ -114,10 +114,22 @@ public class HapiFhirUtils {
 
     
     public static String readIntValueFromJsonNode(String value, JsonNode node){
-
-        JsonNode get = node.get(value);
-        if(get!=null && get.isInt())
-            return get.asText();
+        JsonNode valueNode = node.get(value);
+        if (valueNode != null) {
+            if (valueNode.isInt() || valueNode.isLong()) {
+                return valueNode.asText();
+            } else if (valueNode.isTextual()) {
+                String text = valueNode.asText();
+                try {
+                    // Intentamos parsear el texto como un número
+                    Integer.parseInt(text); // O usar Long.parseLong(text) si esperas valores grandes
+                    return text;
+                } catch (NumberFormatException e) {
+                    // No es un número válido, devolver null
+                    return null;
+                }
+            }
+        }
         return null;
     }
 
@@ -213,6 +225,40 @@ public class HapiFhirUtils {
             default:
                 throw new IllegalArgumentException("Campo de dirección no soportado para extensión: " + fieldName);
         }
+    }
+
+    public static CodeableConcept buildCodeableConceptFromJson(JsonNode node) {
+        if (node == null || node.isEmpty()) return null;
+
+        CodeableConcept concept = new CodeableConcept();
+        JsonNode codingNode = node.get("coding");
+        if (codingNode != null && codingNode.isArray()) {
+            for (JsonNode cod : codingNode) {
+                String system = cod.has("system") ? cod.get("system").asText() : null;
+                String code = cod.has("code") ? cod.get("code").asText() : null;
+                String display = cod.has("display") ? cod.get("display").asText() : null;
+
+                if (system != null && code != null) {
+                    concept.addCoding(new Coding(system, code, display));
+                }
+            }
+        }
+
+        if (node.has("text")) {
+            concept.setText(node.get("text").asText());
+        }
+
+        return concept;
+    }
+
+
+    public static Date readDateTimeValueFromJsonNode(String field, JsonNode node, String format) throws ParseException {
+        JsonNode value = node.get(field);
+        if (value != null && !value.asText().isBlank()) {
+            SimpleDateFormat sdf = new SimpleDateFormat(format);
+            return sdf.parse(value.asText());
+        }
+        return null;
     }
 
     public static void addCodigoExtension(StringType cityElement, String extensionUrl, String system, JsonNode direccion, String s) {

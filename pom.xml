@@ -181,8 +181,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        
-    </dependencies>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r4</artifactId>
+                <version>6.3.11</version>
+            </dependency>
+
+        </dependencies>
     
      <build>
         <!-- 
@@ -235,7 +240,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <configuration>
                     <overlays>
                         <overlay>
