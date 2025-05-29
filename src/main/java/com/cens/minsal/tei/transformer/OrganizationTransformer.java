@@ -12,11 +12,13 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
  */
+@Component
 public class OrganizationTransformer {
     
     static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/OrganizationLE";
@@ -27,12 +29,13 @@ public class OrganizationTransformer {
         Organization org = new Organization();
         org.getMeta().addProfile(profile);
         
-        String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", node);
+        String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombreLegal", node);
+        System.out.println("+++++++++++++++++++++++++"+nombre);
         
         if(nombre!=null)
             org.setName(nombre);
         else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+".nombre", oo);
+            HapiFhirUtils.addNotFoundIssue(parentPath+"nombreLegal", oo);
         String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
         if(codigoDEIS!=null)
             org.getIdentifierFirstRep().setValue(codigoDEIS);

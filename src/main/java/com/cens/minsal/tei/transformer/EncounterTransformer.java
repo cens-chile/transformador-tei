@@ -4,10 +4,172 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.utils.HapiFhirUtils;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
+import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.List;
+
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
  */
 public class EncounterTransformer {
-    
+    public static Encounter transform(JsonNode json, OperationOutcome oo) {
+        Encounter encounter = new Encounter();
+        encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        // ID
+        if (json.hasNonNull("id")) {
+            encounter.setId(json.get("id").asText());
+        }
+
+        // Identificador
+        if (json.hasNonNull("idEncuentro")) {
+            Identifier identifier = new Identifier();
+            identifier.setValue(json.get("identificador").asText());
+            encounter.addIdentifier(identifier);
+        }
+
+        // Estado
+        if (json.has("estado")) {
+            JsonNode estado = json.get("estado");
+            if (estado.has("codigoEstado")) {
+                try {
+                    encounter.setStatus(EncounterStatus.fromCode(estado.get("codigoEstado").asText()));
+                } catch (Exception e) {
+                    HapiFhirUtils.addErrorIssue("Estado inválido: " + estado.get("codigoEstado").asText(), "codigoEstado",oo);
+                }
+            }
+        }
+
+        // Clase (modalidadAtencion)
+        if (json.has("modalidadAtencion")) {
+            Coding classCoding = new Coding();
+            JsonNode modalidad = json.get("modalidadAtencion");
+            classCoding.setCode(String.valueOf(modalidad.get("codigoModAtencion").asInt()));
+            classCoding.setSystem(modalidad.get("urlModalidadAtencion").asText());
+            encounter.setClass_(classCoding);
+        }
+
+        // Tipo de consulta (type)
+        if (json.has("tipoDeConsulta")) {
+            JsonNode tipoConsulta = json.get("tipoDeConsulta");
+            CodeableConcept typeConcept = new CodeableConcept();
+            Coding coding = new Coding();
+            coding.setCode(String.valueOf(tipoConsulta.get("codigoTipoConsulta").asInt()));
+            coding.setSystem(tipoConsulta.get("urlTipoConsulta").asText());
+            typeConcept.addCoding(coding);
+            encounter.addType(typeConcept);
+        }
+
+        // Tipo de servicio (serviceType)
+        if (json.has("tipoDeServicio")) {
+            JsonNode servicio = json.get("tipoDeServicio");
+            CodeableConcept serviceType = new CodeableConcept();
+            serviceType.addCoding(new Coding()
+                    .setCode(servicio.get("codigo").asText())
+                    .setSystem(servicio.get("urlTipoServicio").asText()));
+            encounter.setServiceType(serviceType);
+        }
+
+        // Paciente
+        if (json.has("paciente")) {
+            encounter.setSubject(new Reference(json.get("paciente").get("referenciaPaciente").asText()));
+        }
+
+        // Solicitud IC
+        if (json.has("solicitudIC")) {
+            encounter.addBasedOn(new Reference(json.get("solicitudIC").get("referenciaSIC").asText()));
+        }
+
+        // Participantes
+        if (json.has("participantes")) {
+            for (JsonNode p : json.get("participantes")) {
+                EncounterParticipantComponent comp = new EncounterParticipantComponent();
+                comp.addType(new CodeableConcept().addCoding(new Coding()
+                        .setCode(p.get("tipo").asText())
+                        .setSystem(p.get("urlTipoParticipante").asText())));
+                comp.setIndividual(new Reference(p.get("individuo").asText()));
+                encounter.addParticipant(comp);
+            }
+        }
+
+        // Cita médica
+        if (json.has("citaMedica")) {
+            encounter.setAppointment(List.of(new Reference(json.get("citaMedica").get("referenciaACitaMedica").asText())));
+        }
+
+        // Establecimiento
+        if (json.has("establecimiento")) {
+            encounter.setServiceProvider(new Reference(json.get("establecimiento").asText()));
+        }
+
+        // Período
+        if (json.has("periodo")) {
+            JsonNode periodo = json.get("periodo");
+            try {
+                Period period = new Period();
+                period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode( "fechaInicio",periodo,"dd-MM-yyyy HH:mm:SS"));
+                period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode( "fechaFin",periodo,"dd-MM-yyyy HH:mm:SS"));
+                encounter.setPeriod(period);
+            } catch (Exception e) {
+                HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);
+            }
+        }
+
+        // Duración (como extensión)
+        if (json.has("duracion")) {
+            Extension extension = HapiFhirUtils.buildExtension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-duracion-consulta",
+                    new Duration().setValue(json.get("duracion").decimalValue()).setUnit("min").setSystem("http://unitsofmeasure.org").setCode("min")
+            );
+            encounter.addExtension(extension);
+        }
+
+        // Pertinencia y motivoNoPertinencia (como extensiones)
+        if (json.has("pertinencia")) {
+            Extension extPertinencia = HapiFhirUtils.buildExtension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-pertinencia",
+                    new BooleanType(json.get("pertinencia").asBoolean()));
+            encounter.addExtension(extPertinencia);
+        }
+
+        if (json.has("motivoNoPertinencia")) {
+            Extension extMotivo = HapiFhirUtils.buildExtension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-motivo-no-pertinencia",
+                    new StringType(json.get("motivoNoPertinencia").asText()));
+            encounter.addExtension(extMotivo);
+        }
+
+        // Razones del encuentro
+        if (json.has("codigoRazonDelEncuentro")) {
+            for (JsonNode razon : json.get("codigoRazonDelEncuentro")) {
+                CodeableConcept reason = new CodeableConcept();
+                reason.addCoding(new Coding()
+                        .setCode(razon.get("codigoRazon").asText())
+                        .setSystem(razon.get("urlRazon").asText()));
+                encounter.addReasonCode(reason);
+            }
+        }
+
+        // Diagnósticos (referencias)
+        if (json.has("diagnosticos")) {
+            for (JsonNode dx : json.get("diagnosticos")) {
+                Encounter.DiagnosisComponent diag = new Encounter.DiagnosisComponent();
+                diag.setCondition(new Reference(dx.get("referenciaDiagnostico").asText()));
+                encounter.addDiagnosis(diag);
+
+            }
+        }
+
+        return encounter;
+    }
 }

@@ -109,24 +109,25 @@ public class BundleAtenderTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
         }
+
         get = node.get("establecimiento");
         Organization organization = null;
+        System.out.println("---------------------"+get);
         if(get != null){
             organization = OrganizationTransformer.transform(get, out,"");
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(establecimiento)", out);
         }
 
-        /***********Encuentro
+        //Encuentro
         get = node.get("encuentro");
         Encounter encounter = null;
         if(get != null){
             encounter = EncounterTransformer.transform(get, out);
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", out);
         }
 
-         */
 
         get = node.get("planDeAtencion");
         CarePlan  careplan = null;
