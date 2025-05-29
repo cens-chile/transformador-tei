@@ -5,6 +5,7 @@
 package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSDerivadoParaEnum;
 import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,23 +40,25 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class BundleIniciarTransformer {
-    
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleIniciarTransformer.class);
     FhirServerConfig fhirServerConfig;
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
     MessageHeaderTransformer messageHeaderTransformer;
-    
+    ValueSetValidatorService validator;
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
-            MessageHeaderTransformer messageHeaderTransformer) {
+            MessageHeaderTransformer messageHeaderTransformer,
+            ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
+        this.validator = validator;
     }
     
     
     public String buildBundle(String cmd){
         ObjectMapper mapper = new ObjectMapper();
-        
+        validator.customMethod();
         String res;
         OperationOutcome out = new OperationOutcome();
         

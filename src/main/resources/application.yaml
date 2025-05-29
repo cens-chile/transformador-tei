@@ -13,6 +13,13 @@ management:
   endpoint:
     health:
       show-details: "ALWAYS"
+tei:
+  fhir:
+    validator_fhir_package_tei: ${TEI_FHIR_PACKAGE_TEI:package_tei.tgz}
+    validator_fhir_package_tei_version: ${TEI_FHIR_PACKAGE_TEI_VERSION:0.2.1}
+    validator_fhir_package_core: ${TEI_FHIR_PACKAGE_CORE:package_core.tgz}
+        
+    
 #spring:
 #  main:
 #    allow-circular-references: true
