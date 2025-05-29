@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
-import com.cens.minsal.tei.transformer.OrganizationTransformer;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -77,7 +76,7 @@ public class BundleTerminarTransformer {
         MessageHeader messageHeader = null;
         if(get!=null)
             messageHeader = 
-                messageHeaderTransformer.coreDataSetTEIToMessageHeader(get, out);
+                messageHeaderTransformer.transform(get, out);
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
@@ -85,21 +84,22 @@ public class BundleTerminarTransformer {
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
         if(get!=null)
-            sr = buildServiceRequest(get, out);
+            sr = buildServiceRequest(node, out);
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
 
-        // Prestador
-        get = node.get("prestadorAdministrativo");
+        get = node.get("prestador");
+        String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
+        if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
+            HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", out);
+        }
         Practitioner practitioner = null;
-        if(get!=null){
-            practitioner = practitionerTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE",get, out);
+
+        if(get!=null && tipoPrestador != null){
+            practitioner = practitionerTransformer.transform(tipoPrestador,get, out);
         }
-        else if((get = node.get("prestadorProfesional")) != null){
-            practitioner = practitionerTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE",get, out);
-        }
-        else {
+        else{
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
         }
 
@@ -108,6 +108,9 @@ public class BundleTerminarTransformer {
         PractitionerRole practitionerRole = null;
         if(get != null){
             practitionerRole = practitionerRoleTransformer.transform(get, out);
+            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
+            CodeableConcept cc = new CodeableConcept(roleCode);
+            practitionerRole.addCode(cc);
         } else {
             HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
         }
@@ -142,7 +145,6 @@ public class BundleTerminarTransformer {
                 .setResource(messageHeader);
 
         IdType sRId = IdType.newRandomUuid();
-
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
 
@@ -162,7 +164,7 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, null, null);
+        setMessageHeaderReferences(messageHeader, null, new Reference("Practitioner/"+practitioner.getIdPart().toString()));
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -176,14 +178,19 @@ public class BundleTerminarTransformer {
     }
     
     
-    public ServiceRequest buildServiceRequest(JsonNode node, OperationOutcome oo){
+    public ServiceRequest buildServiceRequest(JsonNode nodeOrigin, OperationOutcome oo){
         String profile ="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ServiceRequestLE";
         ServiceRequest sr = new ServiceRequest();
         sr.getMeta().addProfile(profile);
-        
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-        
+
+        JsonNode pacienteJ =  nodeOrigin.get("paciente");
+        if(pacienteJ != null && pacienteJ.get("id") != null){
+            sr.setSubject(new Reference("Patient/"+pacienteJ.get("id")));
+        }else HapiFhirUtils.addNotFoundIssue("SolicitudIC.Paciente.id",oo);
+
+        JsonNode node = nodeOrigin.get("solicitudIC");
         try {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
@@ -191,9 +198,32 @@ public class BundleTerminarTransformer {
             Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
+
+        String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
+        Identifier identifierIC = new Identifier().setValue(idIC);
+        sr.addIdentifier(identifierIC);
+
+        //codigoEstadoIC
+
+        String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
+        sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
+                new StringType(codigoEstadoIC)));
+
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
         sr.getCategoryFirstRep().addCoding(coding);
+
+        String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", node);
+        String glosaCierreIC = HapiFhirUtils.readStringValueFromJsonNode("glosaCierreIC", node);
+        String sistemaMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("sistemaMotivoCierreIC", node);
+        CodeableConcept cc = new CodeableConcept();
+        Coding codingCierreIC = new Coding(sistemaMotivoCierreIC,codigoMotivoCierreIC, glosaCierreIC);
+        cc.addCoding(codingCierreIC);
+        Type type = cc;
+        sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMotivoCierreInterconsulta",
+        type));
+
+
         return sr;
     }
 }

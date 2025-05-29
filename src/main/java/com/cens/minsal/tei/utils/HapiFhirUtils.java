@@ -26,7 +26,6 @@ public class HapiFhirUtils {
        
         List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
         for (Bundle.BundleEntryComponent entry : entries){
-            System.out.println("entry = " + entry.getResponse().getLocation());
             if(entry.hasResponse() && entry.getResponse().getLocation().contains(resourceType.getSimpleName())){
                 entries.remove(entry);
                 return entry;

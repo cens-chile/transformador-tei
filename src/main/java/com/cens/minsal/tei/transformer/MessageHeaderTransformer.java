@@ -8,7 +8,7 @@ import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSMessageHeaderEventEnum;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Date;
-import org.hl7.fhir.r4.model.Coding;
+
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.springframework.stereotype.Component;
@@ -22,12 +22,12 @@ public class MessageHeaderTransformer {
     private static final String profile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/MessageHeaderLE";
     
     
-    public MessageHeader coreDataSetTEIToMessageHeader(JsonNode node, OperationOutcome oo){
+    public MessageHeader transform(JsonNode node, OperationOutcome oo){
         MessageHeader m = new MessageHeader();
         m.getMeta().addProfile(profile);
         m.getMeta().setLastUpdated(new Date());
         
-        m.setEvent(VSMessageHeaderEventEnum.INICIAR.getCoding());
+        m.setEvent(VSMessageHeaderEventEnum.TERMINAR.getCoding());
         
         String software = HapiFhirUtils.readStringValueFromJsonNode("software", node);
         if(software!=null)

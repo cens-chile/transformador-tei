@@ -53,10 +53,10 @@ public class BundleAtenderTransformer {
     
     public String buildBundle(String cmd) {
         ObjectMapper mapper = new ObjectMapper();
-        
+        OperationOutcome oo = new OperationOutcome();
         String res;
-        OperationOutcome out = new OperationOutcome();
-        
+
+
         Bundle b = new Bundle();
         b.getMeta().addProfile(bundleProfile);
         b.setType(Bundle.BundleType.MESSAGE);
@@ -78,63 +78,67 @@ public class BundleAtenderTransformer {
         MessageHeader messageHeader = null;
         if(get!=null)
             messageHeader = 
-                messageHeaderTransformer.coreDataSetTEIToMessageHeader(get, out);
+                messageHeaderTransformer.transform(get, oo);
         else
-            HapiFhirUtils.addNotFoundIssue("datosSistema", out);
+            HapiFhirUtils.addNotFoundIssue("datosSistema", oo);
 
 
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
         if(get!=null)
-            sr = buildServiceRequest(get, out);
+            sr = buildServiceRequest(get, oo);
         else
-            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
+            HapiFhirUtils.addNotFoundIssue("solicitudIC", oo);
 
 
         // Prestador
-        get = node.get("prestadorProfesional");
-        Practitioner practitioner = null;
-        if(get!=null){
-            practitioner = practitionerTransformer.transform("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE",get, out);
+        get = node.get("prestador");
+        String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
+        if(!tipoPrestador.toLowerCase().equals("profesional") || !tipoPrestador.toLowerCase().equals("administrativo")){
+            HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", oo);
         }
-        else {
-            HapiFhirUtils.addNotFoundIssue("Prestador", out);
+        Practitioner practitioner = null;
+
+        if(get!=null && tipoPrestador != null){
+            practitioner = practitionerTransformer.transform(tipoPrestador,get, oo);
+        }
+        else{
+            HapiFhirUtils.addNotFoundIssue("Prestador", oo);
         }
 
         // Rol del Profesional (practitionerRol)
         get = node.get("rolDelProfesional");
         PractitionerRole practitionerRole = null;
         if(get != null){
-            practitionerRole = practitionerRoleTransformer.transform(get, out);
+            practitionerRole = practitionerRoleTransformer.transform(get, oo);
         } else {
-            HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
+            HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", oo);
         }
 
         get = node.get("establecimiento");
         Organization organization = null;
-        System.out.println("---------------------"+get);
         if(get != null){
-            organization = OrganizationTransformer.transform(get, out,"");
+            organization = OrganizationTransformer.transform(get, oo,"");
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(establecimiento)", out);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(establecimiento)", oo);
         }
 
         //Encuentro
         get = node.get("encuentro");
         Encounter encounter = null;
         if(get != null){
-            encounter = EncounterTransformer.transform(get, out);
+            encounter = EncounterTransformer.transform(get, oo);
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", out);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
         }
 
 
         get = node.get("planDeAtencion");
         CarePlan  careplan = null;
         if(get != null){
-            careplan = carePlanTransformer.transform(get, out);
+            careplan = carePlanTransformer.transform(get, oo);
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención", out);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención", oo);
         }
 
 
@@ -142,9 +146,9 @@ public class BundleAtenderTransformer {
          get = node.get("condicion");
          Condition condition = null;
          if(get != null){
-         condition = ConditionTransformer.transform(get, out);
+         condition = ConditionTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Condición del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Condición del paciente", oo);
          }
 
          */
@@ -154,9 +158,9 @@ public class BundleAtenderTransformer {
          get = node.get("alergiaIntolerancia");
          AllergyIntolerance allergyIntolerance = null;
          if(get != null){
-         allergyIntolerance = AllergyIntoleranceTransformer.transform(get, out);
+         allergyIntolerance = AllergyIntoleranceTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la AlergiaIntolerancia del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la AlergiaIntolerancia del paciente", oo);
          }
 
          */
@@ -165,9 +169,9 @@ public class BundleAtenderTransformer {
          get = node.get("");
          Observation observation = null;
          if(get != null){
-         observation = ObservationTransformer.transform(get, out);
+         observation = ObservationTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", oo);
          }
 
          */
@@ -176,9 +180,9 @@ public class BundleAtenderTransformer {
          get = node.get("");
          Observation observation = null;
          if(get != null){
-         observation = ObservationTransformer.transform(get, out);
+         observation = ObservationTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", oo);
          }
 
          */
@@ -187,9 +191,9 @@ public class BundleAtenderTransformer {
          get = node.get("");
          Observation observation = null;
          if(get != null){
-         observation = ObservationTransformer.transform(get, out);
+         observation = ObservationTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", oo);
          }
 
          */
@@ -199,16 +203,16 @@ public class BundleAtenderTransformer {
          get = node.get("");
          Anamnesis anamnesis = null;
          if(get != null){
-         anamnesis = AnamnesisTransformer.transform(get, out);
+         anamnesis = AnamnesisTransformer.transform(get, oo);
          } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de la Anamnesis del paciente", out);
+         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de la Anamnesis del paciente", oo);
          }
 
          */
 
 
-        if (!out.getIssue().isEmpty()) {
-            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
+        if (!oo.getIssue().isEmpty()) {
+            res = HapiFhirUtils.resourceToString(oo,fhirServerConfig.getFhirContext());
             return res;
         }
 

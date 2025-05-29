@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
@@ -76,7 +75,7 @@ public class BundleIniciarTransformer {
         MessageHeader messageHeader = null;
         if(get!=null)
             messageHeader = 
-                messageHeaderTransformer.coreDataSetTEIToMessageHeader(node.get("datosSistema"), out);
+                messageHeaderTransformer.transform(node.get("datosSistema"), out);
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
@@ -165,10 +164,8 @@ public class BundleIniciarTransformer {
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
         String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
-        System.out.println("modalidadAtencion::::::::::::::::::::::::"+ modalidadAtencion);
         if(modalidadAtencion!=null){
             VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
-            System.out.println("aaaaaaaaaaaa:"+fromCode.getCode());
             if(fromCode!=null){
                 Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
                 sr.getCategoryFirstRep().addCoding(coding);

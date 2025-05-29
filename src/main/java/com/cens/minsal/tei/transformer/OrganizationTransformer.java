@@ -30,8 +30,7 @@ public class OrganizationTransformer {
         org.getMeta().addProfile(profile);
         
         String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombreLegal", node);
-        System.out.println("+++++++++++++++++++++++++"+nombre);
-        
+
         if(nombre!=null)
             org.setName(nombre);
         else 

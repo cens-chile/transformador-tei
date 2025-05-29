@@ -27,8 +27,14 @@ public class PractitionerTransformer {
         String prestadorAdm = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE";
 
         Practitioner practitioner = new Practitioner();
-        practitioner.getMeta().addProfile(profile);
         practitioner.getMeta().setLastUpdated(new Date());
+
+        if(profile.equals("administrativo")){
+            practitioner.getMeta().addProfile(prestadorAdm);
+        } else {
+            practitioner.getMeta().addProfile(prestadorPro);
+        }
+
 
         // ID
 
@@ -43,19 +49,18 @@ public class PractitionerTransformer {
         }
 
 
-        if(profile.equals(prestadorPro)) {
+        if(profile.equals("profesional")) {
             String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
             if (idGen != null) {
                 Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-CodigoPaises.html", new StringType(nacionalidad));
                 practitioner.addExtension(nacionalidadExt);
             }
         }
-
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
         if (identificadores != null) {
             addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-            if(profile.equals(prestadorPro)) {
+            if(profile.equals("profesional")) {
                 addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
             }
         }
@@ -163,7 +168,7 @@ public class PractitionerTransformer {
             practitioner.addAddress(address);
         }
 
-        if(profile.equals(prestadorPro)) {
+        if(profile.equals("profesional")) {
             // Calificaciones (títulos, especialidades, subespecialidades, etc.)
             addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
             addQualifications(practitioner, node.get("especialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
