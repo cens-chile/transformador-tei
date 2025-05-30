@@ -10,6 +10,7 @@ import com.cens.minsal.tei.valuesets.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,8 @@ public class BundleTerminarTransformer {
 
         
         JsonNode get = node.get("datosSistema");
+
+
         MessageHeader messageHeader = null;
         if(get!=null)
             messageHeader = 
@@ -83,6 +86,8 @@ public class BundleTerminarTransformer {
 
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
+
+
         if(get!=null)
             sr = buildServiceRequest(node, out);
         else
@@ -115,14 +120,14 @@ public class BundleTerminarTransformer {
             HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
         }
 
-
+        /*
         get = node.get("paciente");
         Patient patient = null;
         if(get != null){
             patient = patientTransformer.transform(get, out);
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos del paciente", out);
-        }
+        }*/
 
         get = node.get("establecimiento");
         Organization organization = null;
@@ -156,15 +161,16 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(pracRolId.getIdPart())
                 .setResource(practitionerRole);
 
+        /*
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
-
+*/
         IdType orgId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, null, new Reference("Practitioner/"+practitioner.getIdPart().toString()));
+        setMessageHeaderReferences(messageHeader, new Reference("ServiceRequest/"+sRId.getValue()), new Reference("Practitioner/"+practitioner.getIdPart().toString()));
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
