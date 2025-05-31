@@ -94,7 +94,7 @@ public class BundleAtenderTransformer {
         // Prestador
         get = node.get("prestador");
         String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-        if(!tipoPrestador.toLowerCase().equals("profesional") || !tipoPrestador.toLowerCase().equals("administrativo")){
+        if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
             HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", oo);
         }
         Practitioner practitioner = null;
@@ -127,7 +127,7 @@ public class BundleAtenderTransformer {
         get = node.get("encuentro");
         Encounter encounter = null;
         if(get != null){
-            encounter = EncounterTransformer.transform(get, oo);
+            encounter = EncounterTransformer.transform(get, oo,"Atender");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
         }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.jena.base.Sys;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -170,8 +171,8 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, new Reference("ServiceRequest/"+sRId.getValue()), new Reference("Practitioner/"+practitioner.getIdPart().toString()));
-        
+        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pAId.getValue()));
+
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
@@ -192,8 +193,9 @@ public class BundleTerminarTransformer {
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
         JsonNode pacienteJ =  nodeOrigin.get("paciente");
-        if(pacienteJ != null && pacienteJ.get("id") != null){
-            sr.setSubject(new Reference("Patient/"+pacienteJ.get("id")));
+        String idPaciente = HapiFhirUtils.readStringValueFromJsonNode("id", pacienteJ);
+        if(pacienteJ != null && idPaciente != null){
+            sr.setSubject(new Reference("Patient/"+idPaciente));
         }else HapiFhirUtils.addNotFoundIssue("SolicitudIC.Paciente.id",oo);
 
         JsonNode node = nodeOrigin.get("solicitudIC");

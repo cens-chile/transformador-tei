@@ -20,9 +20,8 @@ import java.util.List;
  * @author José <jose.m.andrade@gmail.com>
  */
 public class EncounterTransformer {
-    public static Encounter transform(JsonNode json, OperationOutcome oo) {
+    public static Encounter transform(JsonNode json, OperationOutcome oo, String evento) {
         Encounter encounter = new Encounter();
-        encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -85,10 +84,7 @@ public class EncounterTransformer {
             encounter.setSubject(new Reference(json.get("paciente").get("referenciaPaciente").asText()));
         }
 
-        // Solicitud IC
-        if (json.has("solicitudIC")) {
-            encounter.addBasedOn(new Reference(json.get("solicitudIC").get("referenciaSIC").asText()));
-        }
+
 
         // Participantes
         if (json.has("participantes")) {
@@ -134,20 +130,7 @@ public class EncounterTransformer {
             encounter.addExtension(extension);
         }
 
-        // Pertinencia y motivoNoPertinencia (como extensiones)
-        if (json.has("pertinencia")) {
-            Extension extPertinencia = HapiFhirUtils.buildExtension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-pertinencia",
-                    new BooleanType(json.get("pertinencia").asBoolean()));
-            encounter.addExtension(extPertinencia);
-        }
 
-        if (json.has("motivoNoPertinencia")) {
-            Extension extMotivo = HapiFhirUtils.buildExtension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-motivo-no-pertinencia",
-                    new StringType(json.get("motivoNoPertinencia").asText()));
-            encounter.addExtension(extMotivo);
-        }
 
         // Razones del encuentro
         if (json.has("codigoRazonDelEncuentro")) {
@@ -169,7 +152,37 @@ public class EncounterTransformer {
 
             }
         }
+        if (evento.equals("Atender")) {
+            encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
+            EncounterTransformer.atenderComplete(json, encounter, oo);
+        }
+
 
         return encounter;
+    }
+
+
+    private static void atenderComplete (JsonNode node, Encounter encounter, OperationOutcome oo){
+        // agregar pertenencia y motivo de no pertenencia
+        // Pertinencia y motivoNoPertinencia (como extensiones)
+        if (node.has("pertinencia")) {
+            Extension extPertinencia = HapiFhirUtils.buildExtension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-pertinencia",
+                    new BooleanType(node.get("pertinencia").asBoolean()));
+            encounter.addExtension(extPertinencia);
+        }
+
+        if (node.has("motivoNoPertinencia")) {
+            Extension extMotivo = HapiFhirUtils.buildExtension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-motivo-no-pertinencia",
+                    new StringType(node.get("motivoNoPertinencia").asText()));
+            encounter.addExtension(extMotivo);
+        }
+
+        // Agregar BasedOn
+        // Solicitud IC
+        if (node.has("solicitudIC")) {
+            encounter.addBasedOn(new Reference(node.get("solicitudIC").get("referenciaSIC").asText()));
+        }
     }
 }
