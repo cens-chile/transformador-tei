@@ -75,9 +75,9 @@ public class BundleTerminarTransformer {
 
         
         JsonNode get = node.get("datosSistema");
-
-
         MessageHeader messageHeader = null;
+        ((ObjectNode)get).put("tipoEvento", "terminar");
+
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(get, out);
@@ -110,6 +110,7 @@ public class BundleTerminarTransformer {
         }
 
         // Rol del Profesional (practitionerRol)
+        /*
         get = node.get("rolDelProfesional");
         PractitionerRole practitionerRole = null;
         if(get != null){
@@ -120,6 +121,7 @@ public class BundleTerminarTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
         }
+        */
 
         /*
         get = node.get("paciente");
@@ -157,12 +159,12 @@ public class BundleTerminarTransformer {
         IdType pAId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pAId.getIdPart())
                 .setResource(practitioner);
-
+/*
         IdType pracRolId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pracRolId.getIdPart())
                 .setResource(practitionerRole);
 
-        /*
+
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);

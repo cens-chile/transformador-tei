@@ -10,6 +10,7 @@ import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -76,6 +77,8 @@ public class BundleAtenderTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
+        ((ObjectNode)get).put("tipoEvento", "atender");
+
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(get, oo);

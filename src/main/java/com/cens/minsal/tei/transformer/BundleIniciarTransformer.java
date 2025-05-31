@@ -17,6 +17,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -77,6 +79,9 @@ public class BundleIniciarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
+        ((ObjectNode)get).put("tipoEvento", "iniciar");
+
+
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(node.get("datosSistema"), out);

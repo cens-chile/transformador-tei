@@ -26,9 +26,34 @@ public class MessageHeaderTransformer {
         MessageHeader m = new MessageHeader();
         m.getMeta().addProfile(profile);
         m.getMeta().setLastUpdated(new Date());
-        
-        m.setEvent(VSMessageHeaderEventEnum.TERMINAR.getCoding());
-        
+        String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento",node);
+
+        switch (tipoEvento.toLowerCase()) {
+            case "iniciar":
+                m.setEvent(VSMessageHeaderEventEnum.INICIAR.getCoding());
+                break;
+            case "referenciar":
+                m.setEvent(VSMessageHeaderEventEnum.REFERENCIAR.getCoding());
+                break;
+            case "revisar":
+                m.setEvent(VSMessageHeaderEventEnum.REVISAR.getCoding());
+                break;
+            case "priorizar":
+                m.setEvent(VSMessageHeaderEventEnum.PRIORIZAR.getCoding());
+                break;
+            case "agendar":
+                m.setEvent(VSMessageHeaderEventEnum.AGENDAR.getCoding());
+                break;
+            case "atender":
+                m.setEvent(VSMessageHeaderEventEnum.ATENDER.getCoding());
+                break;
+            case "terminar":
+                m.setEvent(VSMessageHeaderEventEnum.TERMINAR.getCoding());
+                break;
+            default:
+                throw new IllegalArgumentException("Evento desconocido: " + tipoEvento);
+        }
+
         String software = HapiFhirUtils.readStringValueFromJsonNode("software", node);
         if(software!=null)
             m.getSource().setSoftware(software);
