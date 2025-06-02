@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.jena.base.Sys;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -36,24 +36,29 @@ public class BundleTerminarTransformer {
     PractitionerRoleTransformer practitionerRoleTransformer;
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
+    ValueSetValidatorService validator;
+
 
 
     public BundleTerminarTransformer(FhirServerConfig fhirServerConfig,
                                      MessageHeaderTransformer messageHeaderTransformer,
                                      PractitionerTransformer practitionerTransformer,
                                      PatientTransformer patientTransformer,
-                                     OrganizationTransformer organizationTransformer) {
+                                     OrganizationTransformer organizationTransformer,
+                                     ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
+        this.validator = validator;
     }
     
     
     public String buildBundle(String cmd) {
         ObjectMapper mapper = new ObjectMapper();
-        
+        validator.customMethod();
+
         String res;
         OperationOutcome out = new OperationOutcome();
         
