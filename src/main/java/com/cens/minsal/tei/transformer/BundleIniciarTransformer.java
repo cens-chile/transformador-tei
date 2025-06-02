@@ -21,6 +21,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -105,11 +106,19 @@ public class BundleIniciarTransformer {
         Observation buildIndiceComorbilidad  = null;
         if(node.get("indiceComorbilidad")!=null){
            buildIndiceComorbilidad = ObservationTransformer.buildIndiceComporbilidad(node.get("indiceComorbilidad"),out); 
-            sr.getSupportingInfo().add(new Reference(buildIndiceComorbilidad));
+           sr.getSupportingInfo().add(new Reference(buildIndiceComorbilidad));
         }
         
-        
-        
+        //Construir Diagnostico
+        ConditionTransformer conditionTransformer = new ConditionTransformer(validator);
+        Condition cond = null;
+        if(node.get("diagnostico")!=null){
+            cond = conditionTransformer.transform(node.get("diagnostico"), out,"diagnostico");
+        }
+        else
+            HapiFhirUtils.addNotFoundIssue("diagnostico", out);
+            
+       
         
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
@@ -135,6 +144,11 @@ public class BundleIniciarTransformer {
         IdType orgId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(org);
+            
+            
+        IdType condId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(condId.getIdPart())
+                .setResource(cond);
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         

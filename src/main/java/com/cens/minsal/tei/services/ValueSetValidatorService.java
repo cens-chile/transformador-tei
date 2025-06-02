@@ -30,7 +30,7 @@ public class ValueSetValidatorService {
     
     public void customMethod() {
       String comunaCode = "13101";
-      String realDisplay = "Santiago Centro";
+      String realDisplay = "Santiago ";
       String system = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
       String valueset = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
       if(isValueSetSupported(valueset)){
@@ -44,6 +44,9 @@ public class ValueSetValidatorService {
     
     
     public String validateCode(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl){
+        
+        System.out.println("theCodeSystem = " + theCodeSystem);
+        System.out.println("theCode = " + theCode);
         CodeValidationResult codeValidationResult2 = validationSupport.validateCode
         (validationSupportContext, new ConceptValidationOptions(), theCodeSystem, theCode, theDisplay, theValueSetUrl);
         
@@ -54,6 +57,7 @@ public class ValueSetValidatorService {
     }
     
     public boolean isValueSetSupported(String theValueSetUrl){
+        
       return validationSupport.isValueSetSupported(validationSupportContext, theValueSetUrl);
     }
     
