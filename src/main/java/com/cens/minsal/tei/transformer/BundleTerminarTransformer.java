@@ -96,6 +96,7 @@ public class BundleTerminarTransformer {
 
 
         get = node.get("prestador");
+
         String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
         if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
             HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", out);
@@ -109,19 +110,9 @@ public class BundleTerminarTransformer {
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
         }
 
-        // Rol del Profesional (practitionerRol)
-        /*
-        get = node.get("rolDelProfesional");
-        PractitionerRole practitionerRole = null;
-        if(get != null){
-            practitionerRole = practitionerRoleTransformer.transform(get, out);
-            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
-            CodeableConcept cc = new CodeableConcept(roleCode);
-            practitionerRole.addCode(cc);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
-        }
-        */
+
+
+
 
         /*
         get = node.get("paciente");
@@ -146,6 +137,16 @@ public class BundleTerminarTransformer {
             return res;
         }
 
+        //Rol del Profesional (practitionerRol)
+
+        PractitionerRole practitionerRole = null;
+        practitionerRole = practitionerRoleTransformer.transform(get, out);
+        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
+        CodeableConcept cc = new CodeableConcept(roleCode);
+        practitionerRole.addCode(cc);
+
+        practitionerRole.setPractitioner(new Reference("Practitioner/"+practitioner.getId().toString()));
+        practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
 
         //Agrega recursos con sus respectivos UUID al bundle de respuesta
         IdType mHId = IdType.newRandomUuid();
@@ -159,12 +160,12 @@ public class BundleTerminarTransformer {
         IdType pAId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pAId.getIdPart())
                 .setResource(practitioner);
-/*
+
         IdType pracRolId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pracRolId.getIdPart())
                 .setResource(practitionerRole);
 
-
+/*
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
@@ -210,13 +211,14 @@ public class BundleTerminarTransformer {
         }
 
         String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
+        if (idIC == null) HapiFhirUtils.addNotFoundIssue("idInterconsulta", oo);
         Identifier identifierIC = new Identifier().setValue(idIC);
         sr.addIdentifier(identifierIC);
 
         //codigoEstadoIC
 
         String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
-        sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
+            sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
                 new StringType(codigoEstadoIC)));
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
@@ -224,8 +226,12 @@ public class BundleTerminarTransformer {
         sr.getCategoryFirstRep().addCoding(coding);
 
         String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", node);
+        if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("codigoMotivoCierreIC", oo);
+
         String glosaCierreIC = HapiFhirUtils.readStringValueFromJsonNode("glosaCierreIC", node);
+        if(glosaCierreIC == null) HapiFhirUtils.addNotFoundIssue("glosaCierreIC", oo);
         String sistemaMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("sistemaMotivoCierreIC", node);
+        if(sistemaMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("sistemaMotivoCierreIC", oo);
         CodeableConcept cc = new CodeableConcept();
         Coding codingCierreIC = new Coding(sistemaMotivoCierreIC,codigoMotivoCierreIC, glosaCierreIC);
         cc.addCoding(codingCierreIC);

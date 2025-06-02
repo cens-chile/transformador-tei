@@ -27,6 +27,7 @@ public class MessageHeaderTransformer {
         m.getMeta().addProfile(profile);
         m.getMeta().setLastUpdated(new Date());
         String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento",node);
+        if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
 
         switch (tipoEvento.toLowerCase()) {
             case "iniciar":
