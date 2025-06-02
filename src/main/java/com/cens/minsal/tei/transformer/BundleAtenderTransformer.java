@@ -10,6 +10,7 @@ import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -76,6 +77,8 @@ public class BundleAtenderTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
+        ((ObjectNode)get).put("tipoEvento", "atender");
+
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(get, oo);
@@ -94,7 +97,7 @@ public class BundleAtenderTransformer {
         // Prestador
         get = node.get("prestador");
         String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-        if(!tipoPrestador.toLowerCase().equals("profesional") || !tipoPrestador.toLowerCase().equals("administrativo")){
+        if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
             HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", oo);
         }
         Practitioner practitioner = null;
@@ -127,7 +130,7 @@ public class BundleAtenderTransformer {
         get = node.get("encuentro");
         Encounter encounter = null;
         if(get != null){
-            encounter = EncounterTransformer.transform(get, oo);
+            encounter = EncounterTransformer.transform(get, oo,"Atender");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
         }

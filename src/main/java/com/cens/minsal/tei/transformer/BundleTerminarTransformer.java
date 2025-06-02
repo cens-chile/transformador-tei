@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -35,24 +36,29 @@ public class BundleTerminarTransformer {
     PractitionerRoleTransformer practitionerRoleTransformer;
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
+    ValueSetValidatorService validator;
+
 
 
     public BundleTerminarTransformer(FhirServerConfig fhirServerConfig,
                                      MessageHeaderTransformer messageHeaderTransformer,
                                      PractitionerTransformer practitionerTransformer,
                                      PatientTransformer patientTransformer,
-                                     OrganizationTransformer organizationTransformer) {
+                                     OrganizationTransformer organizationTransformer,
+                                     ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
+        this.validator = validator;
     }
     
     
     public String buildBundle(String cmd) {
         ObjectMapper mapper = new ObjectMapper();
-        
+        validator.customMethod();
+
         String res;
         OperationOutcome out = new OperationOutcome();
         
@@ -74,9 +80,9 @@ public class BundleTerminarTransformer {
 
         
         JsonNode get = node.get("datosSistema");
-
-
         MessageHeader messageHeader = null;
+        ((ObjectNode)get).put("tipoEvento", "terminar");
+
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(get, out);
@@ -95,6 +101,7 @@ public class BundleTerminarTransformer {
 
 
         get = node.get("prestador");
+
         String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
         if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
             HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", out);
@@ -108,17 +115,9 @@ public class BundleTerminarTransformer {
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
         }
 
-        // Rol del Profesional (practitionerRol)
-        get = node.get("rolDelProfesional");
-        PractitionerRole practitionerRole = null;
-        if(get != null){
-            practitionerRole = practitionerRoleTransformer.transform(get, out);
-            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
-            CodeableConcept cc = new CodeableConcept(roleCode);
-            practitionerRole.addCode(cc);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("Rol de profesional no definido", out);
-        }
+
+
+
 
         /*
         get = node.get("paciente");
@@ -143,6 +142,16 @@ public class BundleTerminarTransformer {
             return res;
         }
 
+        //Rol del Profesional (practitionerRol)
+
+        PractitionerRole practitionerRole = null;
+        practitionerRole = practitionerRoleTransformer.transform(get, out);
+        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
+        CodeableConcept cc = new CodeableConcept(roleCode);
+        practitionerRole.addCode(cc);
+
+        practitionerRole.setPractitioner(new Reference("Practitioner/"+practitioner.getId().toString()));
+        practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
 
         //Agrega recursos con sus respectivos UUID al bundle de respuesta
         IdType mHId = IdType.newRandomUuid();
@@ -161,7 +170,7 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(pracRolId.getIdPart())
                 .setResource(practitionerRole);
 
-        /*
+/*
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
@@ -170,8 +179,8 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, new Reference("ServiceRequest/"+sRId.getValue()), new Reference("Practitioner/"+practitioner.getIdPart().toString()));
-        
+        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pAId.getValue()));
+
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
@@ -192,8 +201,9 @@ public class BundleTerminarTransformer {
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
         JsonNode pacienteJ =  nodeOrigin.get("paciente");
-        if(pacienteJ != null && pacienteJ.get("id") != null){
-            sr.setSubject(new Reference("Patient/"+pacienteJ.get("id")));
+        String idPaciente = HapiFhirUtils.readStringValueFromJsonNode("id", pacienteJ);
+        if(pacienteJ != null && idPaciente != null){
+            sr.setSubject(new Reference("Patient/"+idPaciente));
         }else HapiFhirUtils.addNotFoundIssue("SolicitudIC.Paciente.id",oo);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
@@ -206,13 +216,14 @@ public class BundleTerminarTransformer {
         }
 
         String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
+        if (idIC == null) HapiFhirUtils.addNotFoundIssue("idInterconsulta", oo);
         Identifier identifierIC = new Identifier().setValue(idIC);
         sr.addIdentifier(identifierIC);
 
         //codigoEstadoIC
 
         String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
-        sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
+            sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
                 new StringType(codigoEstadoIC)));
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
@@ -220,8 +231,12 @@ public class BundleTerminarTransformer {
         sr.getCategoryFirstRep().addCoding(coding);
 
         String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", node);
+        if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("codigoMotivoCierreIC", oo);
+
         String glosaCierreIC = HapiFhirUtils.readStringValueFromJsonNode("glosaCierreIC", node);
+        if(glosaCierreIC == null) HapiFhirUtils.addNotFoundIssue("glosaCierreIC", oo);
         String sistemaMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("sistemaMotivoCierreIC", node);
+        if(sistemaMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("sistemaMotivoCierreIC", oo);
         CodeableConcept cc = new CodeableConcept();
         Coding codingCierreIC = new Coding(sistemaMotivoCierreIC,codigoMotivoCierreIC, glosaCierreIC);
         cc.addCoding(codingCierreIC);
