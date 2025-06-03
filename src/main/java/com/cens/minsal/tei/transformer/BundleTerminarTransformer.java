@@ -57,7 +57,6 @@ public class BundleTerminarTransformer {
     
     public String buildBundle(String cmd) {
         ObjectMapper mapper = new ObjectMapper();
-        validator.customMethod();
 
         String res;
         OperationOutcome out = new OperationOutcome();
@@ -81,11 +80,12 @@ public class BundleTerminarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
+        MessageHeaderTransformer messageHeaderTransformer = new MessageHeaderTransformer(validator);
         ((ObjectNode)get).put("tipoEvento", "terminar");
 
+
         if(get!=null)
-            messageHeader = 
-                messageHeaderTransformer.transform(get, out);
+            messageHeader = messageHeaderTransformer.transform(get, out);
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
@@ -232,6 +232,11 @@ public class BundleTerminarTransformer {
 
         String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", node);
         if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("codigoMotivoCierreIC", oo);
+        String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSMotivoCierreInterconsulta";
+        String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSMotivoCierreInterconsulta";
+        String resValidacion = validator.validateCode(cs,codigoMotivoCierreIC,"",vs);
+
+        if (resValidacion == null){HapiFhirUtils.addErrorIssue(codigoMotivoCierreIC, "No válido", oo ); }
 
         String glosaCierreIC = HapiFhirUtils.readStringValueFromJsonNode("glosaCierreIC", node);
         if(glosaCierreIC == null) HapiFhirUtils.addNotFoundIssue("glosaCierreIC", oo);
