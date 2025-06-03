@@ -5,6 +5,7 @@
 package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,19 +37,22 @@ public class BundleAtenderTransformer {
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
     CarePlanTransformer carePlanTransformer;
-
+    ValueSetValidatorService validator;
 
     public BundleAtenderTransformer(FhirServerConfig fhirServerConfig,
                                     MessageHeaderTransformer messageHeaderTransformer,
                                     PractitionerTransformer practitionerTransformer,
                                     PatientTransformer patientTransformer,
-                                    OrganizationTransformer organizationTransformer,CarePlanTransformer carePlanTransformer) {
+                                    OrganizationTransformer organizationTransformer,
+                                    CarePlanTransformer carePlanTransformer,
+                                    ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
         this.carePlanTransformer = carePlanTransformer;
+        this.validator = validator;
     }
     
     
@@ -120,8 +124,9 @@ public class BundleAtenderTransformer {
 
         get = node.get("establecimiento");
         Organization organization = null;
+        OrganizationTransformer orgTransformer = new OrganizationTransformer(validator);
         if(get != null){
-            organization = OrganizationTransformer.transform(get, oo,"");
+            organization = orgTransformer.transform(get, oo,"");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(establecimiento)", oo);
         }

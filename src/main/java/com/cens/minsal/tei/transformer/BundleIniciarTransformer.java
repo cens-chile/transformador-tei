@@ -98,11 +98,12 @@ public class BundleIniciarTransformer {
         
         
         //Construir Organización que inicia la IC
+        OrganizationTransformer orgTransformer = new OrganizationTransformer(validator);
         Organization org = null;
         try{
             get = node.get("establecimiento").get("origen");
             if(get!=null)
-                org = OrganizationTransformer.transform(get, out,"establecimiento.origen");
+                org = orgTransformer.transform(get, out,"establecimiento.origen");
         }catch(NullPointerException ex){
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS", out);
         }
