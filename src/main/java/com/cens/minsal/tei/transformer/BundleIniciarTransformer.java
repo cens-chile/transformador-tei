@@ -122,7 +122,10 @@ public class BundleIniciarTransformer {
         }
         else
             HapiFhirUtils.addNotFoundIssue("diagnostico", out);
-            
+        
+        //agregar discapacidad
+        Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
+        Observation buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad, out);
        
         
         if (!out.getIssue().isEmpty()) {
@@ -155,6 +158,10 @@ public class BundleIniciarTransformer {
             b.addEntry().setFullUrl(condId.getIdPart())
                 .setResource(cond);
         
+        IdType disId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(disId.getIdPart())
+                .setResource(buildDiscapacidad);    
+            
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         
         

@@ -7,6 +7,7 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSIndiceComorbilidadValuexEnum;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
@@ -29,7 +30,7 @@ public class ObservationTransformer {
         ob.setStatus(Observation.ObservationStatus.FINAL);
         ob.getCategoryFirstRep().
             addCoding(
-            new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIndiceComorbilidadLE",
+            new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
             "survey",""));
         
         ob.getCode().addCoding((new Coding()).setCode("ECICEP")).setText("Indice Comorbilidad");
@@ -43,6 +44,25 @@ public class ObservationTransformer {
         ob.setValue((new CodeableConcept()).addCoding(fromCode.getCoding()));
         
         
+        return ob;
+    }
+    
+    public static Observation buildDiscapacidad(boolean discapacidad, OperationOutcome oo){
+        
+        
+        Observation ob = new Observation();
+        ob.getMeta().addProfile(profile);
+        
+        ob.setStatus(Observation.ObservationStatus.FINAL);
+        ob.getCategoryFirstRep().
+            addCoding(
+            new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
+            "survey",""));
+        
+        ob.getCode().addCoding((new Coding()).setSystem("http://loinc.org").setCode("101720-1"));
+        
+        ob.setValue(new BooleanType(discapacidad));
+
         return ob;
     }
     
