@@ -8,6 +8,8 @@ import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
+
 
 import java.text.ParseException;
 import java.util.Date;
@@ -18,26 +20,27 @@ import java.util.Date;
  */
 @Component
 public class PractitionerRoleTransformer {
+    ValueSetValidatorService validator;
+
+    public PractitionerRoleTransformer(ValueSetValidatorService validator){
+        this.validator = validator;
+    }
 
     public static PractitionerRole transform(JsonNode inputNode,OperationOutcome oo) {
         PractitionerRole role = new PractitionerRole();
 
-        // 1. Meta.profile
         role.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerRoleLE");
 
-        // 2. ID
         String id = HapiFhirUtils.readStringValueFromJsonNode("ID", inputNode);
         if (id != null) {
             role.setId(id);
         }
 
-        // 3. Activo
         Boolean activo = HapiFhirUtils.readBooleanValueFromJsonNode("Activo", inputNode);
         if (activo != null) {
             role.setActive(activo);
         }
 
-        // 4. Período
         JsonNode periodo = inputNode.get("Periodo");
         if (periodo != null) {
             Period period = new Period();
@@ -54,18 +57,19 @@ public class PractitionerRoleTransformer {
             role.setPeriod(period);
         }
 
-        // 5. Referencia a Practitioner
         JsonNode prestador = inputNode.get("Prestador");
         if (prestador != null && prestador.has("Referencia")) {
             role.setPractitioner(new Reference(prestador.get("Referencia").asText()));
         }
 
-        // 6. Rol (code)
         JsonNode rol = inputNode.get("Rol");
         if (rol != null) {
             CodeableConcept concept = new CodeableConcept();
             String sistema = rol.has("Sistema") ? rol.get("Sistema").asText() : null;
             String codigo = rol.has("Codigo") ? rol.get("Codigo").asText() : null;
+
+
+
             if (sistema != null && codigo != null) {
                 concept.addCoding(new Coding(sistema, codigo, null));
                 role.addCode(concept);

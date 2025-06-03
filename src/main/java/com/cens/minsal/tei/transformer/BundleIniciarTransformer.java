@@ -60,7 +60,6 @@ public class BundleIniciarTransformer {
     
     public String buildBundle(String cmd){
         ObjectMapper mapper = new ObjectMapper();
-        validator.customMethod();
         String res;
         OperationOutcome out = new OperationOutcome();
         

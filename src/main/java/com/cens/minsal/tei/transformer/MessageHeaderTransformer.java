@@ -4,9 +4,11 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSMessageHeaderEventEnum;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -20,15 +22,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageHeaderTransformer {
     private static final String profile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/MessageHeaderLE";
-    
-    
+    ValueSetValidatorService validator;
+
+    public MessageHeaderTransformer(ValueSetValidatorService validator) {
+        this.validator = validator;
+    }
     public MessageHeader transform(JsonNode node, OperationOutcome oo){
         MessageHeader m = new MessageHeader();
         m.getMeta().addProfile(profile);
         m.getMeta().setLastUpdated(new Date());
         String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento",node);
         if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
-
+        String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTipoEventoLE";
+        String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTipoEventoLE";
+        String resValidacion = validator.validateCode(cs, tipoEvento, "", vs);
+        if (resValidacion == null){
+            HapiFhirUtils.addErrorIssue("Tipo de evento No válido", "--", oo);
+        }
         switch (tipoEvento.toLowerCase()) {
             case "iniciar":
                 m.setEvent(VSMessageHeaderEventEnum.INICIAR.getCoding());

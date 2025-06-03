@@ -4,6 +4,7 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSIndiceComorbilidadValuexEnum;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,16 +15,24 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.stereotype.Component;
 
+import javax.xml.validation.Validator;
+
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
  */
 @Component
 public class OrganizationTransformer {
+
+    ValueSetValidatorService validator;
+
+    public OrganizationTransformer(ValueSetValidatorService validator){
+        this.validator = validator;
+    }
     
     static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/OrganizationLE";
     
-    public static Organization transform(JsonNode node, OperationOutcome oo,String parentPath){
+    public Organization transform(JsonNode node, OperationOutcome oo,String parentPath){
         
         
         Organization org = new Organization();
@@ -40,7 +49,18 @@ public class OrganizationTransformer {
             org.getIdentifierFirstRep().setValue(codigoDEIS);
         else 
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
-        
+
+        String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
+        String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";
+        String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
+
+        String csOri = "";
+        String vsOri = "";
+        String resValidacionOri = validator.validateCode(csDest, codigoDEIS,"",vsDest);
+
+        if (resValidacionDest == null){
+            HapiFhirUtils.addErrorIssue(codigoDEIS,"CodigoDEIS no valido", oo);
+        }
         
         return org;
     }
