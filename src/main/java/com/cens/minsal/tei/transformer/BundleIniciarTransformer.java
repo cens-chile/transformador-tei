@@ -47,13 +47,16 @@ public class BundleIniciarTransformer {
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
     MessageHeaderTransformer messageHeaderTransformer;
+    OrganizationTransformer orgTransformer;
     ValueSetValidatorService validator;
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
             MessageHeaderTransformer messageHeaderTransformer,
+            OrganizationTransformer orgTransformer,
             ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
+        this.orgTransformer = orgTransformer;
         this.validator = validator;
     }
     
@@ -98,7 +101,6 @@ public class BundleIniciarTransformer {
         
         
         //Construir Organización que inicia la IC
-        OrganizationTransformer orgTransformer = new OrganizationTransformer(validator);
         Organization org = null;
         try{
             get = node.get("establecimiento").get("origen");

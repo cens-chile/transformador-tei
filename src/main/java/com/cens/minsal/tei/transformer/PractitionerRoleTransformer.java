@@ -10,8 +10,6 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 
-
-import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -26,7 +24,7 @@ public class PractitionerRoleTransformer {
         this.validator = validator;
     }
 
-    public static PractitionerRole transform(JsonNode inputNode,OperationOutcome oo) {
+    public PractitionerRole transform(JsonNode inputNode,OperationOutcome oo) {
         PractitionerRole role = new PractitionerRole();
 
         role.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerRoleLE");

@@ -124,9 +124,8 @@ public class BundleAtenderTransformer {
 
         get = node.get("establecimiento");
         Organization organization = null;
-        OrganizationTransformer orgTransformer = new OrganizationTransformer(validator);
         if(get != null){
-            organization = orgTransformer.transform(get, oo,"");
+            organization = organizationTransformer.transform(get, oo,"");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(establecimiento)", oo);
         }
