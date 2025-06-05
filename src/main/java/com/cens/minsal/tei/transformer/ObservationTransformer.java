@@ -30,7 +30,7 @@ public class ObservationTransformer {
     static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIndiceComorbilidadLE";
     static final String discapacidadProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationDiscapacidadLE";
     static final String cuidadorProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIniciarCuidadorLE";
-    
+    static final String resultadoExProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationResultadoExamen";
     
     
     public static Observation buildIndiceComporbilidad(JsonNode indice, OperationOutcome oo){
@@ -94,7 +94,7 @@ public class ObservationTransformer {
         for(JsonNode resultadoEx: resultadoExs){
         
             Observation ob = new Observation();
-            ob.getMeta().addProfile(cuidadorProfile);
+            ob.getMeta().addProfile(resultadoExProfile);
 
             ob.setStatus(Observation.ObservationStatus.REGISTERED);
             ob.getCategoryFirstRep().
