@@ -31,16 +31,18 @@ public class PatientTransformer {
         patient.getMeta().setLastUpdated(new Date());
 
         // ID
-        patient.setId(node.get("id").asText());
+        //patient.setId(node.get("id").asText());
 
         // Identificadores
+        if(node.get("tipoEvento")!=null && !node.get("tipoEvento").equals("iniciar")){
         JsonNode identificadores = node.get("identificadores");
-        if (identificadores.has("RUN")) {
-            Identifier id = new Identifier();
-            id.setUse(Identifier.IdentifierUse.OFFICIAL);
-            id.setSystem("https://interop.minsal.cl/fhir/ig/tei/CodeSystem/CSRut");
-            id.setValue(identificadores.get("RUN").asText());
-            patient.setIdentifier(Collections.singletonList(id));
+            if (identificadores.has("RUN")) {
+                Identifier id = new Identifier();
+                id.setUse(Identifier.IdentifierUse.OFFICIAL);
+                id.setSystem("https://interop.minsal.cl/fhir/ig/tei/CodeSystem/CSRut");
+                id.setValue(identificadores.get("RUN").asText());
+                patient.setIdentifier(Collections.singletonList(id));
+            }
         }
 
         // Nombre

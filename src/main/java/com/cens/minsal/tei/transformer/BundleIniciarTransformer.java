@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -50,6 +51,7 @@ public class BundleIniciarTransformer {
     FhirServerConfig fhirServerConfig;
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
+    PatientTransformer patientTr;
     MessageHeaderTransformer messageHeaderTransformer;
     OrganizationTransformer orgTransformer;
     AllergyIntoleranceTransformer allInTransformer;
@@ -58,12 +60,14 @@ public class BundleIniciarTransformer {
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
             MessageHeaderTransformer messageHeaderTransformer,
+            PatientTransformer patientTr,
             OrganizationTransformer orgTransformer,
             ValueSetValidatorService validator,
             QuestionnaireResponseTransformer questTransformer,
             AllergyIntoleranceTransformer allInTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
+        this.patientTr = patientTr;
         this.orgTransformer = orgTransformer;
         this.allInTransformer = allInTransformer;
         this.questTransformer = questTransformer;
@@ -101,6 +105,18 @@ public class BundleIniciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
+        JsonNode paciente = node.get("paciente");
+        ((ObjectNode)paciente).put("tipoEvento", "iniciar");
+        Patient patient = null;
+        if(paciente!=null)
+            patient = patientTr.transform(paciente, out);
+        else
+            HapiFhirUtils.addNotFoundIssue("paciente", out);
+            
+        
+        
+        
+        
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
         if(get!=null)
@@ -171,16 +187,26 @@ public class BundleIniciarTransformer {
             return res;
         }
         
+        
+        
         IdType mHId = IdType.newRandomUuid();
+        System.out.println("mHId = " + mHId.getIdPart());
         b.addEntry().setFullUrl(mHId.getIdPart())
                 .setResource(messageHeader);
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(patient));
+        
+        IdType patId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(patId.getIdPart())
+                .setResource(patient);
+        
+        
         
         IdType sRId = IdType.newRandomUuid();
         
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
         
-        setMessageHeaderReferences(messageHeader, new Reference(sr), null);
+        
         
         
         IdType iCId = IdType.newRandomUuid();
