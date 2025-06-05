@@ -48,10 +48,9 @@ public class AllergyIntoleranceTransformer {
             String nombre = aiNode.get("nombre").toString();
             if(nombre!=null)
                 codingFirstRep.setDisplay(nombre);
-            
-            
-            
+
             alleIn.add(ai);
+            i++;
         }
         
         

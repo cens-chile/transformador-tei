@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
@@ -50,15 +52,21 @@ public class BundleIniciarTransformer {
     static final String snomedSystem = "http://snomed.info/sct";
     MessageHeaderTransformer messageHeaderTransformer;
     OrganizationTransformer orgTransformer;
+    AllergyIntoleranceTransformer allInTransformer;
+    QuestionnaireResponseTransformer questTransformer;
     ValueSetValidatorService validator;
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
             MessageHeaderTransformer messageHeaderTransformer,
             OrganizationTransformer orgTransformer,
-            ValueSetValidatorService validator) {
+            ValueSetValidatorService validator,
+            QuestionnaireResponseTransformer questTransformer,
+            AllergyIntoleranceTransformer allInTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.orgTransformer = orgTransformer;
+        this.allInTransformer = allInTransformer;
+        this.questTransformer = questTransformer;
         this.validator = validator;
     }
     
@@ -138,7 +146,7 @@ public class BundleIniciarTransformer {
                 HapiFhirUtils.addInvalidIssue("cuidador", out);
         Observation cuidadorObservation = ObservationTransformer.buildCuidador(cuidador);
         
-        
+        //Se agregan exámenes realizados
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
         if(resultados!=null){
@@ -146,7 +154,16 @@ public class BundleIniciarTransformer {
         }
         
         
+        //Se agregan alergias
+        List<AllergyIntolerance> alergias = new ArrayList();
+        JsonNode allNode = node.get("alergias");
+        if(allNode!=null){
+            alergias = allInTransformer.transform(allNode, out);
+        }
         
+        //Se agrega motivo de derivacion
+        QuestionnaireResponse motivoDerivacion = 
+                questTransformer.transform(node, out);
        
         
         if (!out.getIssue().isEmpty()) {
@@ -193,6 +210,17 @@ public class BundleIniciarTransformer {
             b.addEntry().setFullUrl(obId.getIdPart())
                 .setResource(ob);  
         }
+        
+        for(AllergyIntolerance aler : alergias){
+            IdType alerId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(alerId.getIdPart())
+                .setResource(aler);  
+        }
+        
+        
+        IdType motId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(motId.getIdPart())
+                .setResource(motivoDerivacion);  
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
