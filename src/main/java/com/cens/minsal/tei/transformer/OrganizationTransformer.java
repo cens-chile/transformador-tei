@@ -6,16 +6,11 @@ package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.minsal.tei.valuesets.VSIndiceComorbilidadValuexEnum;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.springframework.stereotype.Component;
 
-import javax.xml.validation.Validator;
 
 /**
  *
@@ -45,8 +40,14 @@ public class OrganizationTransformer {
         else 
             HapiFhirUtils.addNotFoundIssue(parentPath+"nombreLegal", oo);
         String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
+
+        String sistema = HapiFhirUtils.readStringValueFromJsonNode("sistema", node);
+        if (sistema == null){
+            HapiFhirUtils.addNotFoundIssue("establecimiento->sistema", oo);
+        }
+
         if(codigoDEIS!=null)
-            org.getIdentifierFirstRep().setValue(codigoDEIS);
+            org.getIdentifierFirstRep().setValue(codigoDEIS).setSystem(sistema);
         else 
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
 
@@ -54,14 +55,10 @@ public class OrganizationTransformer {
         String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";
         String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
 
-        String csOri = "";
-        String vsOri = "";
-        String resValidacionOri = validator.validateCode(csDest, codigoDEIS,"",vsDest);
-
         if (resValidacionDest == null){
             HapiFhirUtils.addErrorIssue(codigoDEIS,"CodigoDEIS no valido", oo);
         }
-        
+
         return org;
     }
     

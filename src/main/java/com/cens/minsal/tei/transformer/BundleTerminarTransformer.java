@@ -44,6 +44,7 @@ public class BundleTerminarTransformer {
                                      MessageHeaderTransformer messageHeaderTransformer,
                                      PractitionerTransformer practitionerTransformer,
                                      PatientTransformer patientTransformer,
+                                     PractitionerRoleTransformer practitionerRoleTransformer,
                                      OrganizationTransformer organizationTransformer,
                                      ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
@@ -51,6 +52,7 @@ public class BundleTerminarTransformer {
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
+        this.practitionerRoleTransformer = practitionerRoleTransformer;
         this.validator = validator;
     }
     
@@ -200,11 +202,10 @@ public class BundleTerminarTransformer {
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
-        JsonNode pacienteJ =  nodeOrigin.get("paciente");
-        String idPaciente = HapiFhirUtils.readStringValueFromJsonNode("id", pacienteJ);
-        if(pacienteJ != null && idPaciente != null){
-            sr.setSubject(new Reference("Patient/"+idPaciente));
-        }else HapiFhirUtils.addNotFoundIssue("SolicitudIC.Paciente.id",oo);
+        Reference pacienteRef = new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",nodeOrigin));
+        if(pacienteRef != null ){
+            sr.setSubject(pacienteRef);
+        }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
         try {
@@ -223,6 +224,15 @@ public class BundleTerminarTransformer {
         //codigoEstadoIC
 
         String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
+
+        if(codigoEstadoIC != null){
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoInterconsulta";
+            String resValidacion = validator.validateCode(cs,codigoEstadoIC,"",vs);
+            if (resValidacion == null){HapiFhirUtils.addErrorIssue(codigoEstadoIC, "No válido", oo ); }
+        }
+
+
             sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
                 new StringType(codigoEstadoIC)));
 

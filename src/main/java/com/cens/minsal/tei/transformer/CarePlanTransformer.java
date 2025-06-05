@@ -71,13 +71,6 @@ public class CarePlanTransformer {
             HapiFhirUtils.addNotFoundIssue("Solicitud de Exámen no puede ser vacío", oo);
         }
 
-        // subject (paciente) [1..1]
-        JsonNode pacienteNode = node.get("paciente");
-        if (pacienteNode != null && pacienteNode.has("referenciaPaciente")) {
-            String ref = pacienteNode.get("referenciaPaciente").asText();
-            carePlan.setSubject(new Reference(ref));
-        }else { HapiFhirUtils.addNotFoundIssue("Campo Paciente no puede ser nulo",oo);}
-
         // encounter [0..1]
         JsonNode encuentroNode = node.get("encuentro");
         if (encuentroNode != null && encuentroNode.has("referenciaEncuentro")) {

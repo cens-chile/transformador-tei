@@ -185,7 +185,7 @@ public class PractitionerTransformer {
             Identifier id = new Identifier();
             id.setUse(Identifier.IdentifierUse.OFFICIAL);
             id.setValue(valueNode.asText());
-            id.getType().addCoding().setSystem("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador").setCode(code);
+            id.getType().addCoding().setSystem("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador").setCode(code).setDisplay(text);
             id.getType().setText(text);
             p.addIdentifier(id);
         } else {

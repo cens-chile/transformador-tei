@@ -8,7 +8,7 @@ import com.cens.minsal.tei.utils.HapiFhirUtils;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
-
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,41 +20,64 @@ import java.util.List;
  * @author José <jose.m.andrade@gmail.com>
  */
 public class EncounterTransformer {
-    public static Encounter transform(JsonNode json, OperationOutcome oo, String evento) {
+    ValueSetValidatorService validator;
+
+    public EncounterTransformer(ValueSetValidatorService validator){
+        this.validator = validator;
+    }
+
+    public Encounter transform(JsonNode json, OperationOutcome oo, String evento) {
         Encounter encounter = new Encounter();
 
         ObjectMapper mapper = new ObjectMapper();
 
-        // ID
-        if (json.hasNonNull("id")) {
-            encounter.setId(json.get("id").asText());
-        }
-
         // Identificador
-        if (json.hasNonNull("idEncuentro")) {
+        if (json.hasNonNull("identificadorConsultaEspecialidad")) {
             Identifier identifier = new Identifier();
-            identifier.setValue(json.get("identificador").asText());
+            identifier.setValue(HapiFhirUtils.readStringValueFromJsonNode("identificadorConsultaEspecialidad",json));
             encounter.addIdentifier(identifier);
         }
 
         // Estado
         if (json.has("estado")) {
             JsonNode estado = json.get("estado");
+            String cod = null;
             if (estado.has("codigoEstado")) {
+
+                String cs = "http://hl7.org/fhir/encounter-status";
+                String vs = "http://hl7.org/fhir/ValueSet/encounter-status";
+                cod = HapiFhirUtils.readStringValueFromJsonNode("codigoEstado", estado);
+                String resValidacionDest = validator.validateCode(cs,
+                        cod, "", vs);
+
+                if (resValidacionDest == null){
+                    HapiFhirUtils.addErrorIssue(cod,"encuentro.estado.codigoEstado no valido", oo);
+                }
+
+
                 try {
                     encounter.setStatus(EncounterStatus.fromCode(estado.get("codigoEstado").asText()));
                 } catch (Exception e) {
                     HapiFhirUtils.addErrorIssue("Estado inválido: " + estado.get("codigoEstado").asText(), "codigoEstado",oo);
                 }
             }
-        }
+        }else HapiFhirUtils.addNotFoundIssue("estado.codigoEstado", oo);
 
         // Clase (modalidadAtencion)
         if (json.has("modalidadAtencion")) {
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+
             Coding classCoding = new Coding();
             JsonNode modalidad = json.get("modalidadAtencion");
-            classCoding.setCode(String.valueOf(modalidad.get("codigoModAtencion").asInt()));
-            classCoding.setSystem(modalidad.get("urlModalidadAtencion").asText());
+            String cod = HapiFhirUtils.readIntValueFromJsonNode("codigoModAtencion", modalidad);
+            String resValidacionDest = validator.validateCode(cs,
+                    cod, "", vs);
+            if (resValidacionDest == null){
+                HapiFhirUtils.addErrorIssue(cod,"modalidadAtencion.codigoModAtencion", oo);
+            }
+            classCoding.setCode(cod);
+            classCoding.setSystem(cs);
             encounter.setClass_(classCoding);
         }
 
@@ -80,8 +103,8 @@ public class EncounterTransformer {
         }
 
         // Paciente
-        if (json.has("paciente")) {
-            encounter.setSubject(new Reference(json.get("paciente").get("referenciaPaciente").asText()));
+        if (json.has("referenciaPaciente")) {
+            encounter.setSubject(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", json)));
         }
 
 
