@@ -19,6 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
+import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -127,7 +129,24 @@ public class BundleIniciarTransformer {
         
         //agregar discapacidad
         Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
-        Observation buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad, out);
+        if(!node.get("presentaDiscapacidad").isBoolean())
+                HapiFhirUtils.addInvalidIssue("resolutividadAPS", out);
+        Observation buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+        
+        Boolean cuidador = HapiFhirUtils.readBooleanValueFromJsonNode("cuidador", node);
+        if(!node.get("cuidador").isBoolean())
+                HapiFhirUtils.addInvalidIssue("cuidador", out);
+        Observation cuidadorObservation = ObservationTransformer.buildCuidador(cuidador);
+        
+        
+        List<Observation> examenes = new ArrayList();
+        JsonNode resultados = node.get("resultadoExamenes");
+        if(resultados!=null){
+            examenes = ObservationTransformer.buildResultadoExamen(resultados, out);
+        }
+        
+        
+        
        
         
         if (!out.getIssue().isEmpty()) {
@@ -162,8 +181,20 @@ public class BundleIniciarTransformer {
         
         IdType disId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(disId.getIdPart())
-                .setResource(buildDiscapacidad);    
-            
+                .setResource(buildDiscapacidad);   
+        
+        IdType cuidadorId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(cuidadorId.getIdPart())
+                .setResource(cuidadorObservation);   
+        
+        
+        for(Observation ob : examenes){
+            IdType obId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(obId.getIdPart())
+                .setResource(ob);  
+        }
+        
+        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         
         
@@ -297,7 +328,5 @@ public class BundleIniciarTransformer {
         
         return sr;
     }
-    
-    
-    
+  
 }

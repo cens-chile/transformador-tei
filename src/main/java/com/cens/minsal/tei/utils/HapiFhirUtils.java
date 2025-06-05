@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.*;
  */
 public class HapiFhirUtils {
     
+    public static final String snomdeSystem = "http://snomed.info/sct";
+    
     public static Bundle.BundleEntryComponent findBundleEntryComponentByResourceOnLocation(Bundle bundle,Class resourceType)
     {
        
