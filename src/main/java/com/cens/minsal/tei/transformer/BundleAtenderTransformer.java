@@ -188,15 +188,18 @@ public class BundleAtenderTransformer {
 
 
 
-        /***********
-         get = node.get("alergiaIntolerancia");
-         AllergyIntolerance allergyIntolerance = null;
+
+         get = node.get("paciente");
+         Patient patient = null;
          if(get != null){
-         allergyIntolerance = AllergyIntoleranceTransformer.transform(get, oo);
+            PatientTransformer pt = new PatientTransformer();
+            patient = pt.transform(get, oo);
          } else {
          HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la AlergiaIntolerancia del paciente", oo);
          }
 
+
+         /***********
          */
 
         /*********** Observación Resultados Exámen
@@ -221,9 +224,6 @@ public class BundleAtenderTransformer {
          */
 
 
-
-
-
         if (!oo.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(oo,fhirServerConfig.getFhirContext());
             return res;
@@ -236,9 +236,13 @@ public class BundleAtenderTransformer {
                 .setResource(messageHeader);
 
         IdType sRId = IdType.newRandomUuid();
-
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
+
+        IdType patId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(patId.getIdPart())
+                .setResource(patient);
+
 
         IdType pAId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pAId.getIdPart())
