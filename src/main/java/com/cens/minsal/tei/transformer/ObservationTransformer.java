@@ -127,6 +127,7 @@ public class ObservationTransformer {
                 HapiFhirUtils.addNotFoundIssue("resultadoExamenes["+i+"]"+".resultado", oo);
             
             obs.add(ob);
+            i++;
 
         }
         
