@@ -75,19 +75,52 @@ public class PatientTransformer {
         patient.setName(Collections.singletonList(nombre));
 
         // Género
-        if (node.has("genero")) {
-            String genero = node.get("genero").asText().toLowerCase();
-            switch (genero) {
-                case "masculino":
-                    patient.setGender(Enumerations.AdministrativeGender.MALE);
-                    break;
-                case "femenino":
-                    patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-                    break;
-                default:
-                    patient.setGender(Enumerations.AdministrativeGender.UNKNOWN);
-            }
-        }
+        if (node.has("codIdGenero")) {
+            String genero = node.get("codIdGenero").asText().toLowerCase();
+            String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSIdentidaddeGenero",
+                    HapiFhirUtils.readStringValueFromJsonNode("codIdGenero", node),"","https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSIdentidaddeGenero");
+            if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.codIdGenero",oo);
+            Extension extIDGen = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/IdentidadDeGenero",
+                    new StringType((genero)));
+            patient.addExtension(extIDGen);
+
+        } else HapiFhirUtils.addNotFoundIssue("paciente.codIdGenero",oo);
+
+        if(node.has("nacionalidad")){
+            String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
+            String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais",
+                    HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node),"",
+                    "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais");
+
+            if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.nacionalidad",oo);
+            Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",
+                    new StringType((nacionalidad)));
+            patient.addExtension(nacionalidadExt);
+            }else HapiFhirUtils.addNotFoundIssue("paciente.nacionalidad",oo);
+
+        if(node.has("paisOrigen")){
+            String paisOrigen = HapiFhirUtils.readStringValueFromJsonNode("paisOrigen", node);
+            String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais",
+                    HapiFhirUtils.readStringValueFromJsonNode("paisOrigen", node),"",
+                    "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais");
+
+            if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.paisOrigen",oo);
+            Extension paisOrigenExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PaisOrigenMPI",
+                    new StringType((paisOrigen)));
+            patient.addExtension(paisOrigenExt);
+
+        }else HapiFhirUtils.addNotFoundIssue("paciente.paisOrigen",oo);
+
+        //dePuebloOriginario
+
+        if(node.has("dePuebloOriginario")){
+            Boolean dePuebloOriginario = HapiFhirUtils.readBooleanValueFromJsonNode("dePuebloOriginario", node);
+            Extension dePuebloOriginarioExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosOriginariosPerteneciente",
+                    new BooleanType(dePuebloOriginario));
+            patient.addExtension(dePuebloOriginarioExt);
+
+        }else HapiFhirUtils.addNotFoundIssue("paciente.dePuebloOriginario",oo);
+
 
         // Fecha de nacimiento
         if (node.has("fechaNacimiento")) {
@@ -145,14 +178,14 @@ public class PatientTransformer {
                 patient.addTelecom(phone);
             }
 
-            if (contacto.has("email")) {
+            else if (contacto.has("email")) {
                 ContactPoint email = new ContactPoint();
                 email.setSystem(ContactPoint.ContactPointSystem.EMAIL);
                 email.setUse(ContactPoint.ContactPointUse.HOME);
                 email.setValue(contacto.get("email").asText());
                 patient.addTelecom(email);
-            }
-        }
+            } else HapiFhirUtils.addNotFoundIssue("paciente.telefono o email", oo);
+        } else HapiFhirUtils.addNotFoundIssue("paciente.contacto", oo);
 
         patient.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
 
