@@ -149,6 +149,12 @@ public class BundleAtenderTransformer {
         if(get != null){
             EncounterTransformer encounterTransformer = new EncounterTransformer(validator);
             encounter = encounterTransformer.transform(get, oo,"Atender");
+            try {
+                String refPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+                encounter.setSubject(new Reference(refPaciente));
+            }catch (Exception e){
+                HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para encuentro)", oo);
+            }
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
         }
@@ -163,10 +169,10 @@ public class BundleAtenderTransformer {
             if(paciente != null){
                 careplan.setSubject(new Reference(paciente));
             }else{
-                HapiFhirUtils.addNotFoundIssue("Paciente",oo);
+                HapiFhirUtils.addNotFoundIssue("planDeAtencion.referenciaPaciente",oo);
             }
         } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención", oo);
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención(planDeAtencion)", oo);
         }
 
         String descripcionPlan = HapiFhirUtils.readStringValueFromJsonNode("descripcion",get);
@@ -192,11 +198,13 @@ public class BundleAtenderTransformer {
          get = node.get("paciente");
          Patient patient = null;
          if(get != null){
-            PatientTransformer pt = new PatientTransformer();
-            patient = pt.transform(get, oo);
-         } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la AlergiaIntolerancia del paciente", oo);
-         }
+            PatientTransformer pt = new PatientTransformer(validator);
+            ((ObjectNode)get).put("tipoEvento", "atender");
+
+
+
+             patient = pt.transform(get, oo);
+         } else HapiFhirUtils.addNotFoundIssue("paciente", oo);
 
 
          /***********
@@ -268,7 +276,7 @@ public class BundleAtenderTransformer {
         IdType encId = IdType.newRandomUuid();
         b.addEntry().setFullUrl((encId.getIdPart())).setResource(encounter);
 
-        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pAId.getValue()), new Reference(encId.getValue()));
+        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pracRolId.getValue()), new Reference(encId.getValue()));
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -309,14 +317,10 @@ public class BundleAtenderTransformer {
         Identifier identifierIC = new Identifier().setValue(idIC);
         sr.addIdentifier(identifierIC);
 
-
-
-
-
         Reference pacienteRef = new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",nodeOrigin));
         if(pacienteRef != null ){
             sr.setSubject(pacienteRef);
-        }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
+        }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para solicitudIC)",oo);
 
         JsonNode practitionerJ = nodeOrigin.get("prestador");
         if(practitionerJ == null){

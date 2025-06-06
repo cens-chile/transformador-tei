@@ -36,9 +36,13 @@ public class EncounterTransformer {
             Identifier identifier = new Identifier();
             identifier.setValue(HapiFhirUtils.readStringValueFromJsonNode("identificadorConsultaEspecialidad",json));
             encounter.addIdentifier(identifier);
-        }
+        } else HapiFhirUtils.addNotFoundIssue("identificadorConsultaEspecialidad" , oo);
 
-        // Estado
+        // Estado no es necesario solicitarlo , es un dato estático
+
+        encounter.setStatus(EncounterStatus.fromCode("finished"));
+
+        /*
         if (json.has("estado")) {
             JsonNode estado = json.get("estado");
             String cod = null;
@@ -63,6 +67,8 @@ public class EncounterTransformer {
             }
         }else HapiFhirUtils.addNotFoundIssue("estado.codigoEstado", oo);
 
+        */
+
         // Clase (modalidadAtencion)
         if (json.has("modalidadAtencion")) {
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
@@ -79,7 +85,8 @@ public class EncounterTransformer {
             classCoding.setCode(cod);
             classCoding.setSystem(cs);
             encounter.setClass_(classCoding);
-        }
+        } else HapiFhirUtils.addNotFoundIssue( "modalidadAtencion", oo);
+
 
         // Tipo de consulta (type)
         if (json.has("tipoDeConsulta")) {
@@ -101,12 +108,6 @@ public class EncounterTransformer {
                     .setSystem(servicio.get("urlTipoServicio").asText()));
             encounter.setServiceType(serviceType);
         }
-
-        // Paciente
-        if (json.has("referenciaPaciente")) {
-            encounter.setSubject(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", json)));
-        }
-
 
 
         // Participantes
@@ -142,7 +143,7 @@ public class EncounterTransformer {
             } catch (Exception e) {
                 HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);
             }
-        }
+        } else HapiFhirUtils.addNotFoundIssue("periodo", oo);
 
         // Duración (como extensión)
         if (json.has("duracion")) {
@@ -170,17 +171,15 @@ public class EncounterTransformer {
         if (json.has("diagnosticos")) {
             for (JsonNode dx : json.get("diagnosticos")) {
                 Encounter.DiagnosisComponent diag = new Encounter.DiagnosisComponent();
-                diag.setCondition(new Reference(dx.get("referenciaDiagnostico").asText()));
+                diag.setCondition(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaDiagnostico", dx)));
                 encounter.addDiagnosis(diag);
 
             }
-        }
+        } else HapiFhirUtils.addNotFoundIssue("diagnosticos", oo);
         if (evento.equals("Atender")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
             EncounterTransformer.atenderComplete(json, encounter, oo);
         }
-
-
         return encounter;
     }
 
@@ -203,9 +202,9 @@ public class EncounterTransformer {
         }
 
         // Agregar BasedOn
-        // Solicitud IC
         if (node.has("solicitudIC")) {
-            encounter.addBasedOn(new Reference(node.get("solicitudIC").get("referenciaSIC").asText()));
-        }
+            encounter.addBasedOn(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaSIC",
+                    node.get("solicitudIC"))));
+        }else HapiFhirUtils.addNotFoundIssue("solicitudIC.ReferenciaSIC",oo);
     }
 }

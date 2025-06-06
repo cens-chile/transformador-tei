@@ -4,6 +4,7 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.fhir.r4.model.*;
@@ -24,6 +25,13 @@ public class PatientTransformer {
 
     static final String PROFILE = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PatientLE";
 
+    ValueSetValidatorService validator;
+
+    public PatientTransformer(ValueSetValidatorService validator) {
+        this.validator = validator;
+    }
+
+
     public Patient transform( JsonNode node, OperationOutcome oo){
 
         Patient patient = new Patient();
@@ -34,16 +42,15 @@ public class PatientTransformer {
         //patient.setId(node.get("id").asText());
 
         // Identificadores
-        if(node.get("tipoEvento")!=null && !node.get("tipoEvento").equals("iniciar")){
+        String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
+        if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
         JsonNode identificadores = node.get("identificadores");
-            if (identificadores.has("RUN")) {
-                Identifier id = new Identifier();
-                id.setUse(Identifier.IdentifierUse.OFFICIAL);
-                id.setSystem("https://interop.minsal.cl/fhir/ig/tei/CodeSystem/CSRut");
-                id.setValue(identificadores.get("RUN").asText());
-                patient.setIdentifier(Collections.singletonList(id));
+        if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
+
+        if (identificadores.has("RUN")) {
+                addIdentifier(patient, "01", "RUN", identificadores.get("RUN"), oo);
             }
-        }
+        //}
 
         // Nombre
         HumanName nombre = new HumanName();
@@ -55,15 +62,16 @@ public class PatientTransformer {
                 for (JsonNode n : nombreCompleto.get("nombres")) {
                     nombre.addGiven(n.asText());
                 }
-            }
+            } else HapiFhirUtils.addNotFoundIssue("nombres",oo);
             if (nombreCompleto.has("primerApellido")) {
                 nombre.setFamily(nombreCompleto.get("primerApellido").asText());
-            }
+            } else HapiFhirUtils.addNotFoundIssue("primerApellido",oo);
             if (nombreCompleto.has("segundoApellido")) {
                 String primerApellido = nombre.hasFamily() ? nombre.getFamily() : "";
                 nombre.setFamily(primerApellido + " " + nombreCompleto.get("segundoApellido").asText());
             }
-        }
+        } else HapiFhirUtils.addNotFoundIssue("nombreCompleto",oo);
+
         patient.setName(Collections.singletonList(nombre));
 
         // Género
@@ -105,16 +113,18 @@ public class PatientTransformer {
             if (direccionNode.has("comuna")) {
                 String codigo = direccionNode.get("comuna").get("codigo").asText();
                 direccion.addExtension(HapiFhirUtils.buildExtension(
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-comuna",
+                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
                         new CodeType(codigo)
                 ));
             }
             if (direccionNode.has("region")) {
                 String codigo = direccionNode.get("region").get("codigo").asText();
+                String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
+                        codigo,"","https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
+                if(valido == null) HapiFhirUtils.addInvalidIssue("region.codigo",oo);
                 direccion.addExtension(HapiFhirUtils.buildExtension(
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-region",
-                        new CodeType(codigo)
-                ));
+                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
+                        new CodeType(codigo)));
             }
             if (direccionNode.has("pais")) {
                 direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
