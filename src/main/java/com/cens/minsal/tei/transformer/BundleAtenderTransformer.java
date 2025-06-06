@@ -105,18 +105,21 @@ public class BundleAtenderTransformer {
 
         // Prestador
         get = node.get("prestador");
-        String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-        if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
-            HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", oo);
-        }
         Practitioner practitioner = null;
 
-        if(get!=null && tipoPrestador != null){
-            practitioner = practitionerTransformer.transform(tipoPrestador,get, oo);
+        try {
+            String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
+            if (tipoPrestador == null) HapiFhirUtils.addNotFoundIssue("tipoPrestador", oo);
+            if (!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")) {
+                HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", oo);
+            }
+
+            practitioner = practitionerTransformer.transform(tipoPrestador, get, oo);
+
+        }catch (Exception e){
+            HapiFhirUtils.addNotFoundIssue("prestador.tipoPrestador",oo);
         }
-        else{
-            HapiFhirUtils.addNotFoundIssue("Prestador", oo);
-        }
+
         get = node.get("establecimiento");
         Organization organization = null;
         if(get != null){
@@ -137,8 +140,11 @@ public class BundleAtenderTransformer {
         CodeableConcept cc = new CodeableConcept(roleCode);
         practitionerRole.addCode(cc);
 
-
-        practitionerRole.setPractitioner(new Reference("Practitioner/"+practitioner.getId()));
+        try {
+            practitionerRole.setPractitioner(new Reference("Practitioner/" + practitioner.getId()));
+        }catch (Exception e){
+            HapiFhirUtils.addNotFoundIssue("Practitioner", oo);
+        }
         practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
 
 
@@ -323,17 +329,22 @@ public class BundleAtenderTransformer {
         }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para solicitudIC)",oo);
 
         JsonNode practitionerJ = nodeOrigin.get("prestador");
-        if(practitionerJ == null){
-            HapiFhirUtils.addNotFoundIssue("Practitioner Not Found", oo);
-        }
-        String idPractitioner = HapiFhirUtils.readStringValueFromJsonNode("id", practitionerJ);
 
-        if (practitionerJ != null && idPractitioner != null) {
-            List<Reference> practL = new ArrayList<>();
-            Reference practitionerRef = new Reference("Practitioner/" + idPractitioner);
-            practL.add(practitionerRef);
-            sr.setPerformer(practL);
-        } else HapiFhirUtils.addNotFoundIssue("Prestador.id",oo);
+        if(practitionerJ == null){
+            HapiFhirUtils.addNotFoundIssue("prestador", oo);
+        }
+        try {
+            String idPractitioner = HapiFhirUtils.readStringValueFromJsonNode("id", practitionerJ);
+            if (practitionerJ != null && idPractitioner != null) {
+                List<Reference> practL = new ArrayList<>();
+                Reference practitionerRef = new Reference("Practitioner/" + idPractitioner);
+                practL.add(practitionerRef);
+                sr.setPerformer(practL);
+            } else HapiFhirUtils.addNotFoundIssue("Prestador.id",oo);
+
+        } catch (Exception e) {
+            HapiFhirUtils.addNotFoundIssue("practitioner.id", oo);
+        }
 
 
 

@@ -7,13 +7,16 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.models.info.Contact;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -146,61 +149,110 @@ public class PatientTransformer {
         }
 
         // Dirección
-        if (node.has("direccion")) {
-            JsonNode direccionNode = node.get("direccion");
-            Address direccion = new Address();
-            direccion.setUse(Address.AddressUse.HOME);
-            direccion.setType(Address.AddressType.PHYSICAL);
+        if (node.has("direcciones")) {
+            JsonNode direcciones= node.get("direcciones");
+            List<Address> addressList = new ArrayList<>();
 
-            if (direccionNode.has("linea")) {
-                direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("linea").asText())));
-            }
-            if (direccionNode.has("comuna")) {
-                String codigo = direccionNode.get("comuna").get("codigo").asText();
-                direccion.addExtension(HapiFhirUtils.buildExtension(
-                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
-                        new CodeType(codigo)
-                ));
-            }
-            if (direccionNode.has("region")) {
-                String codigo = direccionNode.get("region").get("codigo").asText();
+            for (JsonNode direccionNode : direcciones){
+                Address direccion = new Address();
+                if (direccionNode.has("codigoUso")) {
+                    String usoDir = HapiFhirUtils.readStringValueFromJsonNode("codigoUso", direccionNode);
+                    switch (usoDir) { // lo puse en español, pero en la guia está en inglés (core CL)
+                        case "hogar": {
+                            direccion.setUse(Address.AddressUse.HOME);
+                            break;
+                        }
+                        case "trabajo": {
+                            direccion.setUse(Address.AddressUse.WORK);
+                        }
+                        case "temporal": {
+                            direccion.setUse(Address.AddressUse.TEMP);
+                        }
+                        case "antiguo": {
+                            direccion.setUse(Address.AddressUse.OLD);
+                        }
+                    }
+                    direccion.setUse(Address.AddressUse.HOME);
+                    direccion.setType(Address.AddressType.PHYSICAL);
+                }
+                if (direccionNode.has("direccion")) {
+                    direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("direccion").asText())));
+                }
+                    if (direccionNode.has("pais")) {
+                        direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
+                    }
+
+                    if (direccionNode.has("region")) {
+                        String codigo = direccionNode.get("region").get("codigo").asText();
+                        String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
+                                codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
+                        if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
+                        direccion.addExtension(HapiFhirUtils.buildExtension(
+                                "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
+                                new CodeType(codigo)));
+                    }
+                    if (direccionNode.has("comuna")) {
+                        String codigo = direccionNode.get("comuna").get("codigo").asText();
+                        direccion.addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
+                            new CodeType(codigo)
+                    ));
+                    }
+                    if (direccionNode.has("provincia")) {
+                        String codigo = direccionNode.get("provincia").get("codigo").asText();
+                        direccion.addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
+                            new CodeType(codigo)
+                    ));
+
+                    }
+
+                    if (direccionNode.has("situacionCalle")) {
+                    Boolean sitCalleB = HapiFhirUtils.readBooleanValueFromJsonNode("situacionCalle", direccionNode);
+                    Extension sitCalleExt =
+                            new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/SituacionCalle",
+                                    new BooleanType(sitCalleB));
+                    direccion.addExtension(sitCalleExt);
+                    }
+
+                /*String codigo = direccionNode.get("region").get("codigo").asText();
                 String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
-                        codigo,"","https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
-                if(valido == null) HapiFhirUtils.addInvalidIssue("region.codigo",oo);
+                        codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
+                if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
                 direccion.addExtension(HapiFhirUtils.buildExtension(
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
                         new CodeType(codigo)));
-            }
-            if (direccionNode.has("pais")) {
-                direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
-            }
+                        */
 
-            patient.setAddress(Collections.singletonList(direccion));
+                addressList.add(direccion);
+            }
+            patient.setAddress(addressList);
         }
+
 
         // Contacto
         if (node.has("contacto")) {
-            JsonNode contacto = node.get("contacto");
-
-            if (contacto.has("telefono")) {
-                ContactPoint phone = new ContactPoint();
-                phone.setSystem(ContactPoint.ContactPointSystem.PHONE);
-                phone.setUse(ContactPoint.ContactPointUse.MOBILE);
-                phone.setValue(contacto.get("telefono").asText());
-                patient.addTelecom(phone);
+            JsonNode contactos = node.get("contacto");
+            List<ContactPoint> contactPointList  = new ArrayList<>();
+            for (JsonNode contacto: contactos) {
+                ContactPoint cp = new ContactPoint();
+                if (contacto.has("telefono")) {
+                    cp.setSystem(ContactPoint.ContactPointSystem.PHONE);
+                    cp.setUse(ContactPoint.ContactPointUse.MOBILE);
+                    cp.setValue(contacto.get("telefono").asText());
+                    patient.addTelecom(cp);
+                } else if (contacto.has("email")) {
+                    cp.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+                    cp.setUse(ContactPoint.ContactPointUse.HOME);
+                    cp.setValue(contacto.get("email").asText());
+                    patient.addTelecom(cp);
+                } else HapiFhirUtils.addNotFoundIssue("paciente.telefono o email", oo);
+                contactPointList.add(cp);
             }
-
-            else if (contacto.has("email")) {
-                ContactPoint email = new ContactPoint();
-                email.setSystem(ContactPoint.ContactPointSystem.EMAIL);
-                email.setUse(ContactPoint.ContactPointUse.HOME);
-                email.setValue(contacto.get("email").asText());
-                patient.addTelecom(email);
-            } else HapiFhirUtils.addNotFoundIssue("paciente.telefono o email", oo);
-        } else HapiFhirUtils.addNotFoundIssue("paciente.contacto", oo);
-
-        patient.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
-
+            patient.setTelecom(contactPointList);
+            patient.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
+        }
+        else HapiFhirUtils.addNotFoundIssue("paciente.contacto", oo);
 
         return patient;
     }
