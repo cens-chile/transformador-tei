@@ -86,6 +86,18 @@ public class PatientTransformer {
 
         } else HapiFhirUtils.addNotFoundIssue("paciente.codIdGenero",oo);
 
+        if (node.has("sexoBiologico")) {
+            String sexoBiologico = node.get("sexoBiologico").asText().toLowerCase();
+            String valido = validator.validateCode("http://hl7.org/fhir/administrative-gender",
+                    HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node),"",
+                    "http://hl7.org/fhir/ValueSet/administrative-gender");
+            if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.sexoBiologico",oo);
+            Extension sexoBioExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/SexoBiologico",
+                    new StringType((sexoBiologico)));
+            patient.addExtension(sexoBioExt);
+
+        } else HapiFhirUtils.addNotFoundIssue("paciente.codIdGenero",oo);
+
         if(node.has("nacionalidad")){
             String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
             String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais",
