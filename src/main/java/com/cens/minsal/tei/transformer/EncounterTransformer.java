@@ -189,14 +189,14 @@ public class EncounterTransformer {
         // Pertinencia y motivoNoPertinencia (como extensiones)
         if (node.has("pertinencia")) {
             Extension extPertinencia = HapiFhirUtils.buildExtension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-pertinencia",
+                    " https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionPertinenciaAtencionBox",
                     new BooleanType(node.get("pertinencia").asBoolean()));
             encounter.addExtension(extPertinencia);
         }
 
         if (node.has("motivoNoPertinencia")) {
             Extension extMotivo = HapiFhirUtils.buildExtension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-motivo-no-pertinencia",
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMotivoNoPertinencia",
                     new StringType(node.get("motivoNoPertinencia").asText()));
             encounter.addExtension(extMotivo);
         }
