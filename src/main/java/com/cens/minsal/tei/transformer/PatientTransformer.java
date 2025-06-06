@@ -164,15 +164,18 @@ public class PatientTransformer {
                         }
                         case "trabajo": {
                             direccion.setUse(Address.AddressUse.WORK);
+                            break;
                         }
                         case "temporal": {
                             direccion.setUse(Address.AddressUse.TEMP);
+                            break;
                         }
                         case "antiguo": {
                             direccion.setUse(Address.AddressUse.OLD);
+                        break;
                         }
                     }
-                    direccion.setUse(Address.AddressUse.HOME);
+                    //direccion.setUse(Address.AddressUse.HOME);
                     direccion.setType(Address.AddressType.PHYSICAL);
                 }
                 if (direccionNode.has("direccion")) {
