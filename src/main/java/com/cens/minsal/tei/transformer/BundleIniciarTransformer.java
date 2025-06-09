@@ -56,6 +56,7 @@ public class BundleIniciarTransformer {
     OrganizationTransformer orgTransformer;
     AllergyIntoleranceTransformer allInTransformer;
     QuestionnaireResponseTransformer questTransformer;
+    ServiceRequestTransformer serTransformer;
     ValueSetValidatorService validator;
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
@@ -64,13 +65,15 @@ public class BundleIniciarTransformer {
             OrganizationTransformer orgTransformer,
             ValueSetValidatorService validator,
             QuestionnaireResponseTransformer questTransformer,
-            AllergyIntoleranceTransformer allInTransformer) {
+            AllergyIntoleranceTransformer allInTransformer,
+            ServiceRequestTransformer serTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.patientTr = patientTr;
         this.orgTransformer = orgTransformer;
         this.allInTransformer = allInTransformer;
         this.questTransformer = questTransformer;
+        this.serTransformer = serTransformer;
         this.validator = validator;
     }
     
@@ -180,15 +183,18 @@ public class BundleIniciarTransformer {
         //Se agrega motivo de derivacion
         QuestionnaireResponse motivoDerivacion = 
                 questTransformer.transform(node, out);
+        
+        
+        
+        //Se agrega exámen solicitado
+        ServiceRequest examenSolicitado= serTransformer.buildSolicitudExamen(node, out);
        
         
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
-        
-        
-        
+
         IdType mHId = IdType.newRandomUuid();
         System.out.println("mHId = " + mHId.getIdPart());
         b.addEntry().setFullUrl(mHId.getIdPart())
@@ -246,14 +252,15 @@ public class BundleIniciarTransformer {
         
         IdType motId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(motId.getIdPart())
-                .setResource(motivoDerivacion);  
+                .setResource(motivoDerivacion); 
+        
+        IdType soliExId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(soliExId.getIdPart())
+                .setResource(examenSolicitado); 
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
-        
-        
-        
-        
+
         return res;
     }
     

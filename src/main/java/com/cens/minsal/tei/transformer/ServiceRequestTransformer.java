@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,7 +20,14 @@ import java.util.Date;
  */
 @Component
 public class ServiceRequestTransformer {
-
+    
+    private final String profileExamen = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ServiceRequestExamenLE";
+    
+    
+    
+    
+    
+    
     public ServiceRequest transform(String profile, JsonNode node, OperationOutcome oo) {
         ServiceRequest sr = new ServiceRequest();
         sr.getMeta().addProfile(profile);
@@ -154,5 +163,54 @@ public class ServiceRequestTransformer {
     }
 
 
+    public ServiceRequest buildSolicitudExamen(JsonNode node, OperationOutcome oo){
+        JsonNode solicitudExamenNode = node.get("examenSolicitado");
+        if(solicitudExamenNode==null)
+            return null;
+
+        ServiceRequest ser = new ServiceRequest();
+        ser.getMeta().addProfile(profileExamen);
+        
+        
+        
+        try {
+            Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitud", node);
+            ser.setAuthoredOn(fechaSolicitud);
+        } catch (ParseException ex) {
+            Logger.getLogger(ServiceRequestTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            HapiFhirUtils.addErrorIssue("fechaSolicitud", ex.getMessage(), oo);
+        }
+        
+        ser.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
+        ser.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+        
+        String razonSolicitud = HapiFhirUtils.readStringValueFromJsonNode("razonSolicitud", node);
+        if(razonSolicitud!=null){
+            ser.getReasonCodeFirstRep().setText(razonSolicitud);
+        }else
+            HapiFhirUtils.addNotFoundIssue("razonSolicitud", oo);
+        
+        
+        String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigoExamen", node);
+        
+        CodeableConcept code = ser.getCode();
+        
+        Coding coding = code.getCodingFirstRep();
+        
+        if(codigo!=null){
+            coding.setSystem(HapiFhirUtils.loincSystem);
+            coding.setCode(codigo);
+        }
+        
+        String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node);
+        if(examenSolicitado!=null){
+            code.setText(examenSolicitado);
+        }else
+           HapiFhirUtils.addNotFoundIssue("examenSolicitado", oo);
+        
+        return ser;
+        
+    }
+    
 }
 
