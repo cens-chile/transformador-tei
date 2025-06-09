@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.cens.minsal.tei.config.FhirServerConfig;
+import com.cens.minsal.tei.transformer.BundleAgendarTransformer;
 import com.cens.minsal.tei.transformer.BundleAtenderTransformer;
 import com.cens.minsal.tei.transformer.BundleIniciarTransformer;
 import com.cens.minsal.tei.transformer.BundleTerminarTransformer;
@@ -38,19 +39,24 @@ public class StructureMapResourceProvider implements IResourceProvider{
     BundleTerminarTransformer bundleTerminarTransformer;
     BundleAtenderTransformer bundleAtenderTransformer;
 
+    BundleAgendarTransformer bundleAgendarTransformer;
 
     public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer,
                                         BundleTerminarTransformer terminarTransformer,
-                                        BundleAtenderTransformer atenderTransformer) {
+                                        BundleAtenderTransformer atenderTransformer,
+                                        BundleAgendarTransformer agendarTransformer) {
 
-        if (iniciarTransformer == null && terminarTransformer == null) {
-            throw new IllegalArgumentException("Debe proporcionar al menos iniciarTransformer o terminarTransformer");
+        if (iniciarTransformer == null && terminarTransformer == null &&
+                atenderTransformer == null && agendarTransformer == null ) {
+            throw new IllegalArgumentException("Debe proporcionar al menos iniciarTransformer o" +
+                    " terminarTransformer o atenderTransformer o agendarTransformer");
         }
 
         this.fhirServerConfig = fhirServerConfig;
         this.bundleIniciarTransformer = iniciarTransformer;
         this.bundleTerminarTransformer = terminarTransformer;
         this.bundleAtenderTransformer = atenderTransformer;
+        this.bundleAgendarTransformer = agendarTransformer;
     }
     
     
@@ -91,6 +97,10 @@ public class StructureMapResourceProvider implements IResourceProvider{
         else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetAtenderToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleAtenderTransformer.buildBundle(data);
+        }
+        else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetAgendarToBundle")){
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            res = bundleAgendarTransformer.buildBundle(data);
         }
        
         else{
