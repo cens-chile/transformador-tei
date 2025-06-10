@@ -10,7 +10,9 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -163,52 +165,53 @@ public class ServiceRequestTransformer {
     }
 
 
-    public ServiceRequest buildSolicitudExamen(JsonNode node, OperationOutcome oo){
-        JsonNode solicitudExamenNode = node.get("examenSolicitado");
+    public List<ServiceRequest> buildSolicitudExamen(JsonNode solicitudes, OperationOutcome oo){
+        JsonNode solicitudExamenNode = solicitudes.get("solicitudExamen");
         if(solicitudExamenNode==null)
             return null;
+        
+        List<ServiceRequest> sols= new ArrayList();
+        int i=0;
+        for(JsonNode node : solicitudExamenNode){
+            ServiceRequest ser = new ServiceRequest();
+            ser.getMeta().addProfile(profileExamen);
 
-        ServiceRequest ser = new ServiceRequest();
-        ser.getMeta().addProfile(profileExamen);
-        
-        
-        
-        try {
-            Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitud", node);
-            ser.setAuthoredOn(fechaSolicitud);
-        } catch (ParseException ex) {
-            Logger.getLogger(ServiceRequestTransformer.class.getName()).log(Level.SEVERE, null, ex);
-            HapiFhirUtils.addErrorIssue("fechaSolicitud", ex.getMessage(), oo);
+            try {
+                Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitud", node);
+                ser.setAuthoredOn(fechaSolicitud);
+            } catch (ParseException ex) {
+                Logger.getLogger(ServiceRequestTransformer.class.getName()).log(Level.SEVERE, null, ex);
+                HapiFhirUtils.addErrorIssue("solicitudExamen["+i+"].fechaSolicitud", ex.getMessage(), oo);
+            }
+
+            ser.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
+            ser.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+
+            String razonSolicitud = HapiFhirUtils.readStringValueFromJsonNode("razonSolicitud", node);
+            if(razonSolicitud!=null){
+                ser.getReasonCodeFirstRep().setText(razonSolicitud);
+            }else
+                HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].razonSolicitud", oo);
+
+            String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigoExamen", node);
+
+            CodeableConcept code = ser.getCode();
+
+            Coding coding = code.getCodingFirstRep();
+
+            if(codigo!=null){
+                coding.setSystem(HapiFhirUtils.loincSystem);
+                coding.setCode(codigo);
+            }
+
+            String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node);
+            if(examenSolicitado!=null){
+                code.setText(examenSolicitado);
+            }else
+               HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].examenSolicitado", oo);
+            sols.add(ser);
         }
-        
-        ser.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
-        ser.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-        
-        String razonSolicitud = HapiFhirUtils.readStringValueFromJsonNode("razonSolicitud", node);
-        if(razonSolicitud!=null){
-            ser.getReasonCodeFirstRep().setText(razonSolicitud);
-        }else
-            HapiFhirUtils.addNotFoundIssue("razonSolicitud", oo);
-        
-        
-        String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigoExamen", node);
-        
-        CodeableConcept code = ser.getCode();
-        
-        Coding coding = code.getCodingFirstRep();
-        
-        if(codigo!=null){
-            coding.setSystem(HapiFhirUtils.loincSystem);
-            coding.setCode(codigo);
-        }
-        
-        String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node);
-        if(examenSolicitado!=null){
-            code.setText(examenSolicitado);
-        }else
-           HapiFhirUtils.addNotFoundIssue("examenSolicitado", oo);
-        
-        return ser;
+        return sols;
         
     }
     

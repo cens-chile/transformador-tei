@@ -51,13 +51,13 @@ public class OrganizationTransformer {
         else 
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
 
-        String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
+        /*String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
         String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";
         String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
 
         if (resValidacionDest == null){
             HapiFhirUtils.addErrorIssue(codigoDEIS,"CodigoDEIS no valido", oo);
-        }
+        }*/
 
         return org;
     }
