@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -217,13 +218,11 @@ public class BundleIniciarTransformer {
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
-        
-        
-        
+       
         IdType sRId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
-        setServiceRequestReferences(null, new Reference(patient), new Reference(enc), null, new Reference(cond));
+        setServiceRequestReferences(sr,patient,enc, null,cond,alergias);
         
         IdType encId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(encId.getIdPart())
@@ -406,11 +405,14 @@ public class BundleIniciarTransformer {
     }
   
     
-    public void setServiceRequestReferences(ServiceRequest ser,Reference pat,Reference enc,
-            Reference requester,Reference diagSos){
-        ser.setSubject(pat);
-        ser.setEncounter(enc);
-        ser.setRequester(requester);
+    public void setServiceRequestReferences(ServiceRequest ser,Patient pat,Encounter enc,
+        PractitionerRole requester,Condition diagSos,List<AllergyIntolerance> alls){
+        
+        ser.setSubject(new Reference(pat));
+        ser.setEncounter(new Reference(enc));
+        ser.setRequester(new Reference(requester));
+        for(AllergyIntolerance al: alls)
+            ser.getSupportingInfo().add(new Reference(al));
         
     }
 }
