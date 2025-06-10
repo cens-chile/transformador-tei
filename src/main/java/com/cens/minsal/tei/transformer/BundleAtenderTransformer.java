@@ -40,6 +40,7 @@ public class BundleAtenderTransformer {
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
     CarePlanTransformer carePlanTransformer;
+    EncounterTransformer encounterTransformer;
     ValueSetValidatorService validator;
 
     public BundleAtenderTransformer(FhirServerConfig fhirServerConfig,
@@ -49,6 +50,7 @@ public class BundleAtenderTransformer {
                                     OrganizationTransformer organizationTransformer,
                                     CarePlanTransformer carePlanTransformer,
                                     PractitionerRoleTransformer practitionerRoleTransformer,
+                                    EncounterTransformer encounterTransformer,
                                     ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
@@ -56,6 +58,7 @@ public class BundleAtenderTransformer {
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
         this.carePlanTransformer = carePlanTransformer;
+        this.encounterTransformer = encounterTransformer;
         this.validator = validator;
         this.practitionerRoleTransformer = practitionerRoleTransformer;
     }
@@ -150,10 +153,9 @@ public class BundleAtenderTransformer {
 
 
         //Encuentro
-        get = node.get("encuentro");
-        Encounter encounter = null;
-        if(get != null){
-            EncounterTransformer encounterTransformer = new EncounterTransformer(validator);
+       
+        Encounter encounter = encounterTransformer.transform(node, oo,"Atender");
+        /*if(get != null){
             encounter = encounterTransformer.transform(get, oo,"Atender");
             try {
                 String refPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
@@ -163,7 +165,7 @@ public class BundleAtenderTransformer {
             }
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
-        }
+        }*/
 
 
         get = node.get("planDeAtencion");

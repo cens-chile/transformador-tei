@@ -14,11 +14,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
  */
+@Component
 public class EncounterTransformer {
     ValueSetValidatorService validator;
 
@@ -26,17 +28,29 @@ public class EncounterTransformer {
         this.validator = validator;
     }
 
-    public Encounter transform(JsonNode json, OperationOutcome oo, String evento) {
+    public Encounter transform(JsonNode node, OperationOutcome oo, String evento) {
+        JsonNode json;
+        String encKey;
+        if(evento.equals("iniciar"))
+            encKey = "encuentroIniciarAPS";
+        else
+            encKey = "encuentroAtender";
+            
+        
+        json = node.get(encKey);
+        if(json==null){
+            HapiFhirUtils.addNotFoundIssue(encKey, oo);
+            return null;
+        }
+            
+        
+        
+        
         Encounter encounter = new Encounter();
 
         ObjectMapper mapper = new ObjectMapper();
 
-        // Identificador
-        if (json.hasNonNull("identificadorConsultaEspecialidad")) {
-            Identifier identifier = new Identifier();
-            identifier.setValue(HapiFhirUtils.readStringValueFromJsonNode("identificadorConsultaEspecialidad",json));
-            encounter.addIdentifier(identifier);
-        } else HapiFhirUtils.addNotFoundIssue("identificadorConsultaEspecialidad" , oo);
+        
 
         // Estado no es necesario solicitarlo , es un dato estático
 
@@ -70,22 +84,21 @@ public class EncounterTransformer {
         */
 
         // Clase (modalidadAtencion)
-        if (json.has("modalidadAtencion")) {
+        if (json.has("codigoModalidadAtencion")) {
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
             String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
 
             Coding classCoding = new Coding();
-            JsonNode modalidad = json.get("modalidadAtencion");
-            String cod = HapiFhirUtils.readIntValueFromJsonNode("codigoModAtencion", modalidad);
+            String cod = json.get("codigoModalidadAtencion").asText();
             String resValidacionDest = validator.validateCode(cs,
                     cod, "", vs);
             if (resValidacionDest == null){
-                HapiFhirUtils.addErrorIssue(cod,"modalidadAtencion.codigoModAtencion", oo);
+                HapiFhirUtils.addErrorIssue(cod,"codigoModalidadAtencion", oo);
             }
             classCoding.setCode(cod);
             classCoding.setSystem(cs);
             encounter.setClass_(classCoding);
-        } else HapiFhirUtils.addNotFoundIssue( "modalidadAtencion", oo);
+        } else HapiFhirUtils.addNotFoundIssue( "codigoModalidadAtencion", oo);
 
 
         // Tipo de consulta (type)
@@ -110,7 +123,7 @@ public class EncounterTransformer {
         }
 
 
-        // Participantes
+        /* Participantes
         if (json.has("participantes")) {
             for (JsonNode p : json.get("participantes")) {
                 EncounterParticipantComponent comp = new EncounterParticipantComponent();
@@ -120,7 +133,7 @@ public class EncounterTransformer {
                 comp.setIndividual(new Reference(p.get("individuo").asText()));
                 encounter.addParticipant(comp);
             }
-        }
+        }*/
 
         // Cita médica
         if (json.has("citaMedica")) {
@@ -167,29 +180,33 @@ public class EncounterTransformer {
             }
         }
 
-        // Diagnósticos (referencias)
-        if (json.has("diagnosticos")) {
-            for (JsonNode dx : json.get("diagnosticos")) {
-                Encounter.DiagnosisComponent diag = new Encounter.DiagnosisComponent();
-                diag.setCondition(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaDiagnostico", dx)));
-                encounter.addDiagnosis(diag);
-
-            }
-        } else HapiFhirUtils.addNotFoundIssue("diagnosticos", oo);
+        
         if (evento.equals("Atender")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
             EncounterTransformer.atenderComplete(json, encounter, oo);
+        }
+        if (evento.equals("iniciar")) {
+            encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterIniciarLE");
+            iniciarComplete(encounter,json, oo);
         }
         return encounter;
     }
 
 
     private static void atenderComplete (JsonNode node, Encounter encounter, OperationOutcome oo){
+        
+        
+        // Identificador
+        String iden = HapiFhirUtils.readStringValueFromJsonNode("identificadorConsultaEspecialidad", node);
+        if (iden!=null) {
+            encounter.getIdentifierFirstRep().setValue(iden);
+        } else HapiFhirUtils.addNotFoundIssue("identificadorConsultaEspecialidad" , oo);
+        
         // agregar pertenencia y motivo de no pertenencia
         // Pertinencia y motivoNoPertinencia (como extensiones)
         if (node.has("pertinencia")) {
             Extension extPertinencia = HapiFhirUtils.buildExtension(
-                    " https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionPertinenciaAtencionBox",
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionPertinenciaAtencionBox",
                     new BooleanType(node.get("pertinencia").asBoolean()));
             encounter.addExtension(extPertinencia);
         }
@@ -206,5 +223,20 @@ public class EncounterTransformer {
             encounter.addBasedOn(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaSIC",
                     node.get("solicitudIC"))));
         }else HapiFhirUtils.addNotFoundIssue("solicitudIC.ReferenciaSIC",oo);
+    }
+    
+    
+    public void iniciarComplete(Encounter enc, JsonNode node, OperationOutcome oo){
+        
+        String id = HapiFhirUtils.readStringValueFromJsonNode("IdentificacionConsultaAPS", node);
+        if(id!=null){
+            enc.getIdentifierFirstRep().setValue(id);
+        }
+        String consecSystem="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSConsecuenciaAtencionCodigo";
+        Coding cod = new Coding(consecSystem,"3","Derivación");
+        HapiFhirUtils.
+                buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionConsecuenciaAtencionCodigo"
+                        , cod);
+        
     }
 }
