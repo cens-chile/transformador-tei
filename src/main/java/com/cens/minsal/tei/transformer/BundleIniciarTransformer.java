@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -53,6 +54,7 @@ public class BundleIniciarTransformer {
     static final String snomedSystem = "http://snomed.info/sct";
     PatientTransformer patientTr;
     MessageHeaderTransformer messageHeaderTransformer;
+    EncounterTransformer encTransformer;
     OrganizationTransformer orgTransformer;
     AllergyIntoleranceTransformer allInTransformer;
     QuestionnaireResponseTransformer questTransformer;
@@ -61,6 +63,7 @@ public class BundleIniciarTransformer {
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
             MessageHeaderTransformer messageHeaderTransformer,
+            EncounterTransformer encTransformer,
             PatientTransformer patientTr,
             OrganizationTransformer orgTransformer,
             ValueSetValidatorService validator,
@@ -69,6 +72,7 @@ public class BundleIniciarTransformer {
             ServiceRequestTransformer serTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
+        this.encTransformer = encTransformer;
         this.patientTr = patientTr;
         this.orgTransformer = orgTransformer;
         this.allInTransformer = allInTransformer;
@@ -127,6 +131,10 @@ public class BundleIniciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
+        
+        
+        //Construir Encuentro
+        Encounter enc = encTransformer.transform(node, out, "iniciar");
         
         
         //Construir Organización que inicia la IC
@@ -208,11 +216,13 @@ public class BundleIniciarTransformer {
         
         
         IdType sRId = IdType.newRandomUuid();
-        
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
+        setServiceRequestReferences(null, new Reference(patient), new Reference(enc), null, new Reference(cond));
         
-        
+        IdType encId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(encId.getIdPart())
+                .setResource(enc);
         
         
         IdType iCId = IdType.newRandomUuid();
@@ -390,4 +400,12 @@ public class BundleIniciarTransformer {
         return sr;
     }
   
+    
+    public void setServiceRequestReferences(ServiceRequest ser,Reference pat,Reference enc,
+            Reference requester,Reference diagSos){
+        ser.setSubject(pat);
+        ser.setEncounter(enc);
+        ser.setRequester(requester);
+        
+    }
 }
