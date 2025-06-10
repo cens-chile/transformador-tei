@@ -190,26 +190,29 @@ public class PatientTransformer {
                         String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
                                 codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
                         if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
-                        direccion.addExtension(HapiFhirUtils.buildExtension(
-                                "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
+                        direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
                                 new CodeType(codigo)));
                     }
+
+                    //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
+
+                if (direccionNode.has("provincia")) {
+                    String codigo = direccionNode.get("provincia").get("codigo").asText();
+                    String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL",
+                            codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL");
+                    if (valido == null) HapiFhirUtils.addInvalidIssue("provincia.codigo", oo);
+                    direccion.getDistrictElement().addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
+                            new CodeType(codigo)));
+                }
+
                     if (direccionNode.has("comuna")) {
                         String codigo = direccionNode.get("comuna").get("codigo").asText();
-                        direccion.addExtension(HapiFhirUtils.buildExtension(
+                        direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
                             "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
                             new CodeType(codigo)
                     ));
                     }
-                    if (direccionNode.has("provincia")) {
-                        String codigo = direccionNode.get("provincia").get("codigo").asText();
-                        direccion.addExtension(HapiFhirUtils.buildExtension(
-                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
-                            new CodeType(codigo)
-                    ));
-
-                    }
-
                     if (direccionNode.has("situacionCalle")) {
                     Boolean sitCalleB = HapiFhirUtils.readBooleanValueFromJsonNode("situacionCalle", direccionNode);
                     Extension sitCalleExt =
