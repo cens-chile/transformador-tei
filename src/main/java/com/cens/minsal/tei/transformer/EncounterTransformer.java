@@ -30,7 +30,7 @@ public class EncounterTransformer {
 
     public Encounter transform(JsonNode node, OperationOutcome oo, String evento) {
         JsonNode json;
-        String encKey="";
+        String encKey;
         if(evento.equals("iniciar"))
             encKey = "encuentroIniciarAPS";
         else
@@ -187,7 +187,7 @@ public class EncounterTransformer {
         }
         if (evento.equals("iniciar")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterIniciarLE");
-            EncounterTransformer.atenderComplete(json, encounter, oo);
+            iniciarComplete(encounter,json, oo);
         }
         return encounter;
     }
