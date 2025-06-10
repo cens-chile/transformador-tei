@@ -156,15 +156,20 @@ public class BundleIniciarTransformer {
         
         //agregar discapacidad
         Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
-        if(!node.get("presentaDiscapacidad").isBoolean())
+        Observation buildDiscapacidad = new Observation();
+        if(node.has("presentaDiscapacidad")) {
+            if (!node.get("presentaDiscapacidad").isBoolean())
                 HapiFhirUtils.addInvalidIssue("resolutividadAPS", out);
-        Observation buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+             buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+        }
         
         Boolean cuidador = HapiFhirUtils.readBooleanValueFromJsonNode("cuidador", node);
-        if(!node.get("cuidador").isBoolean())
+        Observation cuidadorObservation = new Observation();
+        if(node.has("cuidador")) {
+            if (!node.get("cuidador").isBoolean())
                 HapiFhirUtils.addInvalidIssue("cuidador", out);
-        Observation cuidadorObservation = ObservationTransformer.buildCuidador(cuidador);
-        
+            cuidadorObservation = ObservationTransformer.buildCuidador(cuidador);
+        }
         //Se agregan exámenes realizados
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");

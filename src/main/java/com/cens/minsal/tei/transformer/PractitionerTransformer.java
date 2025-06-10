@@ -4,12 +4,14 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -19,7 +21,11 @@ import java.util.Date;
 @Component
 public class PractitionerTransformer {
 
+    ValueSetValidatorService validator;
 
+    public PractitionerTransformer(ValueSetValidatorService validator) {
+        this.validator = validator;
+    }
 
     public Practitioner transform( String profile, JsonNode node, OperationOutcome oo){
 
@@ -98,12 +104,12 @@ public class PractitionerTransformer {
         }
 
         // Género
-        String genero = HapiFhirUtils.readStringValueFromJsonNode("genero", node);
-        if ("masculino".equalsIgnoreCase(genero)) {
+        String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
+        if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) || "hombre".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.MALE);
-        } else if ("femenino".equalsIgnoreCase(genero)) {
+        } else if ("femenino".equalsIgnoreCase(genero) || "mujer".equalsIgnoreCase(genero) || "female".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);
-        } else if ("otro".equalsIgnoreCase(genero)) {
+        } else if ("otro".equalsIgnoreCase(genero) || "other".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.OTHER);
         } else {
             practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
@@ -142,31 +148,55 @@ public class PractitionerTransformer {
         }
 
         // Dirección
-        JsonNode direccion = node.get("direccion");
-        if (direccion != null) {
-            Address address = new Address();
-            address.setUse(Address.AddressUse.WORK);
-            address.addLine(HapiFhirUtils.readStringValueFromJsonNode("linea", direccion));
-            address.setCity(HapiFhirUtils.readStringValueFromJsonNode("comuna.nombre", direccion));
-            address.setDistrict(HapiFhirUtils.readStringValueFromJsonNode("provincia.nombre", direccion));
-            address.setState(HapiFhirUtils.readStringValueFromJsonNode("region.nombre", direccion));
-            address.setCountry(HapiFhirUtils.readStringValueFromJsonNode("pais.nombre", direccion));
-
-            // Agregar extensiones de códigos
-            HapiFhirUtils.addCodigoExtension(address.getCityElement(), "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
-                    "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSComunas", direccion, "comuna.codigo");
-
-            HapiFhirUtils.addCodigoExtension(address.getDistrictElement(), "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
-                    "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSProvincias", direccion, "provincia.codigo");
-
-            HapiFhirUtils.addCodigoExtension(address.getStateElement(), "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
-                    "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSRegiones", direccion, "region.codigo");
-
-            HapiFhirUtils.addCodigoExtension(address.getCountryElement(), "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",
-                    "urn:iso:std:iso:3166", direccion, "pais.codigo");
-
-            practitioner.addAddress(address);
+        JsonNode direccionNode = node.get("direccion");
+        Address direccion = new Address();
+        if (direccionNode.has("descripcion")) {
+            direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("descripcion").asText())));
         }
+        if (direccionNode.has("pais")) {
+            direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
+        }
+
+        if (direccionNode.has("region")) {
+            String codigo = direccionNode.get("region").get("codigo").asText();
+            String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
+                    codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
+            if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
+            direccion.addExtension(HapiFhirUtils.buildExtension(
+                    "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
+                    new CodeType(codigo)));
+        }
+
+        //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
+
+        if (direccionNode.has("provincia")) {
+            String codigo = direccionNode.get("provincia").get("codigo").asText();
+            String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL",
+                    codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL");
+            if (valido == null) HapiFhirUtils.addInvalidIssue("provincia.codigo", oo);
+            direccion.addExtension(HapiFhirUtils.buildExtension(
+                    "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
+                    new CodeType(codigo)));
+        }
+
+        if (direccionNode.has("comuna")) {
+            String codigo = direccionNode.get("comuna").get("codigo").asText();
+            direccion.addExtension(HapiFhirUtils.buildExtension(
+                    "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
+                    new CodeType(codigo)
+            ));
+
+        }
+
+        if (direccionNode.has("situacionCalle")) {
+            Boolean sitCalleB = HapiFhirUtils.readBooleanValueFromJsonNode("situacionCalle", direccionNode);
+            Extension sitCalleExt =
+                    new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/SituacionCalle",
+                            new BooleanType(sitCalleB));
+            direccion.addExtension(sitCalleExt);
+        }
+            practitioner.addAddress(direccion);
+
 
         if(profile.equals("profesional")) {
             // Calificaciones (títulos, especialidades, subespecialidades, etc.)

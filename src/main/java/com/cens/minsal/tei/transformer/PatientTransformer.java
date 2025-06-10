@@ -194,6 +194,19 @@ public class PatientTransformer {
                                 "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
                                 new CodeType(codigo)));
                     }
+
+                    //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
+
+                if (direccionNode.has("provincia")) {
+                    String codigo = direccionNode.get("provincia").get("codigo").asText();
+                    String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL",
+                            codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL");
+                    if (valido == null) HapiFhirUtils.addInvalidIssue("provincia.codigo", oo);
+                    direccion.addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
+                            new CodeType(codigo)));
+                }
+
                     if (direccionNode.has("comuna")) {
                         String codigo = direccionNode.get("comuna").get("codigo").asText();
                         direccion.addExtension(HapiFhirUtils.buildExtension(
