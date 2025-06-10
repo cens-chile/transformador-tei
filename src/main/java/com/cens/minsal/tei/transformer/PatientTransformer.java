@@ -47,14 +47,27 @@ public class PatientTransformer {
         // Identificadores
         String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
         if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
+
         JsonNode identificadores = node.get("identificadores");
         if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
+        for (JsonNode identificador: identificadores){
+            String code = HapiFhirUtils.readStringValueFromJsonNode("codigo",identificador);
+            String valor = HapiFhirUtils.readStringValueFromJsonNode("valor",identificador);
+            String tipo = HapiFhirUtils.readStringValueFromJsonNode("tipo", identificador);
+            Identifier identifier = new Identifier();
+            String paisEmision = HapiFhirUtils.readStringValueFromJsonNode("paisEmision", identificador);
+            // ************ VAlidar el codigo del pais emisor.
+            Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",new StringType(paisEmision));
+            identifier.addExtension(paisEmisionExt);
 
-        if (identificadores.has("RUN")) {
-                addIdentifier(patient, "01", "RUN", identificadores.get("RUN"), oo);
-            }
-        //}
+            identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+            identifier.setValue(valor);
+            //**************Validar el code del tipo de identificador
+            identifier.getType().addCoding().setSystem("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador").setCode(code);
+            identifier.getType().setText(tipo);
+            patient.addIdentifier(identifier);
 
+        }
         // Nombre
         HumanName nombre = new HumanName();
         nombre.setUse(HumanName.NameUse.OFFICIAL);
@@ -123,6 +136,8 @@ public class PatientTransformer {
             Extension paisOrigenExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PaisOrigenMPI",
                     new StringType((paisOrigen)));
             patient.addExtension(paisOrigenExt);
+
+
 
         }else HapiFhirUtils.addNotFoundIssue("paciente.paisOrigen",oo);
 

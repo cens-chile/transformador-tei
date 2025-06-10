@@ -197,10 +197,12 @@ public class PractitionerTransformer {
         }
             practitioner.addAddress(direccion);
 
-
+        JsonNode tits = node.get("titulosProfesionales");
+        if(tits != null) {
+            addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
+        }
         if(profile.equals("profesional")) {
             // Calificaciones (títulos, especialidades, subespecialidades, etc.)
-            addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
             addQualifications(practitioner, node.get("especialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
             addQualifications(practitioner, node.get("subespecialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
             addQualifications(practitioner, node.get("especialidadesOdontologicas"),  "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
