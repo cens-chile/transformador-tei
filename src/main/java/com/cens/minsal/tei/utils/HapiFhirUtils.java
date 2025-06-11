@@ -84,6 +84,14 @@ public class HapiFhirUtils {
         out.getIssue().add(issue);
     }
     
+    public static void addNotFoundCodeIssue(String value, OperationOutcome out){
+        OperationOutcome.OperationOutcomeIssueComponent issue;
+        issue = new OperationOutcome.OperationOutcomeIssueComponent();
+        issue.setCode(OperationOutcome.IssueType.INVALID);
+        issue.setDiagnostics("The code for de variable "+value+" is invalid");
+        out.getIssue().add(issue);
+    }
+    
     public static void addErrorIssue(String value, String message, OperationOutcome out){
         OperationOutcome.OperationOutcomeIssueComponent issue;
         issue = new OperationOutcome.OperationOutcomeIssueComponent();

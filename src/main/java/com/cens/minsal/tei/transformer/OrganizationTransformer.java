@@ -38,16 +38,11 @@ public class OrganizationTransformer {
         if(nombre!=null)
             org.setName(nombre);
         else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+"nombreLegal", oo);
+            HapiFhirUtils.addNotFoundIssue(parentPath+".nombreLegal", oo);
+        
         String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
-
-        String sistema = HapiFhirUtils.readStringValueFromJsonNode("sistema", node);
-        if (sistema == null){
-            HapiFhirUtils.addNotFoundIssue("establecimiento->sistema", oo);
-        }
-
         if(codigoDEIS!=null)
-            org.getIdentifierFirstRep().setValue(codigoDEIS).setSystem(sistema);
+            org.getIdentifierFirstRep().setValue(codigoDEIS);
         else 
             HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
 

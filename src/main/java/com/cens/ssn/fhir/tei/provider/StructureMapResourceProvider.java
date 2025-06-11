@@ -12,6 +12,7 @@ import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.transformer.BundleAgendarTransformer;
 import com.cens.minsal.tei.transformer.BundleAtenderTransformer;
 import com.cens.minsal.tei.transformer.BundleIniciarTransformer;
+import com.cens.minsal.tei.transformer.BundleReferenciarTransformer;
 import com.cens.minsal.tei.transformer.BundleTerminarTransformer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,12 +37,14 @@ public class StructureMapResourceProvider implements IResourceProvider{
     FhirServerConfig fhirServerConfig;
     
     BundleIniciarTransformer bundleIniciarTransformer;
+    BundleReferenciarTransformer bundleReferenciarTransformer;
     BundleTerminarTransformer bundleTerminarTransformer;
     BundleAtenderTransformer bundleAtenderTransformer;
 
     BundleAgendarTransformer bundleAgendarTransformer;
 
     public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer,
+                                        BundleReferenciarTransformer bundleReferenciarTransformer,
                                         BundleTerminarTransformer terminarTransformer,
                                         BundleAtenderTransformer atenderTransformer,
                                         BundleAgendarTransformer agendarTransformer) {
@@ -54,6 +57,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
 
         this.fhirServerConfig = fhirServerConfig;
         this.bundleIniciarTransformer = iniciarTransformer;
+        this.bundleReferenciarTransformer = bundleReferenciarTransformer;
         this.bundleTerminarTransformer = terminarTransformer;
         this.bundleAtenderTransformer = atenderTransformer;
         this.bundleAgendarTransformer = agendarTransformer;
@@ -89,7 +93,11 @@ public class StructureMapResourceProvider implements IResourceProvider{
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleIniciarTransformer.buildBundle(data);
             
-        } else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
+        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetReferenciarToBundle")){
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            res = bundleReferenciarTransformer.buildBundle(data);
+
+        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleTerminarTransformer.buildBundle(data);
 
