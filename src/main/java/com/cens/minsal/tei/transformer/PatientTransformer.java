@@ -4,6 +4,7 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import co.elastic.clients.util.DateTime;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,14 +48,27 @@ public class PatientTransformer {
         // Identificadores
         String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
         if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
+
         JsonNode identificadores = node.get("identificadores");
         if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
+        for (JsonNode identificador: identificadores){
+            String code = HapiFhirUtils.readStringValueFromJsonNode("codigo",identificador);
+            String valor = HapiFhirUtils.readStringValueFromJsonNode("valor",identificador);
+            String tipo = HapiFhirUtils.readStringValueFromJsonNode("tipo", identificador);
+            Identifier identifier = new Identifier();
+            String paisEmision = HapiFhirUtils.readStringValueFromJsonNode("paisEmision", identificador);
+            // ************ VAlidar el codigo del pais emisor.
+            Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",new StringType(paisEmision));
+            identifier.addExtension(paisEmisionExt);
 
-        if (identificadores.has("RUN")) {
-                addIdentifier(patient, "01", "RUN", identificadores.get("RUN"), oo);
-            }
-        //}
+            identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+            identifier.setValue(valor);
+            //**************Validar el code del tipo de identificador
+            identifier.getType().addCoding().setSystem("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador").setCode(code);
+            identifier.getType().setText(tipo);
+            patient.addIdentifier(identifier);
 
+        }
         // Nombre
         HumanName nombre = new HumanName();
         nombre.setUse(HumanName.NameUse.OFFICIAL);
@@ -75,7 +89,15 @@ public class PatientTransformer {
             }
         } else HapiFhirUtils.addNotFoundIssue("nombreCompleto",oo);
 
-        patient.setName(Collections.singletonList(nombre));
+        patient.addName(nombre);
+
+        if(node.has("nombreSocial")){
+            String nombreSocial = HapiFhirUtils.readStringValueFromJsonNode("nombreSocial",node);
+                HumanName nombreSocialHN = new HumanName();
+                nombreSocialHN.setUse(HumanName.NameUse.USUAL);
+                nombreSocialHN.addGiven(nombreSocial);
+                patient.addName(nombreSocialHN);
+        }
 
         // Género
         if (node.has("codIdGenero")) {
@@ -88,6 +110,34 @@ public class PatientTransformer {
             patient.addExtension(extIDGen);
 
         } else HapiFhirUtils.addNotFoundIssue("paciente.codIdGenero",oo);
+
+        if(node.has("estadoCivil")){
+            String ec = HapiFhirUtils.readStringValueFromJsonNode("estadoCivil", node);
+            //********Validar el estado civil
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoCivil";
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoCivil";
+            String valid = validator.validateCode(cs,ec,"",vs);
+            if(valid != null) {
+                Coding coding = new Coding(cs, ec, valid);
+                patient.setMaritalStatus(new CodeableConcept(coding));
+            }else HapiFhirUtils.addErrorIssue(ec, "codigo de estadoCivil no valido", oo);
+        }
+
+        if(node.has("fallecimiento")){
+            JsonNode fallecimiento = node.get("fallecimiento");
+            if(fallecimiento.has("fallecido")){
+                Boolean fallecido = HapiFhirUtils.readBooleanValueFromJsonNode("fallecido",fallecimiento);
+                patient.setDeceased(new BooleanType(fallecido));
+            } else if (fallecimiento.has("fechaFallecimiento")){
+                try {
+                    Date fechaFallecimiento = HapiFhirUtils.readDateValueFromJsonNode("fechaFallecimiento", fallecimiento);
+                    patient.setDeceased(new DateTimeType(fechaFallecimiento));
+                } catch (Exception e){
+                    HapiFhirUtils.addErrorIssue("fechaFallecimiento", "fecha de fallecimiento no válida", oo);
+                }
+            }
+
+        }
 
         if (node.has("sexoBiologico")) {
             String sexoBiologico = node.get("sexoBiologico").asText().toLowerCase();
@@ -123,6 +173,8 @@ public class PatientTransformer {
             Extension paisOrigenExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PaisOrigenMPI",
                     new StringType((paisOrigen)));
             patient.addExtension(paisOrigenExt);
+
+
 
         }else HapiFhirUtils.addNotFoundIssue("paciente.paisOrigen",oo);
 

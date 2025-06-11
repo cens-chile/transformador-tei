@@ -27,7 +27,7 @@ public class PractitionerTransformer {
         this.validator = validator;
     }
 
-    public Practitioner transform( String tipoPractitioner, JsonNode node, OperationOutcome oo){
+    public Practitioner transform( String tipoPractitioner, JsonNode node, OperationOutcome oo) {
 
         String prestadorPro = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerProfesionalLE";
         String prestadorAdm = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE";
@@ -35,7 +35,7 @@ public class PractitionerTransformer {
         Practitioner practitioner = new Practitioner();
         practitioner.getMeta().setLastUpdated(new Date());
 
-        if(tipoPractitioner.equals("administrativo")){
+        if (tipoPractitioner.equals("administrativo")) {
             practitioner.getMeta().addProfile(prestadorAdm);
         } else {
             practitioner.getMeta().addProfile(prestadorPro);
@@ -49,13 +49,13 @@ public class PractitionerTransformer {
 
         String idGen = HapiFhirUtils.readStringValueFromJsonNode("identidadDeGenero", node);
 
-        if(idGen != null){
+        if (idGen != null) {
             Extension idGeneroExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-IdentidadDeGenero.html", new StringType(idGen));
             practitioner.addExtension(idGeneroExt);
         }
 
 
-        if(tipoPractitioner.equals("profesional")) {
+        if (tipoPractitioner.equals("profesional")) {
             String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
             if (idGen != null) {
                 Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-CodigoPaises.html", new StringType(nacionalidad));
@@ -66,15 +66,14 @@ public class PractitionerTransformer {
         JsonNode identificadores = node.get("identificadores");
         if (identificadores != null) {
             addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-            if(tipoPractitioner.equals("profesional")) {
+            if (tipoPractitioner.equals("profesional")) {
                 addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
             }
         }
 
 
-
         // Activo
-        if (HapiFhirUtils.readBooleanValueFromJsonNode("activo", node) != null){
+        if (HapiFhirUtils.readBooleanValueFromJsonNode("activo", node) != null) {
             practitioner.setActive(Boolean.TRUE.equals(HapiFhirUtils.readBooleanValueFromJsonNode("activo", node)));
         }
 
@@ -117,7 +116,7 @@ public class PractitionerTransformer {
 
         // Fecha de nacimiento
         try {
-            if(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
+            if (HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
                 try {
                     practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
                 } catch (ParseException e) {
@@ -149,7 +148,7 @@ public class PractitionerTransformer {
 
         // Dirección
         JsonNode direccionNode = node.get("direccion");
-        if(direccionNode!=null){
+        if (direccionNode != null) {
             Address direccion = new Address();
             if (direccionNode.has("descripcion")) {
                 direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("descripcion").asText())));
@@ -167,7 +166,7 @@ public class PractitionerTransformer {
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
                         new CodeType(codigo)));
             }
-        
+
 
             //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
 
@@ -193,14 +192,19 @@ public class PractitionerTransformer {
         }
 
 
-        if(tipoPractitioner.equals("profesional")) {
-            // Calificaciones (títulos, especialidades, subespecialidades, etc.)
-            addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
-            addQualifications(practitioner, node.get("especialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
-            addQualifications(practitioner, node.get("subespecialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
-            addQualifications(practitioner, node.get("especialidadesOdontologicas"),  "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
-            addQualifications(practitioner, node.get("especialidadesBioquimicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca", "EspBioQ");
-            addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma", "EspFarma");
+        if (tipoPractitioner.equals("profesional")) {
+            JsonNode tits = node.get("titulosProfesionales");
+            if (tits != null) {
+                addQualifications(practitioner, node.get("titulosProfesionales"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional", "cert");
+            }
+            if (tipoPractitioner.equals("profesional")) {
+                // Calificaciones (títulos, especialidades, subespecialidades, etc.)
+                addQualifications(practitioner, node.get("especialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "esp");
+                addQualifications(practitioner, node.get("subespecialidadesMedicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed", "subesp");
+                addQualifications(practitioner, node.get("especialidadesOdontologicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont", "EspOdo");
+                addQualifications(practitioner, node.get("especialidadesBioquimicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca", "EspBioQ");
+                addQualifications(practitioner, node.get("especialidadesFarmacologicas"), "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma", "EspFarma");
+            }
         }
         return practitioner;
     }
