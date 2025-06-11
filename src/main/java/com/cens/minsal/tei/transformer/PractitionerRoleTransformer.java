@@ -106,6 +106,19 @@ public class PractitionerRoleTransformer {
 
         return role;
     }
+    
+    public PractitionerRole buildPractitionerRole(String role,Organization org,
+            Practitioner prac){
+        
+        PractitionerRole practitionerRole = new PractitionerRole();
+        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE",role,null);
+        CodeableConcept cc = new CodeableConcept(roleCode);
+        practitionerRole.addCode(cc);
+
+        practitionerRole.setPractitioner(new Reference(prac));
+        practitionerRole.setOrganization(new Reference(org));
+        return practitionerRole;
+    }
 
 
 }

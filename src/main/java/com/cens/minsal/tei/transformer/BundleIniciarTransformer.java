@@ -35,9 +35,11 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.LoggerFactory;
@@ -60,6 +62,8 @@ public class BundleIniciarTransformer {
     AllergyIntoleranceTransformer allInTransformer;
     QuestionnaireResponseTransformer questTransformer;
     ServiceRequestTransformer serTransformer;
+    PractitionerTransformer praTransformer;
+    PractitionerRoleTransformer praRoleTransformer;
     ValueSetValidatorService validator;
     
     public BundleIniciarTransformer(FhirServerConfig fhirServerConfig,
@@ -70,7 +74,9 @@ public class BundleIniciarTransformer {
             ValueSetValidatorService validator,
             QuestionnaireResponseTransformer questTransformer,
             AllergyIntoleranceTransformer allInTransformer,
-            ServiceRequestTransformer serTransformer) {
+            ServiceRequestTransformer serTransformer,
+            PractitionerTransformer praTransformer,
+            PractitionerRoleTransformer praRoleTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.encTransformer = encTransformer;
@@ -79,6 +85,8 @@ public class BundleIniciarTransformer {
         this.allInTransformer = allInTransformer;
         this.questTransformer = questTransformer;
         this.serTransformer = serTransformer;
+        this.praTransformer = praTransformer;
+        this.praRoleTransformer = praRoleTransformer;
         this.validator = validator;
     }
     
@@ -121,9 +129,12 @@ public class BundleIniciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("paciente", out);
             
-        
-        
-        
+        get = node.get("profesionalClinicoSolicita");
+        Practitioner practitioner = null;
+        if(get!=null){
+            practitioner = praTransformer.transform("profesional", get, out);
+        }else
+            HapiFhirUtils.addNotFoundIssue("profesionalClinicoSolicita", out);
         
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
@@ -143,15 +154,14 @@ public class BundleIniciarTransformer {
         try{
             get = node.get("establecimiento").get("origen");
             if(get!=null)
-                org = orgTransformer.transform(get, out,"establecimiento.origen");
+                org = orgTransformer.transform(get, out,"establecimiento.origen");   
         }catch(NullPointerException ex){
-            HapiFhirUtils.addNotFoundIssue("establecimientoAPS", out);
+            HapiFhirUtils.addNotFoundIssue("establecimiento.origen", out);
         }
         //Contruir Indice Comorbilidad
-        Observation buildIndiceComorbilidad  = null;
+        Observation indiceComorbilidad  = null;
         if(node.get("indiceComorbilidad")!=null){
-           buildIndiceComorbilidad = ObservationTransformer.buildIndiceComporbilidad(node.get("indiceComorbilidad"),out); 
-           sr.getSupportingInfo().add(new Reference(buildIndiceComorbilidad));
+           indiceComorbilidad = ObservationTransformer.buildIndiceComporbilidad(node.get("indiceComorbilidad"),out); 
         }
         
         //Construir Diagnostico
@@ -165,11 +175,11 @@ public class BundleIniciarTransformer {
         
         //agregar discapacidad
         Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
-        Observation buildDiscapacidad = new Observation();
+        Observation discapacidad = new Observation();
         if(node.has("presentaDiscapacidad")) {
             if (!node.get("presentaDiscapacidad").isBoolean())
                 HapiFhirUtils.addInvalidIssue("resolutividadAPS", out);
-             buildDiscapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+             discapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
         }
         
         Boolean cuidador = HapiFhirUtils.readBooleanValueFromJsonNode("cuidador", node);
@@ -201,7 +211,7 @@ public class BundleIniciarTransformer {
         
         
         //Se agrega exámen solicitado
-        ServiceRequest examenSolicitado= serTransformer.buildSolicitudExamen(node, out);
+        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, out);
        
         
         if (!out.getIssue().isEmpty()) {
@@ -218,11 +228,21 @@ public class BundleIniciarTransformer {
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
+        
+        IdType pracId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(pracId.getIdPart())
+                .setResource(practitioner);
+        
+        PractitionerRole praRole = praRoleTransformer.buildPractitionerRole("iniciador", org, practitioner);
+        addResourceToBundle(b,praRole);
+        
        
         IdType sRId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
-        setServiceRequestReferences(sr,patient,enc, null,cond,alergias);
+        setServiceRequestReferences(sr,patient,enc, praRole,cond,alergias,
+                indiceComorbilidad,cuidadorObservation,discapacidad,
+                motivoDerivacion,examenSolicitados);
         
         IdType encId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(encId.getIdPart())
@@ -231,7 +251,7 @@ public class BundleIniciarTransformer {
         
         IdType iCId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(iCId.getIdPart())
-                .setResource(buildIndiceComorbilidad);
+                .setResource(indiceComorbilidad);
             
         IdType orgId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(orgId.getIdPart())
@@ -244,7 +264,7 @@ public class BundleIniciarTransformer {
         
         IdType disId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(disId.getIdPart())
-                .setResource(buildDiscapacidad);   
+                .setResource(discapacidad);   
         
         IdType cuidadorId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(cuidadorId.getIdPart())
@@ -267,11 +287,11 @@ public class BundleIniciarTransformer {
         IdType motId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(motId.getIdPart())
                 .setResource(motivoDerivacion); 
-        
-        IdType soliExId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(soliExId.getIdPart())
-                .setResource(examenSolicitado); 
-        
+        for(ServiceRequest s : examenSolicitados){
+            IdType sId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(sId.getIdPart())
+                    .setResource(s); 
+        }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
 
@@ -406,13 +426,30 @@ public class BundleIniciarTransformer {
   
     
     public void setServiceRequestReferences(ServiceRequest ser,Patient pat,Encounter enc,
-        PractitionerRole requester,Condition diagSos,List<AllergyIntolerance> alls){
+        PractitionerRole requester,Condition diagSos,List<AllergyIntolerance> alls,
+        Observation indiceComorbilidad,Observation cuidador, Observation dis,
+        QuestionnaireResponse motDer,List<ServiceRequest> solExams){
         
         ser.setSubject(new Reference(pat));
         ser.setEncounter(new Reference(enc));
         ser.setRequester(new Reference(requester));
-        for(AllergyIntolerance al: alls)
+        ser.getSupportingInfo().add(new Reference(diagSos));
+        alls.forEach(al -> {
             ser.getSupportingInfo().add(new Reference(al));
+        });
+        ser.getSupportingInfo().add(new Reference(indiceComorbilidad));
+        ser.getSupportingInfo().add(new Reference(cuidador));
+        ser.getSupportingInfo().add(new Reference(dis));
+        ser.getSupportingInfo().add(new Reference(motDer));
+        solExams.forEach(sol -> {
+            ser.getSupportingInfo().add(new Reference(sol));
+        });
         
+    }
+    
+    public void addResourceToBundle(Bundle b, Resource r){
+        IdType id = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(id.getIdPart())
+                .setResource(r);
     }
 }
