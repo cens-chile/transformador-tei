@@ -273,4 +273,10 @@ public class HapiFhirUtils {
 
     public static void addCodigoExtension(StringType cityElement, String extensionUrl, String system, JsonNode direccion, String s) {
     }
+    
+    public static void addResourceToBundle(Bundle b, Resource r){
+        IdType id = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(id.getIdPart())
+                .setResource(r);
+    }
 }

@@ -129,6 +129,9 @@ public class BundleReferenciarTransformer {
         if(paciente!=null)
             patient = patientTr.transform(paciente, out);
         
+        String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+        if(refPat==null)
+            HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
             
         get = node.get("prestadorReferenciador");
         Practitioner practitioner = null;
@@ -164,7 +167,7 @@ public class BundleReferenciarTransformer {
         try{
             get = node.get("establecimiento").get("destino");
             if(get!=null)
-                org = orgTransformer.transform(get, out,"establecimiento.destino");   
+                orgDest = orgTransformer.transform(get, out,"establecimiento.destino");   
         }catch(NullPointerException ex){
             HapiFhirUtils.addNotFoundIssue("establecimiento.destino", out);
         }
@@ -196,7 +199,7 @@ public class BundleReferenciarTransformer {
             b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(org);
             
-            
+        HapiFhirUtils.addResourceToBundle(b, orgDest);
         
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
