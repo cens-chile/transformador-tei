@@ -4,6 +4,7 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import co.elastic.clients.util.DateTime;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -88,7 +89,15 @@ public class PatientTransformer {
             }
         } else HapiFhirUtils.addNotFoundIssue("nombreCompleto",oo);
 
-        patient.setName(Collections.singletonList(nombre));
+        patient.addName(nombre);
+
+        if(node.has("nombreSocial")){
+            String nombreSocial = HapiFhirUtils.readStringValueFromJsonNode("nombreSocial",node);
+                HumanName nombreSocialHN = new HumanName();
+                nombreSocialHN.setUse(HumanName.NameUse.USUAL);
+                nombreSocialHN.addGiven(nombreSocial);
+                patient.addName(nombreSocialHN);
+        }
 
         // Género
         if (node.has("codIdGenero")) {
@@ -101,6 +110,34 @@ public class PatientTransformer {
             patient.addExtension(extIDGen);
 
         } else HapiFhirUtils.addNotFoundIssue("paciente.codIdGenero",oo);
+
+        if(node.has("estadoCivil")){
+            String ec = HapiFhirUtils.readStringValueFromJsonNode("estadoCivil", node);
+            //********Validar el estado civil
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoCivil";
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoCivil";
+            String valid = validator.validateCode(cs,ec,"",vs);
+            if(valid != null) {
+                Coding coding = new Coding(cs, ec, valid);
+                patient.setMaritalStatus(new CodeableConcept(coding));
+            }else HapiFhirUtils.addErrorIssue(ec, "codigo de estadoCivil no valido", oo);
+        }
+
+        if(node.has("fallecimiento")){
+            JsonNode fallecimiento = node.get("fallecimiento");
+            if(fallecimiento.has("fallecido")){
+                Boolean fallecido = HapiFhirUtils.readBooleanValueFromJsonNode("fallecido",fallecimiento);
+                patient.setDeceased(new BooleanType(fallecido));
+            } else if (fallecimiento.has("fechaFallecimiento")){
+                try {
+                    Date fechaFallecimiento = HapiFhirUtils.readDateValueFromJsonNode("fechaFallecimiento", fallecimiento);
+                    patient.setDeceased(new DateTimeType(fechaFallecimiento));
+                } catch (Exception e){
+                    HapiFhirUtils.addErrorIssue("fechaFallecimiento", "fecha de fallecimiento no válida", oo);
+                }
+            }
+
+        }
 
         if (node.has("sexoBiologico")) {
             String sexoBiologico = node.get("sexoBiologico").asText().toLowerCase();
