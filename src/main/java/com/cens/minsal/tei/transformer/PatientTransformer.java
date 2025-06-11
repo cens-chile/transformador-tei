@@ -139,6 +139,19 @@ public class PatientTransformer {
 
         }
 
+        if(node.has("religion")){
+            String religion  = HapiFhirUtils.readStringValueFromJsonNode("religion", node);
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSReligion";
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSReligion";
+            String valido = validator.validateCode(cs,religion,"",vs);
+            if (valido != null){
+                Coding code = new Coding(cs,religion,valido);
+                CodeableConcept cc = new CodeableConcept(code);
+                Extension religionExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/Religion",cc );
+                patient.addExtension(religionExt);
+            }
+        }
+
         if (node.has("sexoBiologico")) {
             String sexoBiologico = node.get("sexoBiologico").asText().toLowerCase();
             String valido = validator.validateCode("http://hl7.org/fhir/administrative-gender",
@@ -180,13 +193,38 @@ public class PatientTransformer {
 
         //dePuebloOriginario
 
-        if(node.has("dePuebloOriginario")){
-            Boolean dePuebloOriginario = HapiFhirUtils.readBooleanValueFromJsonNode("dePuebloOriginario", node);
+        if(node.has("pueblosOriginariosPerteneciente")){
+            Boolean pueblosOriginariosPerteneciente = HapiFhirUtils.readBooleanValueFromJsonNode("pueblosOriginariosPerteneciente", node);
             Extension dePuebloOriginarioExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosOriginariosPerteneciente",
-                    new BooleanType(dePuebloOriginario));
+                    new BooleanType(pueblosOriginariosPerteneciente));
             patient.addExtension(dePuebloOriginarioExt);
 
-        }else HapiFhirUtils.addNotFoundIssue("paciente.dePuebloOriginario",oo);
+            if(pueblosOriginariosPerteneciente && node.has("pueblosOriginarios")){
+                String pueblosOriginarios = HapiFhirUtils.readStringValueFromJsonNode("pueblosOriginarios", node);
+                String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/PueblosOriginariosCS";
+                String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/PueblosOriginariosVS";
+                String valido = validator.validateCode(cs,pueblosOriginarios,"",vs);
+                if (valido != null) {
+                    Coding coding = new Coding("sytem", pueblosOriginarios, valido);
+                    CodeableConcept cc = new CodeableConcept(coding);
+                    Extension pOExt =
+                            new Extension
+                                    ("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosOriginarios",cc);
+                    patient.addExtension(pOExt);
+                }
+            }
+
+        }else HapiFhirUtils.addNotFoundIssue("paciente.pueblosOriginariosPerteneciente",oo);
+
+//puebloAfroPertenencia
+
+        if(node.has("puebloAfroPertenencia")){
+            Boolean puebloAfroPertenencia = HapiFhirUtils.readBooleanValueFromJsonNode("puebloAfroPertenencia", node);
+            Extension puebloAfroPertenenciaExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosAfrodescendiente",
+                    new BooleanType(puebloAfroPertenencia));
+            patient.addExtension(puebloAfroPertenenciaExt);
+
+        }
 
 
         // Fecha de nacimiento

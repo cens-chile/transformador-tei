@@ -144,9 +144,7 @@ public class BundleAgendarTransformer {
         if(rolProfesionalAgendador != null) {
             practitionerRoleAgendador = practitionerRoleTransformer.transform(rolProfesionalAgendador, oo);
             Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "agendador", "Agendador");
-            if(rolProfesionalAgendador.has("glosa")){
-                roleCode.setDisplay(HapiFhirUtils.readStringValueFromJsonNode("glosa",rolProfesionalAgendador));
-            }
+
             CodeableConcept cc = new CodeableConcept(roleCode);
             practitionerRoleAgendador.addCode(cc);
 

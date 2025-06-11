@@ -27,6 +27,12 @@ public class AppointmentTransformer {
             HapiFhirUtils.addNotFoundIssue("identificador", oo);
         }
 
+        //FechaCreacionCita
+
+        appointment.setCreated(new Date());
+
+        //MediodeContacto
+
         // Estado
         if (node.has("estado")) {
             String estado = node.get("estado").asText();
