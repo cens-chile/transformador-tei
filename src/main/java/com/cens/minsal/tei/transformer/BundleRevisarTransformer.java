@@ -45,8 +45,8 @@ import org.springframework.stereotype.Component;
  * @author José <jose.m.andrade@gmail.com>
  */
 @Component
-public class BundleReferenciarTransformer {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleReferenciarTransformer.class);
+public class BundleRevisarTransformer {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleRevisarTransformer.class);
     FhirServerConfig fhirServerConfig;
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
@@ -61,7 +61,7 @@ public class BundleReferenciarTransformer {
     PractitionerRoleTransformer referenciadorTransformer;
     ValueSetValidatorService validator;
     
-    public BundleReferenciarTransformer(FhirServerConfig fhirServerConfig,
+    public BundleRevisarTransformer(FhirServerConfig fhirServerConfig,
             MessageHeaderTransformer messageHeaderTransformer,
             EncounterTransformer encTransformer,
             PatientTransformer patientTr,
@@ -101,7 +101,7 @@ public class BundleReferenciarTransformer {
             node = mapper.readTree(cmd);
 
         } catch (JsonProcessingException ex) {
-            java.util.logging.Logger.getLogger(BundleReferenciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(BundleRevisarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             throw new FHIRException(ex.getMessage());
         }
         

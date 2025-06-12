@@ -218,12 +218,14 @@ public class BundleIniciarTransformer {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
-
+        PractitionerRole praRole = praRoleTransformer.buildPractitionerRole("iniciador", org, practitioner);
+        
+        
         IdType mHId = IdType.newRandomUuid();
         System.out.println("mHId = " + mHId.getIdPart());
         b.addEntry().setFullUrl(mHId.getIdPart())
                 .setResource(messageHeader);
-        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(patient));
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(praRole));
         
         IdType patId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(patId.getIdPart())
@@ -233,7 +235,7 @@ public class BundleIniciarTransformer {
         b.addEntry().setFullUrl(pracId.getIdPart())
                 .setResource(practitioner);
         
-        PractitionerRole praRole = praRoleTransformer.buildPractitionerRole("iniciador", org, practitioner);
+        
         addResourceToBundle(b,praRole);
         
        
