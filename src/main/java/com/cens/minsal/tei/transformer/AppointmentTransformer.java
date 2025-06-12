@@ -161,12 +161,13 @@ public class AppointmentTransformer {
         } else HapiFhirUtils.addNotFoundIssue("Cita.estadoActorPaciente",oo);
 
         if(node.has("motivoCancelacionCita")){
-            String vs ="http://hl7.org/fhir/ValueSet/resource-types";
-            String cs = "http://hl7.org/fhir/ValueSet/resource-types";
-
-            //String valido = validator.validateCode(cs,"Patient","Patient",vs);
-            Coding coding = new Coding(cs, "Patient", "Patient");
-            CodeableConcept cc = new CodeableConcept();
+            String vs ="http://hl7.org/fhir/ValueSet/appointment-cancellation-reason";
+            String cs = "http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason";
+            String code = HapiFhirUtils.readStringValueFromJsonNode("motivoCancelacionCita",node);
+            String valido = validator.validateCode(cs,code,"",vs);
+            Coding coding = new Coding(cs, "pat", valido);
+            CodeableConcept cc = new CodeableConcept(coding);
+            appointment.setCancelationReason(cc);
         }
 
         return appointment;
