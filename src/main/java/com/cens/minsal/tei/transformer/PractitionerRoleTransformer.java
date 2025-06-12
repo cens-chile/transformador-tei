@@ -111,7 +111,8 @@ public class PractitionerRoleTransformer {
             Practitioner prac){
         
         PractitionerRole practitionerRole = new PractitionerRole();
-        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE",role,null);
+        String valido = validator.validateCode("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE",role,"","https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSPractitionerTipoRolLE");
+        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE",role,valido);
         CodeableConcept cc = new CodeableConcept(roleCode);
         practitionerRole.addCode(cc);
 
