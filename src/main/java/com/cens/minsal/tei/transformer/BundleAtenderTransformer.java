@@ -350,12 +350,8 @@ public class BundleAtenderTransformer {
 
 
 
-        String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
-        String glosaEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("glosaEstadoIC", node);
+        String codigoEstadoIC = "6";
 
-        if(glosaEstadoIC == null) HapiFhirUtils.addNotFoundIssue("glosaEstadoIC", oo);
-
-        if(codigoEstadoIC != null) {
             String csEIC = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
             String vsEIC = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoInterconsulta";
             String resValidacion = validator.validateCode(csEIC, codigoEstadoIC, "", vsEIC);
@@ -366,13 +362,12 @@ public class BundleAtenderTransformer {
             cc.addCoding(new Coding(
                     "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta",
                     codigoEstadoIC,
-                    glosaEstadoIC));
+                    resValidacion));
 
             Extension extensionEstadoIC = new Extension();
             extensionEstadoIC.setUrl("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE");
             extensionEstadoIC.setValue(cc);
             sr.addExtension(extensionEstadoIC);
-        } else HapiFhirUtils.addNotFoundIssue("codigoEstadoIC", oo);
 
         return sr;
     }
