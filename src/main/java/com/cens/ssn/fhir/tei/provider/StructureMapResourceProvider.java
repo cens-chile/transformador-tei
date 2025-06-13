@@ -14,6 +14,7 @@ import com.cens.minsal.tei.transformer.BundleAtenderTransformer;
 import com.cens.minsal.tei.transformer.BundleIniciarTransformer;
 import com.cens.minsal.tei.transformer.BundleReferenciarTransformer;
 import com.cens.minsal.tei.transformer.BundleTerminarTransformer;
+import com.cens.minsal.tei.transformer.BundlePriorizarTransformer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,17 +43,19 @@ public class StructureMapResourceProvider implements IResourceProvider{
     BundleAtenderTransformer bundleAtenderTransformer;
 
     BundleAgendarTransformer bundleAgendarTransformer;
+    BundlePriorizarTransformer bundlePriorizarTransformer;
 
     public StructureMapResourceProvider(FhirServerConfig fhirServerConfig, BundleIniciarTransformer iniciarTransformer,
                                         BundleReferenciarTransformer bundleReferenciarTransformer,
                                         BundleTerminarTransformer terminarTransformer,
                                         BundleAtenderTransformer atenderTransformer,
-                                        BundleAgendarTransformer agendarTransformer) {
+                                        BundleAgendarTransformer agendarTransformer,
+                                        BundlePriorizarTransformer priorizarTransformer) {
 
         if (iniciarTransformer == null && terminarTransformer == null &&
-                atenderTransformer == null && agendarTransformer == null ) {
+                atenderTransformer == null && agendarTransformer == null && priorizarTransformer == null ) {
             throw new IllegalArgumentException("Debe proporcionar al menos iniciarTransformer o" +
-                    " terminarTransformer o atenderTransformer o agendarTransformer");
+                    " terminarTransformer o atenderTransformer o agendarTransformer o priorizarTransformer");
         }
 
         this.fhirServerConfig = fhirServerConfig;
@@ -61,6 +64,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
         this.bundleTerminarTransformer = terminarTransformer;
         this.bundleAtenderTransformer = atenderTransformer;
         this.bundleAgendarTransformer = agendarTransformer;
+        this.bundlePriorizarTransformer = priorizarTransformer;
     }
     
     
@@ -109,6 +113,11 @@ public class StructureMapResourceProvider implements IResourceProvider{
         else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetAgendarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleAgendarTransformer.buildBundle(data);
+        }
+
+        else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetPriorizarToBundle")){
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            res = bundlePriorizarTransformer.buildBundle(data);
         }
        
         else{

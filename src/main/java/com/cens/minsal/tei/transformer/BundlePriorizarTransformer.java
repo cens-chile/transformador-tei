@@ -5,13 +5,13 @@
 package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.config.FhirServerConfig;
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.minsal.tei.valuesets.*;
+import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.cens.minsal.tei.services.ValueSetValidatorService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -26,10 +26,10 @@ import java.util.logging.Logger;
  * @author Juan F. <jfanasco@cens.cl>
  */
 @Component
-public class BundleTerminarTransformer {
+public class BundlePriorizarTransformer {
 
     FhirServerConfig fhirServerConfig;
-    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleTerminarLE";
+    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundlePriorizarLE";
 
     MessageHeaderTransformer messageHeaderTransformer;
     PractitionerTransformer practitionerTransformer;
@@ -40,13 +40,13 @@ public class BundleTerminarTransformer {
 
 
 
-    public BundleTerminarTransformer(FhirServerConfig fhirServerConfig,
-                                     MessageHeaderTransformer messageHeaderTransformer,
-                                     PractitionerTransformer practitionerTransformer,
-                                     PatientTransformer patientTransformer,
-                                     PractitionerRoleTransformer practitionerRoleTransformer,
-                                     OrganizationTransformer organizationTransformer,
-                                     ValueSetValidatorService validator) {
+    public BundlePriorizarTransformer(FhirServerConfig fhirServerConfig,
+                                      MessageHeaderTransformer messageHeaderTransformer,
+                                      PractitionerTransformer practitionerTransformer,
+                                      PatientTransformer patientTransformer,
+                                      PractitionerRoleTransformer practitionerRoleTransformer,
+                                      OrganizationTransformer organizationTransformer,
+                                      ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
@@ -73,7 +73,7 @@ public class BundleTerminarTransformer {
             node = mapper.readTree(cmd);
 
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundlePriorizarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             throw new FHIRException(ex.getMessage());
         }
 
@@ -83,7 +83,7 @@ public class BundleTerminarTransformer {
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
         MessageHeaderTransformer messageHeaderTransformer = new MessageHeaderTransformer(validator);
-        ((ObjectNode)get).put("tipoEvento", "terminar");
+        ((ObjectNode)get).put("tipoEvento", "priorizar");
 
 
         if(get!=null)
@@ -212,7 +212,7 @@ public class BundleTerminarTransformer {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
         } catch (ParseException ex) {
-            Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BundlePriorizarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
 
