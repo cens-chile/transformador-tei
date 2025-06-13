@@ -303,12 +303,7 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para solicitudIC)", oo);
         }
 
-        String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
-        String glosaEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("glosaEstadoIC", node);
-
-        if(glosaEstadoIC == null) {
-            HapiFhirUtils.addNotFoundIssue("glosaEstadoIC", oo);
-        }
+        String codigoEstadoIC = "5";
 
         if(codigoEstadoIC != null) {
             String csEIC = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
@@ -321,7 +316,7 @@ public class BundleAgendarTransformer {
             cc.addCoding(new Coding(
                     "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta",
                     codigoEstadoIC,
-                    glosaEstadoIC));
+                    resValidacion));
 
             Extension extensionEstadoIC = new Extension();
             extensionEstadoIC.setUrl("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE");

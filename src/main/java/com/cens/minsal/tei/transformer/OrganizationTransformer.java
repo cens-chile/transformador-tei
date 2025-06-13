@@ -39,20 +39,22 @@ public class OrganizationTransformer {
             org.setName(nombre);
         else 
             HapiFhirUtils.addNotFoundIssue(parentPath+".nombreLegal", oo);
-        
-        String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
-        if(codigoDEIS!=null)
-            org.getIdentifierFirstRep().setValue(codigoDEIS);
-        else 
-            HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
 
-        /*String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
+        String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
         String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";
+        String codigoDEIS = HapiFhirUtils.readStringValueFromJsonNode("codigoDEIS", node);
+        if(codigoDEIS!=null) {
+            org.getIdentifierFirstRep().setValue(codigoDEIS);
+            org.getIdentifierFirstRep().setSystem(csDest);
+        }
+        else {
+            HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
+        }
         String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
 
         if (resValidacionDest == null){
             HapiFhirUtils.addErrorIssue(codigoDEIS,"CodigoDEIS no valido", oo);
-        }*/
+        }
 
         return org;
     }

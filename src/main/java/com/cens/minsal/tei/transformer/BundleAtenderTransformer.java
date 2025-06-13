@@ -17,6 +17,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +43,7 @@ public class BundleAtenderTransformer {
     CarePlanTransformer carePlanTransformer;
     EncounterTransformer encounterTransformer;
     ValueSetValidatorService validator;
+    ServiceRequestTransformer serTransformer;
 
     public BundleAtenderTransformer(FhirServerConfig fhirServerConfig,
                                     MessageHeaderTransformer messageHeaderTransformer,
@@ -51,6 +53,7 @@ public class BundleAtenderTransformer {
                                     CarePlanTransformer carePlanTransformer,
                                     PractitionerRoleTransformer practitionerRoleTransformer,
                                     EncounterTransformer encounterTransformer,
+                                    ServiceRequestTransformer serTransformer,
                                     ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
@@ -61,6 +64,7 @@ public class BundleAtenderTransformer {
         this.encounterTransformer = encounterTransformer;
         this.validator = validator;
         this.practitionerRoleTransformer = practitionerRoleTransformer;
+        this.serTransformer = serTransformer;
     }
     
     
@@ -208,15 +212,32 @@ public class BundleAtenderTransformer {
          if(get != null){
             PatientTransformer pt = new PatientTransformer(validator);
             ((ObjectNode)get).put("tipoEvento", "atender");
-
-
-
              patient = pt.transform(get, oo);
          } else HapiFhirUtils.addNotFoundIssue("paciente", oo);
 
+        AllergyIntolerance allergyIntolerance  = new AllergyIntolerance();
+        AllergyIntoleranceTransformer at = new AllergyIntoleranceTransformer(validator);
 
-         /***********
-         */
+        List<AllergyIntolerance> alergias = new ArrayList();
+        if(node.has("alergias")){
+            JsonNode allNode = node.get("alergias");
+            if(allNode!=null){
+                alergias = at.transform(allNode, oo);
+            }
+         }
+
+        //Se agrega exámen solicitado
+        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, oo);
+
+        //Se agregan resultados exámenes realizados
+        List<Observation> examenes = new ArrayList();
+        JsonNode resultados = node.get("resultadoExamenes");
+        if(resultados!=null){
+            examenes = ObservationTransformer.buildResultadoExamen(resultados, oo);
+        }
+
+        /***********
+        */
 
         /*********** Observación Resultados Exámen
          get = node.get("");
@@ -280,6 +301,26 @@ public class BundleAtenderTransformer {
         IdType condId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(condId.getIdPart())
                 .setResource(cond);
+
+        for(AllergyIntolerance aler : alergias){
+            IdType alerId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(alerId.getIdPart())
+                    .setResource(aler);
+        }
+
+
+        for(ServiceRequest s : examenSolicitados){
+            IdType sId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(sId.getIdPart())
+                    .setResource(s);
+        }
+
+        for(Observation ob : examenes){
+            IdType obId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(obId.getIdPart())
+                    .setResource(ob);
+        }
+
 
         IdType encId = IdType.newRandomUuid();
         b.addEntry().setFullUrl((encId.getIdPart())).setResource(encounter);

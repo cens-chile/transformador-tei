@@ -81,9 +81,9 @@ public class ConditionTransformer {
             system = "http://terminology.hl7.org/CodeSystem/condition-ver-status";
             String validateCode = validator.validateCode(system, clinicalVerStatus, null, verificationStatusVS);
             if(validateCode!=null){
-                cond.getClinicalStatus().getCodingFirstRep().setCode(clinicalVerStatus);
-                cond.getClinicalStatus().getCodingFirstRep().setSystem(system);
-                cond.getClinicalStatus().getCodingFirstRep().setDisplay(validateCode);
+                cond.getVerificationStatus().getCodingFirstRep().setCode(clinicalVerStatus);
+                cond.getVerificationStatus().getCodingFirstRep().setSystem(system);
+                cond.getVerificationStatus().getCodingFirstRep().setDisplay(validateCode);
             }
             else
                 HapiFhirUtils.addErrorIssue("code and system", "error al validar en el ValueSet", oo);
