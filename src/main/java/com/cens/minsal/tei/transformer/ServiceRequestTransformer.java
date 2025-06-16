@@ -202,6 +202,8 @@ public class ServiceRequestTransformer {
             if(codigo!=null){
                 coding.setSystem(HapiFhirUtils.loincSystem);
                 coding.setCode(codigo);
+                coding.setDisplay(HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node));
+
             }
 
             String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node);

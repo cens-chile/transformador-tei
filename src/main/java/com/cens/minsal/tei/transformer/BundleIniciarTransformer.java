@@ -193,7 +193,8 @@ public class BundleIniciarTransformer {
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
         if(resultados!=null){
-            examenes = ObservationTransformer.buildResultadoExamen(resultados, out);
+            ObservationTransformer ot = new ObservationTransformer(validator);
+            examenes = ot.buildResultadoExamen(resultados, out);
         }
         
         

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.json.Json;
+import org.hl7.fhir.dstu3.model.codesystems.CarePlanActivityCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -155,58 +156,6 @@ public class BundleAtenderTransformer {
         practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
 
 
-
-        //Encuentro
-       
-        Encounter encounter = encounterTransformer.transform(node, oo,"Atender");
-        /*if(get != null){
-            encounter = encounterTransformer.transform(get, oo,"Atender");
-            try {
-                String refPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
-                encounter.setSubject(new Reference(refPaciente));
-            }catch (Exception e){
-                HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para encuentro)", oo);
-            }
-        } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
-        }*/
-
-
-        get = node.get("planDeAtencion");
-        CarePlan  careplan = null;
-
-        if(get != null){
-            careplan = carePlanTransformer.transform(get, oo);
-            String paciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
-            if(paciente != null){
-                careplan.setSubject(new Reference(paciente));
-            }else{
-                HapiFhirUtils.addNotFoundIssue("planDeAtencion.referenciaPaciente",oo);
-            }
-        } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del Plan de Atención(planDeAtencion)", oo);
-        }
-
-        String descripcionPlan = HapiFhirUtils.readStringValueFromJsonNode("descripcion",get);
-        if(descripcionPlan == null){
-            HapiFhirUtils.addNotFoundIssue("No se encontró Descripción del Plan de Atención", oo);
-        } else{
-            careplan.setDescription(descripcionPlan);
-        }
-
-        //Construir Diagnostico
-        ConditionTransformer conditionTransformer = new ConditionTransformer(validator);
-        Condition cond = null;
-        if(node.get("diagnostico")!=null){
-            cond = conditionTransformer.transform(node.get("diagnostico"), oo,"diagnostico");
-        }
-        else
-            HapiFhirUtils.addNotFoundIssue("diagnostico", oo);
-
-
-
-
-
          get = node.get("paciente");
          Patient patient = null;
          if(get != null){
@@ -226,6 +175,28 @@ public class BundleAtenderTransformer {
             }
          }
 
+        for (AllergyIntolerance a: alergias){
+            a.setPatient(new Reference("Patient/"+patient.getId().toString()));
+        }
+
+
+        //Encuentro
+
+        Encounter encounter = encounterTransformer.transform(node, oo,"atender");
+        /*if(get != null){
+            encounter = encounterTransformer.transform(get, oo,"Atender");
+            try {
+                String refPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+                encounter.setSubject(new Reference(refPaciente));
+            }catch (Exception e){
+                HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para encuentro)", oo);
+            }
+        } else {
+            HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
+        }*/
+
+        encounter.setSubject(new Reference("Patient/"+patient.getIdentifierFirstRep().toString()));
+
         //Se agrega exámen solicitado
         List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, oo);
 
@@ -233,37 +204,8 @@ public class BundleAtenderTransformer {
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
         if(resultados!=null){
-            examenes = ObservationTransformer.buildResultadoExamen(resultados, oo);
-        }
-
-        /***********
-        */
-
-        /*********** Observación Resultados Exámen
-         get = node.get("");
-         Observation observation = null;
-         if(get != null){
-         observation = ObservationTransformer.transform(get, oo);
-         } else {
-         HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la Resultados de Exámenes del paciente", oo);
-         }
-         */
-
-        /*********** Solicitud de Medicamentos
-         get = node.get("solicitudDeMedicamentos");
-         MedicationRequest medReq = null;
-         if(get != null){
-         medReq = MedicationRequestTransformer.transform(get, oo);
-         } else {
-         HapiFhirUtils.addNotFoundIssue("solicitudDeMedicamentos no encontrado", oo);
-         }
-
-         */
-
-
-        if (!oo.getIssue().isEmpty()) {
-            res = HapiFhirUtils.resourceToString(oo,fhirServerConfig.getFhirContext());
-            return res;
+            ObservationTransformer observationTransformer = new ObservationTransformer(validator);
+            examenes = observationTransformer.buildResultadoExamen(resultados, oo);
         }
 
 
@@ -294,9 +236,48 @@ public class BundleAtenderTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        IdType cpId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(cpId.getIdPart())
-                .setResource(careplan);
+
+
+
+
+
+
+
+
+        //Construir Diagnostico
+        ConditionTransformer conditionTransformer = new ConditionTransformer(validator);
+        Condition cond = null;
+        if(node.get("diagnostico")!=null){
+            cond = conditionTransformer.transform(node.get("diagnostico"), oo,"diagnostico");
+            cond.setSubject(new Reference("Patient/"+patient.getId()));
+            cond.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+        }
+        else
+            HapiFhirUtils.addNotFoundIssue("diagnostico", oo);
+
+        MedicationRequestTransformer mrt = new MedicationRequestTransformer(validator);
+        MedicationRequest medReq = null;
+        if(node.has("solicitudMedicamento")){
+            medReq = mrt.transform(node.get("solicitudMedicamento"), oo);
+            medReq.setSubject(new Reference("Patient/"+patient.getId()));
+            medReq.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            IdType medId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(medId.getIdPart())
+                    .setResource(medReq);
+        }
+
+      ObservationAnamnesisTransformer anamnesisTransformer = new ObservationAnamnesisTransformer(validator);
+        Observation anam = null;
+
+        if(node.has("anamnesis")){
+            anam = anamnesisTransformer.transform(node.get("anamnesis"),oo);
+            anam.setSubject(new Reference("Patient/"+patient.getId()));
+            anam.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            IdType anamId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(anamId.getIdPart())
+                    .setResource(anam);
+        }
+
 
         IdType condId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(condId.getIdPart())
@@ -311,12 +292,20 @@ public class BundleAtenderTransformer {
 
         for(ServiceRequest s : examenSolicitados){
             IdType sId = IdType.newRandomUuid();
+            s.addIdentifier(new Identifier().setValue(sId.getIdPart())); // Averiguar si este Identifier se debe recibir en JSON de entrada.
+            s.setSubject(new Reference("Patient/"+patient.getId()));
+            List<Reference> sExamenes= new ArrayList<>();
+            sExamenes.add(new Reference("ServiceRequest/"+ sr.getIdentifier().toString()));  //Averiguar si está bien la referencia al ID
+            s.setBasedOn(sExamenes);
             b.addEntry().setFullUrl(sId.getIdPart())
                     .setResource(s);
+
         }
 
         for(Observation ob : examenes){
             IdType obId = IdType.newRandomUuid();
+            ob.setSubject(new Reference("Patient/"+patient.getId()));
+            ob.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
             b.addEntry().setFullUrl(obId.getIdPart())
                     .setResource(ob);
         }
@@ -325,9 +314,66 @@ public class BundleAtenderTransformer {
         IdType encId = IdType.newRandomUuid();
         b.addEntry().setFullUrl((encId.getIdPart())).setResource(encounter);
 
+
+
+
+
+// Plan de atencion -Careplan
+        get = node.get("planDeAtencion");
+        CarePlan  careplan = null;
+
+        if(get != null){
+            careplan = carePlanTransformer.transform(get, oo);
+
+            if(patient != null){
+                careplan.setSubject(new Reference("Patient/"+patient.getId()));
+            }else{
+                HapiFhirUtils.addNotFoundIssue("planDeAtencion.referenciaPaciente",oo);
+            }
+
+            if(encounter != null) {
+                careplan.setEncounter(new Reference("Encounter/" + encounter.getIdentifierFirstRep().getValue()));
+            }
+
+            IdType cpId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(cpId.getIdPart())
+                    .setResource(careplan);
+        }
+
+        //  - recetas (MedicationRequest)
+        CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
+        if(medReq != null) {
+            carePlanActivityComponent.setReference(new Reference("MedicationRequest/" + medReq.getId()));
+            assert careplan != null;
+            careplan.addActivity(carePlanActivityComponent);
+        }
+        if(examenSolicitados != null) {
+            List<CarePlan.CarePlanActivityComponent> cpAList = new ArrayList<>();
+            for (ServiceRequest examenSolicitado : examenSolicitados) {
+                carePlanActivityComponent.setReference(new Reference("ServiceRequest/" + examenSolicitado.getIdentifierFirstRep().getValue()));
+                assert careplan != null;
+                careplan.addActivity(carePlanActivityComponent);
+            }
+
+        }
+
+
+
+        String descripcionPlan = HapiFhirUtils.readStringValueFromJsonNode("descripcion",get);
+        if(descripcionPlan == null){
+            HapiFhirUtils.addNotFoundIssue("No se encontró Descripción del Plan de Atención", oo);
+        } else{
+            careplan.setDescription(descripcionPlan);
+        }
+
+
         setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pracRolId.getValue()), new Reference(encId.getValue()));
-        
-        
+
+        if (!oo.getIssue().isEmpty()) {
+            res = HapiFhirUtils.resourceToString(oo,fhirServerConfig.getFhirContext());
+            return res;
+        }
+
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }

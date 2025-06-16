@@ -12,11 +12,9 @@ import java.util.ArrayList;
 
 import java.util.Date;
 import java.util.List;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.Coding;
 
-import org.hl7.fhir.r4.model.MessageHeader;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.*;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,8 +38,18 @@ public class AllergyIntoleranceTransformer {
             Coding codingFirstRep = ai.getCode().getCodingFirstRep();
             String code = aiNode.get("codigoSustancia").toString();
             codingFirstRep.setSystem(HapiFhirUtils.snomdeSystem);
-            if(code!=null)
+            if(code!=null){
                 codingFirstRep.setCode(code);
+                if(aiNode.has("descripcionSustancia")){
+                    String desc =HapiFhirUtils.readStringValueFromJsonNode("descripcionSustancia",aiNode);
+                    ai.getCode().setText(desc);
+                }
+                if(aiNode.has("descripcionAlergia")){
+                    String desc =HapiFhirUtils.readStringValueFromJsonNode("descripcionAlergia",aiNode);
+                    ai.setText(new Narrative());
+                }
+
+            }
             else
                 HapiFhirUtils.addNotFoundIssue("codigoSustancia", oo);
             

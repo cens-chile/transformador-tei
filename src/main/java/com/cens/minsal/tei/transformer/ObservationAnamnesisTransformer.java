@@ -8,141 +8,57 @@ import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSIndiceComorbilidadValuexEnum;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hl7.fhir.r4.model.*;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.StringType;
 
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
  */
-public class ObservationTransformer {
-    
-    static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIndiceComorbilidadLE";
-    static final String discapacidadProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationDiscapacidadLE";
-    static final String cuidadorProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIniciarCuidadorLE";
-    static final String resultadoExProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationResultadoExamen";
+public class ObservationAnamnesisTransformer {
+
+    static final String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationAnamnesisLE";
     ValueSetValidatorService validator;
 
-    public ObservationTransformer(ValueSetValidatorService validator){
+    public ObservationAnamnesisTransformer(ValueSetValidatorService validator){
         this.validator = validator;
     }
-    
-    
-    public static Observation buildIndiceComporbilidad(JsonNode indice, OperationOutcome oo){
-        
-        
-        Observation ob = new Observation();
-        ob.getMeta().addProfile(profile);
-        
-        ob.setStatus(Observation.ObservationStatus.FINAL);
-        ob.getCategoryFirstRep().
-            addCoding(
-            new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
-            "survey",""));
-        
-        ob.getCode().addCoding((new Coding()).setCode("ECICEP")).setText("Indice Comorbilidad");
-        
-        
-        VSIndiceComorbilidadValuexEnum fromCode = VSIndiceComorbilidadValuexEnum.fromCode(indice.asText());
-        if(fromCode==null){
-            HapiFhirUtils.addErrorIssue("indiceComorbilidad","código no encontrado", oo);
-            return null;
+
+    public Observation  transform(JsonNode node, OperationOutcome oo){
+        Observation obs = new Observation();
+
+        obs.getMeta().addProfile(profile);
+        obs.getMeta().setLastUpdated(new Date());
+
+        obs.setStatus(Observation.ObservationStatus.REGISTERED);
+            String cs = "http://snomed.info/sct"; //"https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTipoObservacionMinsal";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/TipoDeObservacion";
+            String code = "84100007";
+            Coding cod = new Coding(cs, code, "historia clínica");
+            CodeableConcept cc = new CodeableConcept(cod);
+            cc.setText(HapiFhirUtils.readStringValueFromJsonNode("Anámnesis", node));
+            obs.setCode(cc);
+
+        if(node.has("resultadoExamen")){
+            StringType resExamen = new StringType(HapiFhirUtils.readStringValueFromJsonNode("resultadoExamen",node));
+            obs.setValue(resExamen);
         }
-        ob.setValue((new CodeableConcept()).addCoding(fromCode.getCoding()));
-        
-        
-        return ob;
-    }
-    
-    public static Observation buildDiscapacidad(boolean discapacidad){
-        
-        
-        Observation ob = new Observation();
-        ob.getMeta().addProfile(discapacidadProfile);
-        
-        ob.setStatus(Observation.ObservationStatus.FINAL);
-        
-        ob.getCode().addCoding((new Coding()).setSystem("http://loinc.org").setCode("101720-1"));
-        
-        ob.setValue(new BooleanType(discapacidad));
 
-        return ob;
-    }
-    
-    public static Observation buildCuidador(boolean cuidador){
-        
-        Observation ob = new Observation();
-        ob.getMeta().addProfile(cuidadorProfile);
-        
-        ob.setStatus(Observation.ObservationStatus.FINAL);
-        
-        ob.getCode().addCoding((new Coding()).setSystem("http://loinc.org").setCode("95385-1"));
-        
-        ob.setValue(new BooleanType(cuidador));
-
-        return ob;
-    }
-    
-    public List<Observation> buildResultadoExamen(JsonNode resultadoExs, OperationOutcome oo){
-        List<Observation> obs = new ArrayList();
-        int i=0;
-        for(JsonNode resultadoEx: resultadoExs){
-        
-            Observation ob = new Observation();
-            ob.getMeta().addProfile(resultadoExProfile);
-
-            ob.setStatus(Observation.ObservationStatus.REGISTERED);
-
-            ob.getCategoryFirstRep().
-                addCoding(
-                new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
-                "laboratory",""));
-
-
-            String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", resultadoEx);
-            if(codigo!=null){
-                String cs = "https://loinc.org/";
-                String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/CodigoExamen";
-                ob.getCode().getCodingFirstRep().setCode(codigo);
-                ob.getCode().getCodingFirstRep().setSystem(cs);
-                String valido = validator.validateCode(cs,codigo,"",vs);
-                valido =  HapiFhirUtils.readStringValueFromJsonNode("examen", resultadoEx);
-                ob.getCode().getCodingFirstRep().setDisplay(valido);
-                ob.getCode().setText("exámenes");
-            }
-            else 
-                HapiFhirUtils.addNotFoundIssue("resultadoExamenes["+i+"]"+".codigo", oo);
-            
+        if(node.has("fechaExamen")){
             try {
-                Date date = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", resultadoEx);
-                ob.setEffective(new DateTimeType(date));
-            } catch (ParseException ex) {
-                Logger.getLogger(ObservationTransformer.class.getName()).log(Level.SEVERE, null, ex);
-                HapiFhirUtils.addErrorIssue("resultadoExamenes["+i+"]"+".fechaExamen", ex.getMessage(), oo);
+                Date fechaExamen = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", node);
+                DateTimeType dtt = new DateTimeType(fechaExamen);
+                obs.setEffective(dtt);
+            }catch (Exception e){
+                HapiFhirUtils.addErrorIssue("Anamnesis.fechaExamen","Error al leer la fecha del examen en Anamnesis",oo);
             }
-            
-            String resultado = HapiFhirUtils.readStringValueFromJsonNode("resultado", resultadoEx);
-            if(resultado!=null)
-                ob.setValue(new StringType(resultado));
-            else
-                HapiFhirUtils.addNotFoundIssue("resultadoExamenes["+i+"]"+".resultado", oo);
-            
-            obs.add(ob);
-            i++;
-
         }
-        
         return obs;
     }
     

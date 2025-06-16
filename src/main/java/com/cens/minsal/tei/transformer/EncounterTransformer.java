@@ -97,6 +97,7 @@ public class EncounterTransformer {
             }
             classCoding.setCode(cod);
             classCoding.setSystem(cs);
+            classCoding.setDisplay(resValidacionDest);
             encounter.setClass_(classCoding);
         } else HapiFhirUtils.addNotFoundIssue( "Encuentro.codigoModalidadAtencion", oo);
 
@@ -157,7 +158,7 @@ public class EncounterTransformer {
         }
 
         
-        if (evento.equals("Atender")) {
+        if (evento.equals("atender")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
             EncounterTransformer.atenderComplete(json, encounter, oo);
         }

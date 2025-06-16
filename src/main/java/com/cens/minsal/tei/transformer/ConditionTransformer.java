@@ -69,6 +69,7 @@ public class ConditionTransformer {
                 cond.getClinicalStatus().getCodingFirstRep().setCode(estadoDiagCode);
                 cond.getClinicalStatus().getCodingFirstRep().setSystem(system);
                 cond.getClinicalStatus().getCodingFirstRep().setDisplay(validateCode);
+                cond.getClinicalStatus().setText(estadoDiagCode); // Esto debiera venir desde el JSON de entrada, distinto del JSON
             }else
                 HapiFhirUtils.addErrorIssue("[estadoDiagnostico] code and system", "error al validar en el ValueSet", oo);
         }else
@@ -109,14 +110,14 @@ public class ConditionTransformer {
         if(severity!=null){
             String categoryVS = "http://hl7.org/fhir/ValueSet/condition-severity";
             system = "http://snomed.info/sct";
-            String validateCode = validator.validateCode(system, clinicalVerStatus, null, categoryVS);
-            if(validateCode!=null){
+            String validateCode = validator.validateCode(system, severity, "", categoryVS);
+            //if(validateCode!=null){
                 cond.getSeverity().getCodingFirstRep().setCode(severity);
                 cond.getSeverity().getCodingFirstRep().setSystem(system);
                 cond.getSeverity().getCodingFirstRep().setDisplay(validateCode);
                
-            }else
-                HapiFhirUtils.addErrorIssue("code and system", "error al validar en el ValueSet", oo);
+            //}else
+             //   HapiFhirUtils.addErrorIssue(severity, "error al validar en Diagnostico.severidad", oo);
         }
         
         
