@@ -180,24 +180,28 @@ public class BundleAgendarTransformer {
         }
 
         // Appointment
-        JsonNode citaMedica = node.get("citaMedica");
+        JsonNode citaMedica = node.get("cita");
         Appointment appointment = null;
         if(citaMedica != null) {
-            appointment = appointmentTransformer.transform(citaMedica, oo);
+            appointment = appointmentTransformer.transform(node, oo);
 
             // Set patient reference
-            String pacienteRef = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
-            if(pacienteRef != null) {
-                appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                        .setActor(new Reference(pacienteRef))
-                        .setStatus(Appointment.ParticipationStatus.ACCEPTED));
-            }
 
-            // Set location reference
-            if(citaMedica.has("ubicacion")) {
+            String vs ="http://hl7.org/fhir/ValueSet/resource-types";
+            String cs = "http://hl7.org/fhir/ValueSet/resource-types";
+
+            //String valido = validator.validateCode(cs,"Patient","Patient",vs);
+            Coding coding = new Coding(cs, "PractitionerRole", "PractitionerRole");
+            CodeableConcept cc = new CodeableConcept();
+            List<CodeableConcept> ccList = new ArrayList<>();
+            ccList.add(cc);
+
+            if (practitionerRoleResolutor != null){
+                Appointment.AppointmentParticipantComponent apc = new Appointment.AppointmentParticipantComponent();
                 appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                        .setActor(new Reference(citaMedica.get("ubicacion").asText()))
-                        .setStatus(Appointment.ParticipationStatus.ACCEPTED));
+                        .setActor(new Reference("PractitionerRole/"+practitionerRoleResolutor.getId()))
+                        .setStatus(Appointment.ParticipationStatus.ACCEPTED).setType(ccList));
+
             }
 
             // Set service request reference
@@ -299,12 +303,7 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para solicitudIC)", oo);
         }
 
-        String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
-        String glosaEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("glosaEstadoIC", node);
-
-        if(glosaEstadoIC == null) {
-            HapiFhirUtils.addNotFoundIssue("glosaEstadoIC", oo);
-        }
+        String codigoEstadoIC = "5";
 
         if(codigoEstadoIC != null) {
             String csEIC = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
@@ -317,7 +316,7 @@ public class BundleAgendarTransformer {
             cc.addCoding(new Coding(
                     "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta",
                     codigoEstadoIC,
-                    glosaEstadoIC));
+                    resValidacion));
 
             Extension extensionEstadoIC = new Extension();
             extensionEstadoIC.setUrl("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE");

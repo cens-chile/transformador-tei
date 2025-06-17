@@ -83,36 +83,6 @@ public class CarePlanTransformer {
             HapiFhirUtils.addNotFoundIssue("Solicitud de Exámen no puede ser vacío", oo);
         }
 
-        // encounter [0..1]
-        JsonNode encuentroNode = node.get("encuentro");
-        if (encuentroNode != null && encuentroNode.has("referenciaEncuentro")) {
-            String ref = encuentroNode.get("referenciaEncuentro").asText();
-            carePlan.setEncounter(new Reference(ref));
-        }
-
-        // supportingInfo - recetas (MedicationRequest)
-        JsonNode recetasNode = node.get("recetas");
-        if (recetasNode != null && recetasNode.isArray()) {
-            for (JsonNode receta : recetasNode) {
-                if (receta.has("referenciaReceta")) {
-                    String ref = receta.get("referenciaReceta").asText();
-                    carePlan.addSupportingInfo(new Reference(ref));
-                }
-            }
-        }
-
-        // activity - solicitudes de atención (ServiceRequest)
-        JsonNode solicitudesNode = node.get("SolicitudesDeAtencion");
-        if (solicitudesNode != null && solicitudesNode.isArray()) {
-            for (JsonNode solicitud : solicitudesNode) {
-                if (solicitud.has("referenciaSolicitudDeAtencion")) {
-                    String ref = solicitud.get("referenciaSolicitudDeAtencion").asText();
-                    CarePlan.CarePlanActivityComponent actividad = new CarePlan.CarePlanActivityComponent();
-                    actividad.setReference(new Reference(ref));
-                    carePlan.addActivity(actividad);
-                }
-            }
-        }
 
         return carePlan;
     }

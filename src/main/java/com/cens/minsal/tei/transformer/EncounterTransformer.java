@@ -93,12 +93,13 @@ public class EncounterTransformer {
             String resValidacionDest = validator.validateCode(cs,
                     cod, "", vs);
             if (resValidacionDest == null){
-                HapiFhirUtils.addErrorIssue(cod,"codigoModalidadAtencion", oo);
+                HapiFhirUtils.addErrorIssue(cod,"Encuentro.codigoModalidadAtencion", oo);
             }
             classCoding.setCode(cod);
             classCoding.setSystem(cs);
+            classCoding.setDisplay(resValidacionDest);
             encounter.setClass_(classCoding);
-        } else HapiFhirUtils.addNotFoundIssue( "codigoModalidadAtencion", oo);
+        } else HapiFhirUtils.addNotFoundIssue( "Encuentro.codigoModalidadAtencion", oo);
 
 
         // Tipo de consulta (type)
@@ -121,19 +122,6 @@ public class EncounterTransformer {
                     .setSystem(servicio.get("urlTipoServicio").asText()));
             encounter.setServiceType(serviceType);
         }
-
-
-        /* Participantes
-        if (json.has("participantes")) {
-            for (JsonNode p : json.get("participantes")) {
-                EncounterParticipantComponent comp = new EncounterParticipantComponent();
-                comp.addType(new CodeableConcept().addCoding(new Coding()
-                        .setCode(p.get("tipo").asText())
-                        .setSystem(p.get("urlTipoParticipante").asText())));
-                comp.setIndividual(new Reference(p.get("individuo").asText()));
-                encounter.addParticipant(comp);
-            }
-        }*/
 
         // Cita médica
         if (json.has("citaMedica")) {
@@ -158,18 +146,7 @@ public class EncounterTransformer {
             }
         } else HapiFhirUtils.addNotFoundIssue("periodo", oo);
 
-        // Duración (como extensión)
-        if (json.has("duracion")) {
-            Extension extension = HapiFhirUtils.buildExtension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ext-duracion-consulta",
-                    new Duration().setValue(json.get("duracion").decimalValue()).setUnit("min").setSystem("http://unitsofmeasure.org").setCode("min")
-            );
-            encounter.addExtension(extension);
-        }
-
-
-
-        // Razones del encuentro
+               // Razones del encuentro
         if (json.has("codigoRazonDelEncuentro")) {
             for (JsonNode razon : json.get("codigoRazonDelEncuentro")) {
                 CodeableConcept reason = new CodeableConcept();
@@ -181,7 +158,7 @@ public class EncounterTransformer {
         }
 
         
-        if (evento.equals("Atender")) {
+        if (evento.equals("atender")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
             EncounterTransformer.atenderComplete(json, encounter, oo);
         }

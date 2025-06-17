@@ -189,11 +189,12 @@ public class BundleIniciarTransformer {
                 HapiFhirUtils.addInvalidIssue("cuidador", out);
             cuidadorObservation = ObservationTransformer.buildCuidador(cuidador);
         }
-        //Se agregan exámenes realizados
+        //Se agregan resultados exámenes realizados
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
         if(resultados!=null){
-            examenes = ObservationTransformer.buildResultadoExamen(resultados, out);
+            ObservationTransformer ot = new ObservationTransformer(validator);
+            examenes = ot.buildResultadoExamen(resultados, out);
         }
         
         

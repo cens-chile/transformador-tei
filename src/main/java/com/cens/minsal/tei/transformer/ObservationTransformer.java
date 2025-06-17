@@ -4,6 +4,7 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSIndiceComorbilidadValuexEnum;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +32,11 @@ public class ObservationTransformer {
     static final String discapacidadProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationDiscapacidadLE";
     static final String cuidadorProfile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationIniciarCuidadorLE";
     static final String resultadoExProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ObservationResultadoExamen";
+    ValueSetValidatorService validator;
+
+    public ObservationTransformer(ValueSetValidatorService validator){
+        this.validator = validator;
+    }
     
     
     public static Observation buildIndiceComporbilidad(JsonNode indice, OperationOutcome oo){
@@ -88,7 +94,7 @@ public class ObservationTransformer {
         return ob;
     }
     
-    public static List<Observation> buildResultadoExamen(JsonNode resultadoExs, OperationOutcome oo){
+    public List<Observation> buildResultadoExamen(JsonNode resultadoExs, OperationOutcome oo){
         List<Observation> obs = new ArrayList();
         int i=0;
         for(JsonNode resultadoEx: resultadoExs){
@@ -97,6 +103,7 @@ public class ObservationTransformer {
             ob.getMeta().addProfile(resultadoExProfile);
 
             ob.setStatus(Observation.ObservationStatus.REGISTERED);
+
             ob.getCategoryFirstRep().
                 addCoding(
                 new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
@@ -105,8 +112,13 @@ public class ObservationTransformer {
 
             String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", resultadoEx);
             if(codigo!=null){
+                String cs = "https://loinc.org/";
+                String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/CodigoExamen";
                 ob.getCode().getCodingFirstRep().setCode(codigo);
-                ob.getCode().getCodingFirstRep().setSystem("https://loinc.org/");
+                ob.getCode().getCodingFirstRep().setSystem(cs);
+                String valido = validator.validateCode(cs,codigo,"",vs);
+                valido =  HapiFhirUtils.readStringValueFromJsonNode("examen", resultadoEx);
+                ob.getCode().getCodingFirstRep().setDisplay(valido);
                 ob.getCode().setText("exámenes");
             }
             else 
