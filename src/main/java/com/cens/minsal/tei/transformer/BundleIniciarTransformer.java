@@ -183,7 +183,7 @@ public class BundleIniciarTransformer {
         }
         
         Boolean cuidador = HapiFhirUtils.readBooleanValueFromJsonNode("cuidador", node);
-        Observation cuidadorObservation = new Observation();
+        Observation cuidadorObservation = null;
         if(node.has("cuidador")) {
             if (!node.get("cuidador").isBoolean())
                 HapiFhirUtils.addInvalidIssue("cuidador", out);
@@ -218,6 +218,7 @@ public class BundleIniciarTransformer {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
+        
         PractitionerRole praRole = praRoleTransformer.buildPractitionerRole("iniciador", org, practitioner);
         
         
@@ -268,27 +269,38 @@ public class BundleIniciarTransformer {
         b.addEntry().setFullUrl(disId.getIdPart())
                 .setResource(discapacidad);   
         
-        IdType cuidadorId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(cuidadorId.getIdPart())
-                .setResource(cuidadorObservation);   
+        if(cuidadorObservation!=null){
+            IdType cuidadorId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(cuidadorId.getIdPart())
+                    .setResource(cuidadorObservation);   
+            cuidadorObservation.setSubject(new Reference(patient));
+
+        }
         
         
         for(Observation ob : examenes){
             IdType obId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(obId.getIdPart())
                 .setResource(ob);  
+            ob.setSubject(new Reference(patient));
         }
         
         for(AllergyIntolerance aler : alergias){
             IdType alerId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(alerId.getIdPart())
-                .setResource(aler);  
+                .setResource(aler);
+            aler.setPatient(new Reference(patient));
         }
         
         
         IdType motId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(motId.getIdPart())
                 .setResource(motivoDerivacion); 
+        motivoDerivacion.setAuthor(new Reference(praRole));
+        motivoDerivacion.setSubject(new Reference(patient));
+        
+        
+        
         for(ServiceRequest s : examenSolicitados){
             IdType sId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(sId.getIdPart())

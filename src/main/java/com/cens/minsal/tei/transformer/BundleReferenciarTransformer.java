@@ -116,12 +116,12 @@ public class BundleReferenciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
-        JsonNode paciente = node.get("paciente");
+        /*JsonNode paciente = node.get("paciente");
         ((ObjectNode)paciente).put("tipoEvento", "referenciar");
         Patient patient = null;
         if(paciente!=null)
             patient = patientTr.transform(paciente, out);
-        
+        */
         String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         if(refPat==null)
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
@@ -136,7 +136,7 @@ public class BundleReferenciarTransformer {
             else
                 HapiFhirUtils.addNotFoundIssue("prestadorReferenciador.tipoPrestador", out);
         }else
-            HapiFhirUtils.addNotFoundIssue("profesionalClinicoSolicita", out);
+            HapiFhirUtils.addNotFoundIssue("prestadorReferenciador", out);
         
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
@@ -180,13 +180,12 @@ public class BundleReferenciarTransformer {
                 .setResource(messageHeader);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(referenciador));
         
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
+       
         
-        HapiFhirUtils.addResourceToBundle(b, sr);
-        sr.setSubject(new Reference(patient));
+        HapiFhirUtils.addResourceToBundle(b, sr,"ServiceRequest/"+sr.getId());
+        sr.getSubject().setReference(refPat);
         sr.getPerformer().add(new Reference(resolutor));
+        
         
         IdType pracId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(pracId.getIdPart())
@@ -249,11 +248,9 @@ public class BundleReferenciarTransformer {
             else
                 HapiFhirUtils.addInvalidIssue("solicitudIC.modalidadAtencion", oo);
         }
-        else
-             HapiFhirUtils.addNotFoundIssue("solicitudIC.modalidadAtencion", oo);
         
         String destinoAtencion = HapiFhirUtils.readIntValueFromJsonNode("destinoAtencion", node);
-        if(modalidadAtencion!=null){
+        if(destinoAtencion!=null){
             String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo";
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
             String validateCode = validator.validateCode(cs, destinoAtencion, null, vs);

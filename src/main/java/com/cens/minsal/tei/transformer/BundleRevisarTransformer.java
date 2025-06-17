@@ -7,6 +7,7 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
+import com.cens.minsal.tei.valuesets.VSDerivadoParaEnum;
 import com.cens.minsal.tei.valuesets.VSEstadoInterconsultaEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,6 +38,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -107,7 +109,7 @@ public class BundleRevisarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        ((ObjectNode)get).put("tipoEvento", "referenciar");
+        ((ObjectNode)get).put("tipoEvento", "revisar");
 
 
         if(get!=null)
@@ -126,17 +128,13 @@ public class BundleRevisarTransformer {
         if(refPat==null)
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
             
-        get = node.get("prestadorReferenciador");
+        //Se construye Prestador
+        get = node.get("prestadorRevisor");
         Practitioner practitioner = null;
         if(get!=null){
-            String tipoPres = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-            String[] arr = {"profesional","administrativo"};
-            if(tipoPres!=null && Arrays.stream(arr).anyMatch(tipoPres::equals))
-                practitioner = praTransformer.transform(tipoPres, get, out);
-            else
-                HapiFhirUtils.addNotFoundIssue("prestadorReferenciador.tipoPrestador", out);
+                practitioner = praTransformer.transform("profesional", get, out);
         }else
-            HapiFhirUtils.addNotFoundIssue("profesionalClinicoSolicita", out);
+            HapiFhirUtils.addNotFoundIssue("prestadorRevisor", out);
         
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
@@ -145,7 +143,7 @@ public class BundleRevisarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
-        //Construir Organización de origen
+        //Construir Organización que revisa
         Organization org = null;
         try{
             get = node.get("establecimiento").get("origen");
@@ -184,7 +182,7 @@ public class BundleRevisarTransformer {
         b.addEntry().setFullUrl(patId.getIdPart())
                 .setResource(patient);
         
-        HapiFhirUtils.addResourceToBundle(b, sr);
+        HapiFhirUtils.addResourceToBundle(b, sr,"ServiceRequest/"+sr.getId());
         sr.setSubject(new Reference(patient));
         sr.getPerformer().add(new Reference(resolutor));
         
@@ -249,11 +247,34 @@ public class BundleRevisarTransformer {
             else
                 HapiFhirUtils.addInvalidIssue("solicitudIC.modalidadAtencion", oo);
         }
-        else
-             HapiFhirUtils.addNotFoundIssue("solicitudIC.modalidadAtencion", oo);
+        
+        String derivadoPara = HapiFhirUtils.readIntValueFromJsonNode("derivadoPara", node);
+        if(derivadoPara!=null){
+            VSDerivadoParaEnum fromCode = VSDerivadoParaEnum.fromCode(derivadoPara);
+            if(fromCode!=null){
+                Coding coding = VSDerivadoParaEnum.fromCode(derivadoPara).getCoding();
+                sr.getReasonCodeFirstRep().addCoding(coding);
+            } 
+            else
+                HapiFhirUtils.addErrorIssue("derivadoPara","código no encontrado", oo);
+        }
+        
+        String prioridadIc = HapiFhirUtils.readStringValueFromJsonNode("prioridadIc", node);
+        if(prioridadIc!=null){
+            
+            if(prioridadIc.equals("routine")){
+                sr.setPriority(ServiceRequest.ServiceRequestPriority.ROUTINE);
+            } 
+            else if(prioridadIc.equals("urgent")){
+                sr.setPriority(ServiceRequest.ServiceRequestPriority.URGENT);
+            } 
+            else
+                HapiFhirUtils.addErrorIssue("prioridadIc","código no encontrado", oo);
+        }
+        
         
         String destinoAtencion = HapiFhirUtils.readIntValueFromJsonNode("destinoAtencion", node);
-        if(modalidadAtencion!=null){
+        if(destinoAtencion!=null){
             String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo";
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
             String validateCode = validator.validateCode(cs, destinoAtencion, null, vs);
@@ -264,9 +285,19 @@ public class BundleRevisarTransformer {
             else
                 HapiFhirUtils.addInvalidIssue("solicitudIC.destinoAtencion", oo);
         }
-        else
-             HapiFhirUtils.addNotFoundIssue("solicitudIC.destinoAtencion", oo);
        
+        Boolean atPreferente = HapiFhirUtils.readBooleanValueFromJsonNode("atencionPreferente", node);
+        if(atPreferente!=null){
+            if(!node.get("atencionPreferente").isBoolean())
+                HapiFhirUtils.addInvalidIssue("atencionPreferente", oo);
+            
+            Extension extAtPreferente = 
+                HapiFhirUtils.buildBooleanExt(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionBoolAtencionPreferente",
+                 atPreferente);
+            sr.addExtension(extAtPreferente);
+            
+        }
         
         Boolean resolutividadAPS = HapiFhirUtils.readBooleanValueFromJsonNode("resolutividadAPS", node);
         if(resolutividadAPS!=null){
@@ -281,9 +312,17 @@ public class BundleRevisarTransformer {
             
         }
         
+        String fundamentoPri = HapiFhirUtils.readStringValueFromJsonNode("fundamentoPriorizacion", node);
+        
         Extension ext = HapiFhirUtils.buildExtension(
+                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionStringFundamentoPriorizacion"
+                , new StringType(fundamentoPri));
+        sr.addExtension(ext);
+        
+        
+        ext = HapiFhirUtils.buildExtension(
                 "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE", 
-                new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_REVISION.getCoding()));    
+                new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_PRIORIZACION.getCoding()));    
         sr.addExtension(ext);
         
         //EspecialidadMédicaDestinoCódigo
@@ -344,9 +383,10 @@ public class BundleRevisarTransformer {
                 HapiFhirUtils.addNotFoundIssue("solicitudIC.especialidadMedicaDestino.codigo", oo);
         }
         
+        //Se agrega pertinencia de la interconsulta
+        Extension pertinencia = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionPertinenciaInterconsulta");
         
-        
-        
+ 
         return sr;
     }
   

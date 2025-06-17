@@ -279,4 +279,9 @@ public class HapiFhirUtils {
         b.addEntry().setFullUrl(id.getIdPart())
                 .setResource(r);
     }
+    public static void addResourceToBundle(Bundle b, Resource r,String fullUrl){
+        
+        b.addEntry().setFullUrl(fullUrl)
+                .setResource(r);
+    }
 }
