@@ -36,26 +36,26 @@ public class AllergyIntoleranceTransformer {
             AllergyIntolerance ai = new AllergyIntolerance();
             ai.getMeta().addProfile(profile);
             Coding codingFirstRep = ai.getCode().getCodingFirstRep();
-            String code = aiNode.get("codigoSustancia").toString();
+            String code = HapiFhirUtils.readStringValueFromJsonNode("codigoSustancia", aiNode);
             codingFirstRep.setSystem(HapiFhirUtils.snomdeSystem);
             if(code!=null){
                 codingFirstRep.setCode(code);
-                if(aiNode.has("descripcionSustancia")){
-                    String desc =HapiFhirUtils.readStringValueFromJsonNode("descripcionSustancia",aiNode);
-                    ai.getCode().setText(desc);
-                }
                 if(aiNode.has("descripcionAlergia")){
                     String desc =HapiFhirUtils.readStringValueFromJsonNode("descripcionAlergia",aiNode);
-                    ai.setText(new Narrative());
+                    ai.getCode().setText(desc);
+                }else{
+                    HapiFhirUtils.addNotFoundIssue("alergias["+i+"].descripcionAlergia", oo);
                 }
+                
+                String glosa = HapiFhirUtils.readStringValueFromJsonNode("glosaSustancia", aiNode);
+                if(glosa!=null)
+                    codingFirstRep.setDisplay(glosa);
 
             }
             else
-                HapiFhirUtils.addNotFoundIssue("codigoSustancia", oo);
+                HapiFhirUtils.addNotFoundIssue("alergias["+i+"].codigoSustancia", oo);
             
-            String nombre = aiNode.get("nombre").toString();
-            if(nombre!=null)
-                codingFirstRep.setDisplay(nombre);
+            
 
             alleIn.add(ai);
             i++;
