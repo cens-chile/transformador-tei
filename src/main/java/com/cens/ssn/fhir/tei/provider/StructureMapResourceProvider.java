@@ -15,6 +15,7 @@ import com.cens.minsal.tei.transformer.BundleIniciarTransformer;
 import com.cens.minsal.tei.transformer.BundleReferenciarTransformer;
 import com.cens.minsal.tei.transformer.BundleTerminarTransformer;
 import com.cens.minsal.tei.transformer.BundlePriorizarTransformer;
+import com.cens.minsal.tei.transformer.BundleRevisarTransformer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
     
     BundleIniciarTransformer bundleIniciarTransformer;
     BundleReferenciarTransformer bundleReferenciarTransformer;
+    BundleRevisarTransformer bundleRevisarTransformer;
     BundleTerminarTransformer bundleTerminarTransformer;
     BundleAtenderTransformer bundleAtenderTransformer;
 
@@ -50,7 +52,8 @@ public class StructureMapResourceProvider implements IResourceProvider{
                                         BundleTerminarTransformer terminarTransformer,
                                         BundleAtenderTransformer atenderTransformer,
                                         BundleAgendarTransformer agendarTransformer,
-                                        BundlePriorizarTransformer priorizarTransformer) {
+                                        BundlePriorizarTransformer priorizarTransformer,
+                                        BundleRevisarTransformer bundleRevisarTransformer) {
 
         if (iniciarTransformer == null && terminarTransformer == null &&
                 atenderTransformer == null && agendarTransformer == null && priorizarTransformer == null ) {
@@ -61,6 +64,7 @@ public class StructureMapResourceProvider implements IResourceProvider{
         this.fhirServerConfig = fhirServerConfig;
         this.bundleIniciarTransformer = iniciarTransformer;
         this.bundleReferenciarTransformer = bundleReferenciarTransformer;
+        this.bundleRevisarTransformer = bundleRevisarTransformer;
         this.bundleTerminarTransformer = terminarTransformer;
         this.bundleAtenderTransformer = atenderTransformer;
         this.bundleAgendarTransformer = agendarTransformer;
@@ -100,6 +104,10 @@ public class StructureMapResourceProvider implements IResourceProvider{
         }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetReferenciarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleReferenciarTransformer.buildBundle(data);
+
+        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetRevisarToBundle")){
+            String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            res = bundleRevisarTransformer.buildBundle(data);
 
         }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));

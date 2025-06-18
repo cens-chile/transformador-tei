@@ -122,7 +122,6 @@ public class BundleIniciarTransformer {
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
         JsonNode paciente = node.get("paciente");
-        ((ObjectNode)paciente).put("tipoEvento", "iniciar");
         Patient patient = null;
         if(paciente!=null)
             patient = patientTr.transform(paciente, out);
@@ -306,6 +305,8 @@ public class BundleIniciarTransformer {
             IdType sId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(sId.getIdPart())
                     .setResource(s); 
+            s.setSubject(new Reference(patient));
+            s.getBasedOn().add(new Reference(sr));
         }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());

@@ -119,13 +119,16 @@ public class BundleRevisarTransformer {
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
         JsonNode paciente = node.get("paciente");
-        ((ObjectNode)paciente).put("tipoEvento", "referenciar");
-        Patient patient = null;
-        if(paciente!=null)
-            patient = patientTr.transform(paciente, out);
         
-        String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
-        if(refPat==null)
+        Patient patient = null;
+        if(paciente!=null){
+            patient = patientTr.transform(paciente, out);
+        }
+        String refPatText = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+        Reference patRef = null;
+        if(refPatText!=null)
+            patRef= new Reference(refPatText);   
+        else
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
             
         //Se construye Prestador
@@ -163,14 +166,15 @@ public class BundleRevisarTransformer {
             HapiFhirUtils.addNotFoundIssue("establecimiento.destino", out);
         }
         
-        
+        //Se agrega exámen solicitado
+        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, out);
         
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
 
-        PractitionerRole referenciador = referenciadorTransformer.buildPractitionerRole("referenciador", org, practitioner);
+        PractitionerRole referenciador = referenciadorTransformer.buildPractitionerRole("revisor", org, practitioner);
         PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("atendedor", orgDest, null);
         
         IdType mHId = IdType.newRandomUuid();
@@ -201,6 +205,14 @@ public class BundleRevisarTransformer {
         addResourceToBundle(b,resolutor);
         
         
+        for(ServiceRequest s : examenSolicitados){
+            IdType sId = IdType.newRandomUuid();
+            b.addEntry().setFullUrl(sId.getIdPart())
+                    .setResource(s); 
+            s.setSubject(patRef);
+            s.getBasedOn().add(new Reference(sr));
+        }
+        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
 
         return res;
@@ -224,7 +236,7 @@ public class BundleRevisarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
         
-        String iden = HapiFhirUtils.readStringValueFromJsonNode("idIntencosulta", node);
+        String iden = HapiFhirUtils.readStringValueFromJsonNode("idIntercosulta", node);
         if(iden!=null)
             sr.getIdentifierFirstRep().setValue(iden);
         else
@@ -385,7 +397,35 @@ public class BundleRevisarTransformer {
         
         //Se agrega pertinencia de la interconsulta
         Extension pertinencia = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionPertinenciaInterconsulta");
-        
+        JsonNode pertinenciaNode = node.get("pertinenciaIC");
+        if(pertinenciaNode!=null){
+            String codigoPertinencia = HapiFhirUtils.readStringValueFromJsonNode("codigo", pertinenciaNode);
+            if(codigoPertinencia!=null){
+                String vsPer="https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSPertinenciaInterconsulta";
+                String csPer="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPertinenciaInterconsulta";
+                String res = validator.validateCode(csPer, codigoPertinencia,"",vsPer);
+                if(res!=null){
+                    CodeableConcept c = new CodeableConcept();
+                    Coding cod=new Coding(csPer,codigoPertinencia,res);
+                    c.addCoding(cod);
+                    Extension perCodeExt = HapiFhirUtils.buildExtension("EvaluacionPertinencia",c);
+                    pertinencia.addExtension(perCodeExt);
+                    if(codigoPertinencia.equals("2"))
+                    {
+                        String mot = HapiFhirUtils.readStringValueFromJsonNode("motivoNoPertinencia", pertinenciaNode);
+                        if(mot!=null)
+                            pertinencia.addExtension(HapiFhirUtils.
+                                    buildExtension("MotivoNoPertinencia",new StringType(mot)));
+                        else
+                            HapiFhirUtils.addNotFoundIssue("solicitudIC.pertinenciaIC.MotivoNoPertinencia", oo);
+                    }
+                }else
+                    HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.pertinenciaIC.codigo", oo);
+                
+            }else
+                HapiFhirUtils.addNotFoundIssue("solicitudIC.pertinenciaIC.codigo",oo);  
+        }else
+            HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.pertinenciaIC",oo);
  
         return sr;
     }
