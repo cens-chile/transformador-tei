@@ -160,7 +160,6 @@ public class BundleAtenderTransformer {
          Patient patient = null;
          if(get != null){
             PatientTransformer pt = new PatientTransformer(validator);
-            ((ObjectNode)get).put("tipoEvento", "atender");
              patient = pt.transform(get, oo);
          } else HapiFhirUtils.addNotFoundIssue("paciente", oo);
 
@@ -294,9 +293,7 @@ public class BundleAtenderTransformer {
             IdType sId = IdType.newRandomUuid();
             s.addIdentifier(new Identifier().setValue(sId.getIdPart())); // Averiguar si este Identifier se debe recibir en JSON de entrada.
             s.setSubject(new Reference("Patient/"+patient.getId()));
-            List<Reference> sExamenes= new ArrayList<>();
-            sExamenes.add(new Reference("ServiceRequest/"+ sr.getIdentifier().toString()));  //Averiguar si está bien la referencia al ID
-            s.setBasedOn(sExamenes);
+            s.getBasedOn().add(new Reference(sr));
             b.addEntry().setFullUrl(sId.getIdPart())
                     .setResource(s);
 

@@ -46,11 +46,9 @@ public class PatientTransformer {
         //patient.setId(node.get("id").asText());
 
         // Identificadores
-        String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
         String vs = "";
         String cs = "";
         String valido = "";
-        if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
 
         JsonNode identificadores = node.get("identificadores");
         if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
@@ -76,10 +74,6 @@ public class PatientTransformer {
             CodeableConcept cc = new CodeableConcept(coding);
             Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc);
             identifier.getType().addExtension(paisEmisionExt);
-
-
-
-
             identifier.getType().setText(tipo);
             patient.addIdentifier(identifier);
 
@@ -221,7 +215,6 @@ public class PatientTransformer {
             patient.addExtension(paisOrigenExt);
         }else HapiFhirUtils.addNotFoundIssue("paciente.paisOrigen",oo);
 
-        //dePuebloOriginario
 
         if(node.has("pueblosOriginariosPerteneciente")){
             Boolean pueblosOriginariosPerteneciente = HapiFhirUtils.readBooleanValueFromJsonNode("pueblosOriginariosPerteneciente", node);
@@ -241,6 +234,13 @@ public class PatientTransformer {
                             new Extension
                                     ("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosOriginarios",cc);
                     patient.addExtension(pOExt);
+
+                    if(pueblosOriginarios.equals(10)){
+                        if (node.has("otroPuebloOriginario")){
+                            String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode("otroPuebloOriginario",node);
+
+                        }
+                    }
                 }
             }
 

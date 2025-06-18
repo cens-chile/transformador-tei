@@ -121,15 +121,17 @@ public class PractitionerTransformer {
 
         // Género
         String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
-        if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) ||
-                "hombre".equalsIgnoreCase(genero)) {
-            practitioner.setGender(Enumerations.AdministrativeGender.MALE);
-        } else if ("femenino".equalsIgnoreCase(genero) || "mujer".equalsIgnoreCase(genero) || "female".equalsIgnoreCase(genero)) {
-            practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);
-        } else if ("otro".equalsIgnoreCase(genero) || "other".equalsIgnoreCase(genero)) {
-            practitioner.setGender(Enumerations.AdministrativeGender.OTHER);
-        } else {
-            practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
+        if(genero != null) {
+            if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) ||
+                    "hombre".equalsIgnoreCase(genero)) {
+                practitioner.setGender(Enumerations.AdministrativeGender.MALE);
+            } else if ("femenino".equalsIgnoreCase(genero) || "mujer".equalsIgnoreCase(genero) || "female".equalsIgnoreCase(genero)) {
+                practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);
+            } else if ("otro".equalsIgnoreCase(genero) || "other".equalsIgnoreCase(genero)) {
+                practitioner.setGender(Enumerations.AdministrativeGender.OTHER);
+            } else {
+                practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
+            }
         }
 
         // Fecha de nacimiento
