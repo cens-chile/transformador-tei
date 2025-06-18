@@ -47,18 +47,35 @@ public class PractitionerTransformer {
         practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
 
 
-        String idGen = HapiFhirUtils.readStringValueFromJsonNode("identidadDeGenero", node);
+        if (node.has("identidadGenero")) {
+            String genero = HapiFhirUtils.readStringValueFromJsonNode("identidadGenero", node);
+            String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSIdentidaddeGenero";
+            String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSIdentidaddeGenero";
+            String valido = validator.validateCode(cs, genero, "", vs);
 
-        if (idGen != null) {
-            Extension idGeneroExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-IdentidadDeGenero.html", new StringType(idGen));
-            practitioner.addExtension(idGeneroExt);
+            if (valido != null) {
+
+                Coding cod = new Coding(cs, genero, valido);
+                CodeableConcept cc = new CodeableConcept(cod);
+                Extension extIDGen = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/IdentidadDeGenero",
+                        cc);
+                practitioner.addExtension(extIDGen);
+            } else HapiFhirUtils.addNotFoundIssue("paciente.identidadGenero", oo);
         }
 
-
         if (tipoPractitioner.equals("profesional")) {
-            String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
-            if (idGen != null) {
-                Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-CodigoPaises.html", new StringType(nacionalidad));
+            if(node.has("nacionalidad")){
+                String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
+                String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
+                String  vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
+                String valido = validator.validateCode(cs,
+                        nacionalidad,"",
+                        vs);
+                if(valido == null) HapiFhirUtils.addInvalidIssue("Prestador.nacionalidad",oo);
+                Coding coding = new Coding(cs,nacionalidad,valido);
+                CodeableConcept cc = new CodeableConcept(coding);
+                Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",
+                        cc);
                 practitioner.addExtension(nacionalidadExt);
             }
         }
@@ -104,7 +121,8 @@ public class PractitionerTransformer {
 
         // Género
         String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
-        if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) || "hombre".equalsIgnoreCase(genero)) {
+        if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) ||
+                "hombre".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.MALE);
         } else if ("femenino".equalsIgnoreCase(genero) || "mujer".equalsIgnoreCase(genero) || "female".equalsIgnoreCase(genero)) {
             practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);

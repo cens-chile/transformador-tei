@@ -17,7 +17,9 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -106,10 +108,10 @@ public class BundleTerminarTransformer {
 
         String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
         if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
-            HapiFhirUtils.addErrorIssue("Tipo Prestador", "Dato no válido", out);
+            HapiFhirUtils.addErrorIssue("prestador.tipoPrestador", "Dato no válido", out);
         }
-        Practitioner practitioner = null;
 
+        Practitioner practitioner = null;
         if(get!=null && tipoPrestador != null){
             practitioner = practitionerTransformer.transform(tipoPrestador,get, out);
         }
@@ -118,17 +120,6 @@ public class BundleTerminarTransformer {
         }
 
 
-
-
-
-        /*
-        get = node.get("paciente");
-        Patient patient = null;
-        if(get != null){
-            patient = patientTransformer.transform(get, out);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del paciente", out);
-        }*/
 
         get = node.get("establecimiento");
         Organization organization = null;
@@ -160,6 +151,11 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(mHId.getIdPart())
                 .setResource(messageHeader);
 
+        if(practitionerRole != null){
+        List<Reference> rolesList = new ArrayList<>();
+        rolesList.add(new Reference(practitionerRole));
+        sr.setPerformer(rolesList);}
+
         IdType sRId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(sRId.getIdPart())
                 .setResource(sr);
@@ -181,9 +177,8 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pAId.getValue()));
+        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(practitionerRole));
 
-        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }
