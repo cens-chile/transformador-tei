@@ -117,7 +117,6 @@ public class BundleReferenciarTransformer {
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
         /*JsonNode paciente = node.get("paciente");
-        ((ObjectNode)paciente).put("tipoEvento", "referenciar");
         Patient patient = null;
         if(paciente!=null)
             patient = patientTr.transform(paciente, out);
@@ -225,7 +224,7 @@ public class BundleReferenciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
         
-        String iden = HapiFhirUtils.readStringValueFromJsonNode("idIntencosulta", node);
+        String iden = HapiFhirUtils.readStringValueFromJsonNode("idIntercosulta", node);
         if(iden!=null)
             sr.getIdentifierFirstRep().setValue(iden);
         else

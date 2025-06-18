@@ -46,9 +46,9 @@ public class PatientTransformer {
         //patient.setId(node.get("id").asText());
 
         // Identificadores
-        String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
+        /*String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
         if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
-
+        */
         JsonNode identificadores = node.get("identificadores");
         if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
         for (JsonNode identificador: identificadores){
