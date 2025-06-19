@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -109,7 +110,7 @@ public class BundleReferenciarTransformer {
         MessageHeader messageHeader = null;
         ((ObjectNode)get).put("tipoEvento", "referenciar");
 
-
+        
         if(get!=null)
             messageHeader = 
                 messageHeaderTransformer.transform(node.get("datosSistema"), out);
@@ -171,6 +172,7 @@ public class BundleReferenciarTransformer {
             return res;
         }
 
+        //practitioner.setId("PractitionerReferenciador");
         PractitionerRole referenciador = referenciadorTransformer.buildPractitionerRole("referenciador", org, practitioner);
         PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("atendedor", orgDest, null);
         
@@ -187,6 +189,8 @@ public class BundleReferenciarTransformer {
         
         
         IdType pracId = IdType.newRandomUuid();
+        practitioner.setId(pracId.getIdPart());
+        //practitioner.setId("2");
         b.addEntry().setFullUrl(pracId.getIdPart())
                 .setResource(practitioner);
         

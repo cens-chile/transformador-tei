@@ -20,6 +20,7 @@ import java.util.Date;
 public class PractitionerRoleTransformer {
     ValueSetValidatorService validator;
 
+    String profile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerRoleLE";
     public PractitionerRoleTransformer(ValueSetValidatorService validator){
         this.validator = validator;
     }
@@ -27,7 +28,7 @@ public class PractitionerRoleTransformer {
     public PractitionerRole transform(JsonNode inputNode,OperationOutcome oo) {
         PractitionerRole role = new PractitionerRole();
 
-        role.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerRoleLE");
+        role.getMeta().addProfile(profile);
 
         String id = HapiFhirUtils.readStringValueFromJsonNode("ID", inputNode);
         if (id != null) {
@@ -111,6 +112,7 @@ public class PractitionerRoleTransformer {
             Practitioner prac){
         
         PractitionerRole practitionerRole = new PractitionerRole();
+        practitionerRole.getMeta().addProfile(profile);
         String valido = validator.validateCode(
                 "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE",role,
                 "","https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSPractitionerTipoRolLE");

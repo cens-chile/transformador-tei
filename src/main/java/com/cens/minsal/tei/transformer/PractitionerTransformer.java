@@ -170,6 +170,8 @@ public class PractitionerTransformer {
         JsonNode direccionNode = node.get("direccion");
         if (direccionNode != null) {
             Address direccion = new Address();
+            direccion.setUse(Address.AddressUse.WORK);
+                  
             if (direccionNode.has("descripcion")) {
                 direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("descripcion").asText())));
             }
@@ -212,7 +214,7 @@ public class PractitionerTransformer {
                 if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("prestador.direccion.provincia.codigo", oo);
                 Coding coding = new Coding(cs,codigo,valido);
                 CodeableConcept cc = new CodeableConcept(coding);
-                direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
+                direccion.getDistrictElement().addExtension(HapiFhirUtils.buildExtension(
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",cc));
             }
 
