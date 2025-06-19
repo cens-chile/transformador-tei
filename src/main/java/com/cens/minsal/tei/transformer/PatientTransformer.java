@@ -309,7 +309,9 @@ public class PatientTransformer {
                     direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("direccion").asText())));
                 }
                     if (direccionNode.has("pais")) {
-                        direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
+                         vs ="";
+                         cs = "";
+                        String code = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
                     }
 
                     if (direccionNode.has("region")) {

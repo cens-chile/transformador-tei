@@ -174,33 +174,50 @@ public class PractitionerTransformer {
                 direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("descripcion").asText())));
             }
             if (direccionNode.has("pais")) {
-                direccion.setCountry(direccionNode.get("pais").get("codigo").asText());
+                String vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
+                String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
+                String code = HapiFhirUtils.readStringValueFromJsonNode("prestador.direccion.pais.codigo", direccionNode.get("pais"));
+                String valido = validator.validateCode(cs,code,"",vs);
+                Coding coding = new Coding(cs,code,valido);
+                CodeableConcept cc = new CodeableConcept(coding);
+                if (valido != null){
+                    direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc));
+
+                }
             }
 
             if (direccionNode.has("region")) {
-                String codigo = direccionNode.get("region").get("codigo").asText();
-                String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
-                        codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
-                if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
-                direccion.addExtension(HapiFhirUtils.buildExtension(
-                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
-                        new CodeType(codigo)));
+
+                String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("region"));
+                String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL";
+                String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL";
+                String valido = validator.validateCode(cs, codigo, "", vs);
+                if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("prestador.direccion.region.codigo", oo);
+                Coding coding = new Coding(cs,codigo,valido);
+                CodeableConcept cc = new CodeableConcept(coding);
+                direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
+                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",cc));
             }
 
 
             //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
 
             if (direccionNode.has("provincia")) {
-                String codigo = direccionNode.get("provincia").get("codigo").asText();
-                String valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL",
-                        codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL");
-                if (valido == null) HapiFhirUtils.addInvalidIssue("provincia.codigo", oo);
-                direccion.addExtension(HapiFhirUtils.buildExtension(
-                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
-                        new CodeType(codigo)));
+
+                String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("provincia"));
+                String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL";
+                String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL";
+                String valido = validator.validateCode(cs, codigo, "", vs);
+                if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("prestador.direccion.provincia.codigo", oo);
+                Coding coding = new Coding(cs,codigo,valido);
+                CodeableConcept cc = new CodeableConcept(coding);
+                direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
+                        "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",cc));
             }
 
             if (direccionNode.has("comuna")) {
+
                 JsonNode comunaJ = direccionNode.get("comuna");
                 String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",comunaJ);
                 String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
@@ -282,27 +299,27 @@ public class PractitionerTransformer {
                                     .setCode(codigo)
                                     .setDisplay(valido)
                     ).setText(valido));
-                // Periodo
-                String start = null;
-                try {
-                    start = HapiFhirUtils.transformarFecha(HapiFhirUtils.readStringValueFromJsonNode("fechaEmision", q));
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
+                    // Periodo
+                    String start = null;
+                    try {
+                        start = HapiFhirUtils.transformarFecha(HapiFhirUtils.readStringValueFromJsonNode("fechaEmision", q));
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
 
-                if (start != null) {
-                    Period period = new Period();
-                    period.setStartElement(new DateTimeType(start));
-                    qual.setPeriod(period);
-                }
+                    if (start != null) {
+                        Period period = new Period();
+                        period.setStartElement(new DateTimeType(start));
+                        qual.setPeriod(period);
+                    }
 
-                // Institución emisora
-                String issuer = HapiFhirUtils.readStringValueFromJsonNode("institucion", q);
-                if (issuer != null) {
-                    qual.setIssuer(new Reference().setDisplay(issuer));
-                }
+                    // Institución emisora
+                    String issuer = HapiFhirUtils.readStringValueFromJsonNode("institucion", q);
+                    if (issuer != null) {
+                        qual.setIssuer(new Reference().setDisplay(issuer));
+                    }
 
-                p.addQualification(qual);
+                    p.addQualification(qual);
                 } else HapiFhirUtils.addNotFoundCodeIssue("Titulo o especialidad del Prestador["+identifierValue+"].["+nombre+"]",oo);
 
             }
