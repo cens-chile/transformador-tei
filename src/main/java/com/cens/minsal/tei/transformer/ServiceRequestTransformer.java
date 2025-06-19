@@ -169,9 +169,15 @@ public class ServiceRequestTransformer {
         JsonNode solicitudExamenNode = solicitudes.get("solicitudExamen");
         if(solicitudExamenNode==null)
             return null;
+        if(!solicitudExamenNode.isArray()){
+            HapiFhirUtils.addErrorIssue("solicitudExamen", "solicitudExamen debe ser un arreglo.", oo);
+            return null;
+        }
         
         List<ServiceRequest> sols= new ArrayList();
         int i=0;
+        
+            
         for(JsonNode node : solicitudExamenNode){
             ServiceRequest ser = new ServiceRequest();
             ser.getMeta().addProfile(profileExamen);

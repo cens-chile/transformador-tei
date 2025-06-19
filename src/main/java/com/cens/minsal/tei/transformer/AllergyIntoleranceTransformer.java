@@ -31,6 +31,10 @@ public class AllergyIntoleranceTransformer {
     }
     public List<AllergyIntolerance> transform(JsonNode alergias, OperationOutcome oo){
         List<AllergyIntolerance> alleIn=new ArrayList();
+        if(!alergias.isArray()){
+            HapiFhirUtils.addErrorIssue("alergias", "alergias debe ser un arreglo.", oo);
+            return null;
+        }
         int i=0;
         for(JsonNode aiNode: alergias){
             AllergyIntolerance ai = new AllergyIntolerance();

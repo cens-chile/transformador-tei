@@ -56,6 +56,20 @@ public class ValueSetValidatorService {
         return null;
     }
     
+    public CodeValidationResult getValidationResult(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl){
+        
+        System.out.println("theCodeSystem = " + theCodeSystem);
+        System.out.println("theCode = " + theCode);
+        CodeValidationResult codeValidationResult2 = validationSupport.validateCode
+        (validationSupportContext, new ConceptValidationOptions(), theCodeSystem, theCode, theDisplay, theValueSetUrl);
+        
+        if (codeValidationResult2 != null) {
+          return codeValidationResult2;
+        }
+        return null;
+    }
+    
+    
     public boolean isValueSetSupported(String theValueSetUrl){
         
       return validationSupport.isValueSetSupported(validationSupportContext, theValueSetUrl);
