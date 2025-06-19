@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
@@ -50,6 +51,13 @@ public class HapiFhirUtils {
 
         IParser parser = ctx.newJsonParser();
         String encodeResourceToString = ctx.newJsonParser().setPrettyPrint(false).encodeResourceToString(r);
+        return encodeResourceToString;
+    }
+    
+    public static String resourceToPrettyString(Resource r,FhirContext ctx){
+
+        IParser parser = ctx.newJsonParser();
+        String encodeResourceToString = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(r);
         return encodeResourceToString;
     }
     
@@ -275,8 +283,10 @@ public class HapiFhirUtils {
     }
     
     public static void addResourceToBundle(Bundle b, Resource r){
-        IdType id = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(id.getIdPart())
+        String id = UUID.randomUUID().toString();
+        String uuid = "urn:uuid:"+id;
+        r.setId(id);
+        b.addEntry().setFullUrl(uuid)
                 .setResource(r);
     }
     public static void addResourceToBundle(Bundle b, Resource r,String fullUrl){

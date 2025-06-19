@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -188,24 +189,22 @@ public class BundleReferenciarTransformer {
         sr.getPerformer().add(new Reference(resolutor));
         
         
-        IdType pracId = IdType.newRandomUuid();
-        practitioner.setId(pracId.getIdPart());
-        //practitioner.setId("2");
-        b.addEntry().setFullUrl(pracId.getIdPart())
-                .setResource(practitioner);
+        HapiFhirUtils.addResourceToBundle(b, practitioner);
         
-
-        IdType orgId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(orgId.getIdPart())
-                .setResource(org);            
+ 
+        //Organizacion de origen
+        HapiFhirUtils.addResourceToBundle(b, org);
+        //Organizacion de Destino
         HapiFhirUtils.addResourceToBundle(b, orgDest);
         
         
-        addResourceToBundle(b,referenciador);
-        addResourceToBundle(b,resolutor);
+        HapiFhirUtils.addResourceToBundle(b,referenciador);
+        HapiFhirUtils.addResourceToBundle(b,resolutor);
         
         
-        res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
+        res = HapiFhirUtils.resourceToPrettyString(b, fhirServerConfig.getFhirContext());
+        System.out.println("res = " + res);
+        
 
         return res;
     }
