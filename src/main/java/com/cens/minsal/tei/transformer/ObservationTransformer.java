@@ -14,13 +14,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.StringType;
+
+import org.hl7.fhir.r4.model.*;
 
 /**
  *
@@ -100,6 +95,9 @@ public class ObservationTransformer {
         for(JsonNode resultadoEx: resultadoExs){
         
             Observation ob = new Observation();
+
+            IdType obID = IdType.newRandomUuid();
+            ob.setId(obID.getIdPart());
             ob.getMeta().addProfile(resultadoExProfile);
 
             ob.setStatus(Observation.ObservationStatus.REGISTERED);

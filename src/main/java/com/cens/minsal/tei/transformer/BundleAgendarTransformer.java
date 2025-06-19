@@ -149,11 +149,11 @@ public class BundleAgendarTransformer {
             practitionerRoleAgendador.addCode(cc);
 
             if(practitionerProfesional != null) {
-                practitionerRoleAgendador.setPractitioner(new Reference("Practitioner/" + practitionerProfesional.getId()));
+                practitionerRoleAgendador.setPractitioner(new Reference(practitionerProfesional));
             }
 
             if(organization != null) {
-                practitionerRoleAgendador.setOrganization(new Reference("Organization/" + organization.getIdentifierFirstRep().getValue()));
+                practitionerRoleAgendador.setOrganization(new Reference(organization));
             }
         } else {
             HapiFhirUtils.addNotFoundIssue("rolDelProfesionalAgendador", oo);
@@ -169,11 +169,11 @@ public class BundleAgendarTransformer {
             practitionerRoleResolutor.addCode(cc);
 
             if(practitionerProfesional != null) {
-                practitionerRoleResolutor.setPractitioner(new Reference("Practitioner/" + practitionerProfesional.getId()));
+                practitionerRoleResolutor.setPractitioner(new Reference(practitionerProfesional));
             }
 
             if(organization!= null) {
-                practitionerRoleResolutor.setOrganization(new Reference("Organization/" + organization.getIdentifierFirstRep().getValue()));
+                practitionerRoleResolutor.setOrganization(new Reference(organization));
             }
         } else {
             HapiFhirUtils.addNotFoundIssue("rolDelProfesionalResolutor", oo);
@@ -199,14 +199,14 @@ public class BundleAgendarTransformer {
             if (practitionerRoleResolutor != null){
                 Appointment.AppointmentParticipantComponent apc = new Appointment.AppointmentParticipantComponent();
                 appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                        .setActor(new Reference("PractitionerRole/"+practitionerRoleResolutor.getId()))
+                        .setActor(new Reference(practitionerRoleResolutor))
                         .setStatus(Appointment.ParticipationStatus.ACCEPTED).setType(ccList));
 
             }
 
             // Set service request reference
             if(sr != null) {
-                appointment.addBasedOn(new Reference("ServiceRequest/" + sr.getIdentifierFirstRep().getValue()));
+                appointment.addBasedOn(new Reference(sr));
             }
         } else {
             HapiFhirUtils.addNotFoundIssue("citaMedica", oo);
@@ -248,9 +248,9 @@ public class BundleAgendarTransformer {
 
         // Set MessageHeader references
         setMessageHeaderReferences(messageHeader,
-                new Reference(sRId.getValue()),
-                new Reference(pracRolAgendadorId.getValue()),
-                new Reference(appId.getValue()));
+                new Reference(sr),
+                new Reference(practitionerRoleAgendador),
+                new Reference(appointment));
 
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;

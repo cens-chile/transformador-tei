@@ -7,6 +7,8 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ public class ConditionTransformer {
         Condition cond = new Condition();
         
         String code = HapiFhirUtils.readStringValueFromJsonNode("code", node);
+        cond.setCode(new CodeableConcept(new Coding()));
         if(code!=null)
             cond.getCode().getCodingFirstRep().setCode(code);
         else 
@@ -42,19 +45,14 @@ public class ConditionTransformer {
             HapiFhirUtils.addNotFoundIssue(parentPath+".system", oo);
         
         boolean valueSetSupported = validator.isValueSetSupported(codeVS);
-        System.out.println("valueSetSupported = " + valueSetSupported);
-        /*if(valueSetSupported){
-            String validateCode = validator.validateCode(system, code, null, codeVS);
-            if(validateCode==null)
-                HapiFhirUtils.addErrorIssue("code and system", "error al validar en el ValueSet", oo);
-        }*/
-        
-        
+
+
+
         String display = HapiFhirUtils.readStringValueFromJsonNode("glosa", node);
         if(display!=null)
             cond.getCode().getCodingFirstRep().setDisplay(display);
         
-        String text = HapiFhirUtils.readStringValueFromJsonNode("text", node);
+        String text = HapiFhirUtils.readStringValueFromJsonNode("diagnosticoTexto", node);
         if(text!=null)
             cond.getCode().setText(text);
         
@@ -115,7 +113,7 @@ public class ConditionTransformer {
                 cond.getSeverity().getCodingFirstRep().setCode(severity);
                 cond.getSeverity().getCodingFirstRep().setSystem(system);
                 cond.getSeverity().getCodingFirstRep().setDisplay(validateCode);
-               
+
             //}else
              //   HapiFhirUtils.addErrorIssue(severity, "error al validar en Diagnostico.severidad", oo);
         }

@@ -235,6 +235,14 @@ public class PatientTransformer {
                 if (valido != null) {
                     Coding coding = new Coding(cs, pueblosOriginarios, valido);
                     CodeableConcept cc = new CodeableConcept(coding);
+                    //String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode("otroPuebloOriginario",node);
+                    if(pueblosOriginarios.equals(10)){
+                        if (node.has("otroPuebloOriginario")){
+                            String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode(
+                                        "otroPuebloOriginario",node);
+                            cc.setText(otroPuebloOriginario);
+                        }
+                    }
                     Extension pOExt =
                             new Extension
                                     ("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosOriginarios",cc);
@@ -244,10 +252,6 @@ public class PatientTransformer {
 
         }else HapiFhirUtils.addNotFoundIssue("paciente.pueblosOriginariosPerteneciente",oo);
 
-        if(node.has("otroPuebloOriginario")){
-            String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode("otroPuebloOriginario",node);
-
-        }
 
 //puebloAfroPertenencia
 
@@ -330,11 +334,19 @@ public class PatientTransformer {
                 }
 
                     if (direccionNode.has("comuna")) {
-                        String codigo = direccionNode.get("comuna").get("codigo").asText();
-                        direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
-                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
-                            new CodeType(codigo)
-                    ));
+                        JsonNode comunaJ = direccionNode.get("comuna");
+                        String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",comunaJ);
+                         vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
+                         cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
+
+                         valido = validator.validateCode(cs,codigo,"",vs);
+                         if (valido != null){
+                             Coding coding = new Coding(cs,codigo,valido);
+                             CodeableConcept cc = new CodeableConcept(coding);
+                             direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
+                                     "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
+                                     cc));
+                         } else HapiFhirUtils.addNotFoundCodeIssue("Paciente.direcciones.comuna.codigo", oo);
                     }
                     if (direccionNode.has("situacionCalle")) {
                     Boolean sitCalleB = HapiFhirUtils.readBooleanValueFromJsonNode("situacionCalle", direccionNode);

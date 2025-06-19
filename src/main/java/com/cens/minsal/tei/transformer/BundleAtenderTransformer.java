@@ -149,11 +149,11 @@ public class BundleAtenderTransformer {
         practitionerRole.addCode(cc);
 
         try {
-            practitionerRole.setPractitioner(new Reference("Practitioner/" + practitioner.getId()));
+            practitionerRole.setPractitioner(new Reference( practitioner));
         }catch (Exception e){
             HapiFhirUtils.addNotFoundIssue("Practitioner", oo);
         }
-        practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
+        practitionerRole.setOrganization(new Reference(organization));
 
 
          get = node.get("paciente");
@@ -175,7 +175,7 @@ public class BundleAtenderTransformer {
          }
 
         for (AllergyIntolerance a: alergias){
-            a.setPatient(new Reference("Patient/"+patient.getId().toString()));
+            a.setPatient(new Reference(patient));
         }
 
 
@@ -194,7 +194,7 @@ public class BundleAtenderTransformer {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización(encuentro)", oo);
         }*/
 
-        encounter.setSubject(new Reference("Patient/"+patient.getIdentifierFirstRep().toString()));
+        encounter.setSubject(new Reference(patient));
 
         //Se agrega exámen solicitado
         List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, oo);
@@ -248,8 +248,8 @@ public class BundleAtenderTransformer {
         Condition cond = null;
         if(node.get("diagnostico")!=null){
             cond = conditionTransformer.transform(node.get("diagnostico"), oo,"diagnostico");
-            cond.setSubject(new Reference("Patient/"+patient.getId()));
-            cond.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            cond.setSubject(new Reference(patient));
+            cond.setEncounter(new Reference(encounter));
         }
         else
             HapiFhirUtils.addNotFoundIssue("diagnostico", oo);
@@ -258,8 +258,8 @@ public class BundleAtenderTransformer {
         MedicationRequest medReq = null;
         if(node.has("solicitudMedicamento")){
             medReq = mrt.transform(node.get("solicitudMedicamento"), oo);
-            medReq.setSubject(new Reference("Patient/"+patient.getId()));
-            medReq.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            medReq.setSubject(new Reference(patient));
+            medReq.setEncounter(new Reference(encounter));
             IdType medId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(medId.getIdPart())
                     .setResource(medReq);
@@ -270,8 +270,8 @@ public class BundleAtenderTransformer {
 
         if(node.has("anamnesis")){
             anam = anamnesisTransformer.transform(node.get("anamnesis"),oo);
-            anam.setSubject(new Reference("Patient/"+patient.getId()));
-            anam.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            anam.setSubject(new Reference(patient));
+            anam.setEncounter(new Reference(encounter));
             IdType anamId = IdType.newRandomUuid();
             b.addEntry().setFullUrl(anamId.getIdPart())
                     .setResource(anam);
@@ -292,7 +292,7 @@ public class BundleAtenderTransformer {
         for(ServiceRequest s : examenSolicitados){
             IdType sId = IdType.newRandomUuid();
             s.addIdentifier(new Identifier().setValue(sId.getIdPart())); // Averiguar si este Identifier se debe recibir en JSON de entrada.
-            s.setSubject(new Reference("Patient/"+patient.getId()));
+            s.setSubject(new Reference(patient));
             s.getBasedOn().add(new Reference(sr));
             b.addEntry().setFullUrl(sId.getIdPart())
                     .setResource(s);
@@ -301,8 +301,8 @@ public class BundleAtenderTransformer {
 
         for(Observation ob : examenes){
             IdType obId = IdType.newRandomUuid();
-            ob.setSubject(new Reference("Patient/"+patient.getId()));
-            ob.setEncounter(new Reference("Encounter/"+encounter.getIdentifierFirstRep().getValue()));
+            ob.setSubject(new Reference(patient));
+            ob.setEncounter(new Reference(encounter));
             b.addEntry().setFullUrl(obId.getIdPart())
                     .setResource(ob);
         }
@@ -323,13 +323,13 @@ public class BundleAtenderTransformer {
             careplan = carePlanTransformer.transform(get, oo);
 
             if(patient != null){
-                careplan.setSubject(new Reference("Patient/"+patient.getId()));
+                careplan.setSubject(new Reference(patient));
             }else{
                 HapiFhirUtils.addNotFoundIssue("planDeAtencion.referenciaPaciente",oo);
             }
 
             if(encounter != null) {
-                careplan.setEncounter(new Reference("Encounter/" + encounter.getIdentifierFirstRep().getValue()));
+                careplan.setEncounter(new Reference(encounter));
             }
 
             IdType cpId = IdType.newRandomUuid();
@@ -338,16 +338,16 @@ public class BundleAtenderTransformer {
         }
 
         //  - recetas (MedicationRequest)
-        CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
         if(medReq != null) {
-            carePlanActivityComponent.setReference(new Reference("MedicationRequest/" + medReq.getId()));
+            CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
+            carePlanActivityComponent.setReference(new Reference(medReq));
             assert careplan != null;
             careplan.addActivity(carePlanActivityComponent);
         }
         if(examenSolicitados != null) {
-            List<CarePlan.CarePlanActivityComponent> cpAList = new ArrayList<>();
             for (ServiceRequest examenSolicitado : examenSolicitados) {
-                carePlanActivityComponent.setReference(new Reference("ServiceRequest/" + examenSolicitado.getIdentifierFirstRep().getValue()));
+                CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
+                carePlanActivityComponent.setReference(new Reference(examenSolicitado));
                 assert careplan != null;
                 careplan.addActivity(carePlanActivityComponent);
             }

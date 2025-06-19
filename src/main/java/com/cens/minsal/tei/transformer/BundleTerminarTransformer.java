@@ -143,8 +143,8 @@ public class BundleTerminarTransformer {
         CodeableConcept cc = new CodeableConcept(roleCode);
         practitionerRole.addCode(cc);
 
-        practitionerRole.setPractitioner(new Reference("Practitioner/"+practitioner.getId().toString()));
-        practitionerRole.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
+        practitionerRole.setPractitioner(new Reference(practitioner));
+        practitionerRole.setOrganization(new Reference(organization));
 
         //Agrega recursos con sus respectivos UUID al bundle de respuesta
         IdType mHId = IdType.newRandomUuid();
@@ -177,7 +177,7 @@ public class BundleTerminarTransformer {
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
-        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(practitionerRole));
+        setMessageHeaderReferences(messageHeader, new Reference(sRId), new Reference(practitionerRole));
 
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;

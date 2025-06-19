@@ -148,8 +148,8 @@ public class BundlePriorizarTransformer {
         //CodeableConcept cc = new CodeableConcept(roleCode);
         //priorizador.addCode(cc);
 
-        priorizador.setPractitioner(new Reference("Practitioner/"+practitioner.getId().toString()));
-        priorizador.setOrganization(new Reference("Organization/"+organization.getIdentifier().get(0).getValue().toString()));
+        priorizador.setPractitioner(new Reference(practitioner));
+        priorizador.setOrganization(new Reference(organization));
 
         //Agrega recursos con sus respectivos UUID al bundle de respuesta
         IdType mHId = IdType.newRandomUuid();
@@ -162,7 +162,7 @@ public class BundlePriorizarTransformer {
 
 
         // agrega referencias en ServiceRequest
-        sr.setSubject(new Reference("Patient/"+patient.getId().toString()));
+        sr.setSubject(new Reference(patient));
         sr.addPerformer(new Reference(pracRolId));
         IdType sRId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(sRId.getIdPart())
@@ -203,11 +203,6 @@ public class BundlePriorizarTransformer {
         sr.getMeta().addProfile(profile);
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-
-        Reference pacienteRef = new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",nodeOrigin));
-        if(pacienteRef != null ){
-            sr.setSubject(pacienteRef);
-        }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
         try {
