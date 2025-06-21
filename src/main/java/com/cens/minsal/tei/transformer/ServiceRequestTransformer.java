@@ -176,12 +176,13 @@ public class ServiceRequestTransformer {
         
         List<ServiceRequest> sols= new ArrayList();
         int i=0;
-        
-            
+
         for(JsonNode node : solicitudExamenNode){
             ServiceRequest ser = new ServiceRequest();
             ser.getMeta().addProfile(profileExamen);
-
+            String id = IdType.newRandomUuid().getValue();
+            id = id.replace(":","").replace("-","");
+            ser.setId(id);
             try {
                 Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitud", node);
                 ser.setAuthoredOn(fechaSolicitud);
@@ -199,8 +200,10 @@ public class ServiceRequestTransformer {
             }else
                 HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].razonSolicitud", oo);
 
-            String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigoExamen", node);
-
+            String codigo = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitadoCodigo", node);
+            String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitadoGlosa", node);
+            String examenSolicitadoDescripcion = HapiFhirUtils.readStringValueFromJsonNode(
+                    "examenSolicitadoDescripcion",node);
             CodeableConcept code = ser.getCode();
 
             Coding coding = code.getCodingFirstRep();
@@ -208,15 +211,18 @@ public class ServiceRequestTransformer {
             if(codigo!=null){
                 coding.setSystem(HapiFhirUtils.loincSystem);
                 coding.setCode(codigo);
-                coding.setDisplay(HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node));
-
             }
 
-            String examenSolicitado = HapiFhirUtils.readStringValueFromJsonNode("examenSolicitado", node);
             if(examenSolicitado!=null){
-                code.setText(examenSolicitado);
-            }else
-               HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].examenSolicitado", oo);
+                coding.setDisplay(examenSolicitado);
+            }
+
+            if(examenSolicitadoDescripcion!=null){
+                code.setText(examenSolicitadoDescripcion);
+            }
+
+
+
             sols.add(ser);
         }
         return sols;

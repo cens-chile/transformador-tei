@@ -173,8 +173,10 @@ public class PractitionerTransformer {
             direccion.setUse(Address.AddressUse.WORK);
                   
             if (direccionNode.has("descripcion")) {
-                direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("descripcion").asText())));
+                direccion.addLine(HapiFhirUtils.readStringValueFromJsonNode("descripcion",direccionNode));
             }
+                else HapiFhirUtils.addNotFoundIssue("prestador.direccion.descripcion", oo);
+
             if (direccionNode.has("pais")) {
                 String vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
