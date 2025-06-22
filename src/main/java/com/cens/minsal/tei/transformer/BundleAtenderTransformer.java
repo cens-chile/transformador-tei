@@ -153,7 +153,6 @@ public class BundleAtenderTransformer {
         }catch (Exception e){
             HapiFhirUtils.addNotFoundIssue("Practitioner", oo);
         }
-        practitionerRole.setOrganization(new Reference(organization));
 
 
          get = node.get("paciente");
@@ -223,19 +222,20 @@ public class BundleAtenderTransformer {
 
 
         IdType pAId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pAId.getIdPart())
+        b.addEntry().setFullUrl(practitioner.getResourceType().toString()+"/"+practitioner.getId())
                 .setResource(practitioner);
 
-        IdType pracRolId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracRolId.getIdPart())
-                .setResource(practitionerRole);
 
 
         IdType orgId = IdType.newRandomUuid();
         b.addEntry().setFullUrl(orgId.getIdPart())
                 .setResource(organization);
 
+        practitionerRole.setOrganization(new Reference(organization));
 
+        IdType pracRolId = IdType.newRandomUuid();
+        b.addEntry().setFullUrl(pracRolId.getIdPart())
+                .setResource(practitionerRole);
 
 
 
@@ -294,6 +294,7 @@ public class BundleAtenderTransformer {
             s.addIdentifier(new Identifier().setValue(sId.getIdPart())); // Averiguar si este Identifier se debe recibir en JSON de entrada.
             s.setSubject(new Reference(patient));
             s.getBasedOn().add(new Reference(sr));
+            s.setRequester(new Reference(practitioner));
             b.addEntry().setFullUrl(sId.getIdPart())
                     .setResource(s);
 
@@ -347,7 +348,7 @@ public class BundleAtenderTransformer {
         if(examenSolicitados != null) {
             for (ServiceRequest examenSolicitado : examenSolicitados) {
                 CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
-                carePlanActivityComponent.setReference(new Reference(examenSolicitado));
+                carePlanActivityComponent.setReference(new Reference(examenSolicitado.getIdentifierFirstRep().getValue()));
                 assert careplan != null;
                 careplan.addActivity(carePlanActivityComponent);
             }
@@ -390,6 +391,8 @@ public class BundleAtenderTransformer {
         
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+        IdType sId = IdType.newRandomUuid();
+        sr.setId(sId);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
 
