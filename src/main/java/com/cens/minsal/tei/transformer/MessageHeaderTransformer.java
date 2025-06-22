@@ -8,11 +8,16 @@ import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.cens.minsal.tei.valuesets.VSMessageHeaderEventEnum;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.UriType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -72,8 +77,14 @@ public class MessageHeaderTransformer {
             HapiFhirUtils.addNotFoundIssue("software", oo);
         
         String endpoint = HapiFhirUtils.readStringValueFromJsonNode("endpoint", node);
-        if(software!=null)
-            m.getSource().setEndpoint(endpoint);
+        if(endpoint!=null){
+            try {
+                URI uri = new URI(endpoint);
+                m.getSource().setEndpoint(endpoint);
+            } catch (URISyntaxException ex) {
+                HapiFhirUtils.addInvalidIssue("endpoint", oo);
+            }
+        }
         else 
             HapiFhirUtils.addNotFoundIssue("endpoint", oo);
          
