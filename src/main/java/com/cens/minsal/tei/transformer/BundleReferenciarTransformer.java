@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 public class BundleReferenciarTransformer {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleReferenciarTransformer.class);
     FhirServerConfig fhirServerConfig;
-    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
+    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleReferenciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
     PatientTransformer patientTr;
     MessageHeaderTransformer messageHeaderTransformer;
@@ -177,14 +177,12 @@ public class BundleReferenciarTransformer {
         PractitionerRole referenciador = referenciadorTransformer.buildPractitionerRole("referenciador", org, practitioner);
         PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("atendedor", orgDest, null);
         
-        IdType mHId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(mHId.getIdPart())
-                .setResource(messageHeader);
+        HapiFhirUtils.addResourceToBundle(b, messageHeader);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(referenciador));
         
        
-        
-        HapiFhirUtils.addResourceToBundle(b, sr,"ServiceRequest/"+sr.getId());
+        String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
+        HapiFhirUtils.addResourceToBundle(b, sr,srFullUrl);
         sr.getSubject().setReference(refPat);
         sr.getPerformer().add(new Reference(resolutor));
         
@@ -203,8 +201,6 @@ public class BundleReferenciarTransformer {
         
         
         res = HapiFhirUtils.resourceToPrettyString(b, fhirServerConfig.getFhirContext());
-        System.out.println("res = " + res);
-        
 
         return res;
     }
@@ -240,8 +236,8 @@ public class BundleReferenciarTransformer {
         String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
         if(modalidadAtencion!=null){
             //VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
-            String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo";
-            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
+            String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
             String validateCode = validator.validateCode(cs, modalidadAtencion, null, vs);
             if(validateCode!=null){
                 Coding c = new Coding(cs,modalidadAtencion,validateCode);
@@ -332,7 +328,7 @@ public class BundleReferenciarTransformer {
             if(get!=null){
                 String validateCode = validator.validateCode(cs, get, null, vs);
                 if(validateCode!=null){
-                    String extUrl ="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEspecialidadMedicaDestinoCodigo";
+                    String extUrl ="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionSubEspecialidadMedicaDestinoCodigo";
                     Coding c = new Coding(cs,get,validateCode);
                     Extension buildExtension = HapiFhirUtils.buildExtension(extUrl,new CodeableConcept(c));
                     sr.getExtension().add(buildExtension);

@@ -24,6 +24,7 @@ public class HapiFhirUtils {
     
     public static final String snomdeSystem = "http://snomed.info/sct";
     public static final String loincSystem = "http://loinc.org";
+    public static final String urlBaseFullUrl="http://transformador-cens.cl";
     
     public static Bundle.BundleEntryComponent findBundleEntryComponentByResourceOnLocation(Bundle bundle,Class resourceType)
     {
@@ -284,14 +285,20 @@ public class HapiFhirUtils {
     
     public static void addResourceToBundle(Bundle b, Resource r){
         String id = UUID.randomUUID().toString();
-        String uuid = "urn:uuid:"+id;
+        String resourceType= r.getResourceType().name();
+        String fullUrl = "urn:uuid:"+id;
+        fullUrl=urlBaseFullUrl+"/"+resourceType+"/"+id;
         r.setId(id);
-        b.addEntry().setFullUrl(uuid)
+        b.addEntry().setFullUrl(fullUrl)
                 .setResource(r);
     }
     public static void addResourceToBundle(Bundle b, Resource r,String fullUrl){
         
         b.addEntry().setFullUrl(fullUrl)
                 .setResource(r);
+    }
+    
+    public static String getUrlBaseFullUrl(){
+        return urlBaseFullUrl;
     }
 }
