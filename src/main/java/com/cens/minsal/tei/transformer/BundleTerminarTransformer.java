@@ -39,6 +39,7 @@ public class BundleTerminarTransformer {
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
     ValueSetValidatorService validator;
+    PractitionerRoleTransformer referenciadorTransformer;
 
 
 
@@ -48,13 +49,15 @@ public class BundleTerminarTransformer {
                                      PatientTransformer patientTransformer,
                                      PractitionerRoleTransformer practitionerRoleTransformer,
                                      OrganizationTransformer organizationTransformer,
-                                     ValueSetValidatorService validator) {
+                                     ValueSetValidatorService validator,
+                                     PractitionerRoleTransformer referenciadorTransformer) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
         this.practitionerRoleTransformer = practitionerRoleTransformer;
+        this.referenciadorTransformer = referenciadorTransformer;
         this.validator = validator;
     }
     
@@ -99,7 +102,7 @@ public class BundleTerminarTransformer {
 
 
         if(get!=null)
-            sr = buildServiceRequest(node, out);
+            sr = buildServiceRequest(get, out);
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
@@ -134,56 +137,27 @@ public class BundleTerminarTransformer {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
+        HapiFhirUtils.addResourceToBundle(b, messageHeader);
+        PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("terminador", organization, practitioner);
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(resolutor));
 
         //Rol del Profesional (practitionerRol)
+        String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
+        HapiFhirUtils.addResourceToBundle(b, sr,srFullUrl);
 
-        PractitionerRole practitionerRole = null;
-        practitionerRole = practitionerRoleTransformer.transform(get, out);
-        Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
-        CodeableConcept cc = new CodeableConcept(roleCode);
-        practitionerRole.addCode(cc);
+        String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+        sr.getSubject().setReference(refPat);
 
-        practitionerRole.setPractitioner(new Reference(practitioner));
-        practitionerRole.setOrganization(new Reference(organization));
+        sr.getPerformer().add(new Reference(resolutor));
 
-        //Agrega recursos con sus respectivos UUID al bundle de respuesta
-        IdType mHId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(mHId.getIdPart())
-                .setResource(messageHeader);
-
-        if(practitionerRole != null){
-        List<Reference> rolesList = new ArrayList<>();
-        rolesList.add(new Reference(practitionerRole));
-        sr.setPerformer(rolesList);}
-
-        IdType sRId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(sRId.getIdPart())
-                .setResource(sr);
-
-        IdType pAId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pAId.getIdPart())
-                .setResource(practitioner);
-
-        IdType pracRolId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracRolId.getIdPart())
-                .setResource(practitionerRole);
-
-/*
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
-*/
-        IdType orgId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(orgId.getIdPart())
-                .setResource(organization);
-
-        setMessageHeaderReferences(messageHeader, new Reference(sRId), new Reference(practitionerRole));
+        HapiFhirUtils.addResourceToBundle(b,practitioner);
+        HapiFhirUtils.addResourceToBundle(b,organization);
+        HapiFhirUtils.addResourceToBundle(b,resolutor);
 
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }
-    
-    
+
     public void setMessageHeaderReferences(MessageHeader m, Reference sr, Reference pr){
         m.setAuthor(pr);
         m.getFocus().add(sr);
@@ -197,63 +171,60 @@ public class BundleTerminarTransformer {
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
-        Reference pacienteRef = new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",nodeOrigin));
-        if(pacienteRef != null ){
-            sr.setSubject(pacienteRef);
-        }else HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
+        String id = HapiFhirUtils.readStringValueFromJsonNode("idSolicitudServicio", nodeOrigin);
 
-        JsonNode node = nodeOrigin.get("solicitudIC");
+        if(id!=null)
+            sr.setId(id);
+        else
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
+
         try {
-            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
+            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", nodeOrigin);
             sr.setAuthoredOn(d);
         } catch (ParseException ex) {
             Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
 
-        String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
+        String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", nodeOrigin);
         if (idIC == null) HapiFhirUtils.addNotFoundIssue("idInterconsulta", oo);
         Identifier identifierIC = new Identifier().setValue(idIC);
         sr.addIdentifier(identifierIC);
 
         //codigoEstadoIC
 
-        String codigoEstadoIC = HapiFhirUtils.readStringValueFromJsonNode("codigoEstadoIC", node);
+        String codigoEstadoIC = "7";
 
         if(codigoEstadoIC != null){
             String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoInterconsulta";
             String resValidacion = validator.validateCode(cs,codigoEstadoIC,"",vs);
             if (resValidacion == null){HapiFhirUtils.addErrorIssue(codigoEstadoIC, "No válido", oo ); }
+            Coding coding = new Coding(cs,codigoEstadoIC,resValidacion);
+            CodeableConcept cc = new CodeableConcept(coding);
+            sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
+                    cc));
         }
 
 
-            sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
-                new StringType(codigoEstadoIC)));
-
-        String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
+        String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", nodeOrigin);
         Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
         sr.getCategoryFirstRep().addCoding(coding);
 
-        String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", node);
+        String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", nodeOrigin);
         if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("codigoMotivoCierreIC", oo);
         String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSMotivoCierreInterconsulta";
         String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSMotivoCierreInterconsulta";
         String resValidacion = validator.validateCode(cs,codigoMotivoCierreIC,"",vs);
 
-        if (resValidacion == null){HapiFhirUtils.addErrorIssue(codigoMotivoCierreIC, "No válido", oo ); }
+        if (resValidacion == null) HapiFhirUtils.addErrorIssue(codigoMotivoCierreIC, "No válido", oo );
 
-        String glosaCierreIC = HapiFhirUtils.readStringValueFromJsonNode("glosaCierreIC", node);
-        if(glosaCierreIC == null) HapiFhirUtils.addNotFoundIssue("glosaCierreIC", oo);
-        String sistemaMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("sistemaMotivoCierreIC", node);
-        if(sistemaMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("sistemaMotivoCierreIC", oo);
+
         CodeableConcept cc = new CodeableConcept();
-        Coding codingCierreIC = new Coding(sistemaMotivoCierreIC,codigoMotivoCierreIC, glosaCierreIC);
+        Coding codingCierreIC = new Coding(cs,codigoMotivoCierreIC, resValidacion);
         cc.addCoding(codingCierreIC);
-        Type type = cc;
         sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMotivoCierreInterconsulta",
-        type));
-
+        cc));
 
         return sr;
     }
