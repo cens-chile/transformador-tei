@@ -32,7 +32,7 @@ public class QuestionnaireResponseTransformer {
         
         QuestionnaireResponse.QuestionnaireResponseItemComponent item = quest.getItemFirstRep();
         item.setLinkId("MotivoDerivacion");
-        item.setText("MotivoDerivacion");
+        item.setText("Motivo Derivación");
         
         
         item.getAnswerFirstRep().setValue(new StringType(mot));

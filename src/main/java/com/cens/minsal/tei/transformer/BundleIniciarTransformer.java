@@ -152,8 +152,7 @@ public class BundleIniciarTransformer {
         Organization org = null;
         try{
             get = node.get("establecimiento").get("origen");
-            if(get!=null)
-                org = orgTransformer.transform(get, out,"establecimiento.origen");   
+            org = orgTransformer.transform(get, out,"establecimiento.origen");   
         }catch(NullPointerException ex){
             HapiFhirUtils.addNotFoundIssue("establecimiento.origen", out);
         }
@@ -207,9 +206,7 @@ public class BundleIniciarTransformer {
         //Se agrega motivo de derivacion
         QuestionnaireResponse motivoDerivacion = 
                 questTransformer.transform(node, out);
-        
-        
-        
+
         //Se agrega exámen solicitado
         List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, out);
        
@@ -222,91 +219,59 @@ public class BundleIniciarTransformer {
         PractitionerRole praRole = praRoleTransformer.buildPractitionerRole("iniciador", org, practitioner);
         
         
-        IdType mHId = IdType.newRandomUuid();
-        System.out.println("mHId = " + mHId.getIdPart());
-        b.addEntry().setFullUrl(mHId.getIdPart())
-                .setResource(messageHeader);
+        HapiFhirUtils.addResourceToBundle(b, messageHeader);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(praRole));
         
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
+        HapiFhirUtils.addResourceToBundle(b, patient);
         
-        IdType pracId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracId.getIdPart())
-                .setResource(practitioner);
+        HapiFhirUtils.addResourceToBundle(b, practitioner);
         
+        HapiFhirUtils.addResourceToBundle(b,praRole);
         
-        addResourceToBundle(b,praRole);
-        
-       
-        IdType sRId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(sRId.getIdPart())
-                .setResource(sr);
+        HapiFhirUtils.addResourceToBundle(b, sr);
         setServiceRequestReferences(sr,patient,enc, praRole,cond,alergias,
                 indiceComorbilidad,cuidadorObservation,discapacidad,
                 motivoDerivacion,examenSolicitados);
         
-        IdType encId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(encId.getIdPart())
-                .setResource(enc);
         
+        HapiFhirUtils.addResourceToBundle(b, enc);
+        enc.setSubject(new Reference(patient));
         
-        IdType iCId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(iCId.getIdPart())
-                .setResource(indiceComorbilidad);
+        HapiFhirUtils.addResourceToBundle(b, indiceComorbilidad);
             
-        IdType orgId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(orgId.getIdPart())
-                .setResource(org);
+        HapiFhirUtils.addResourceToBundle(b, org);
             
             
-        IdType condId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(condId.getIdPart())
-                .setResource(cond);
+        HapiFhirUtils.addResourceToBundle(b, cond);
         
-        IdType disId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(disId.getIdPart())
-                .setResource(discapacidad);   
+        HapiFhirUtils.addResourceToBundle(b, discapacidad);
         
         if(cuidadorObservation!=null){
-            IdType cuidadorId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(cuidadorId.getIdPart())
-                    .setResource(cuidadorObservation);   
+            HapiFhirUtils.addResourceToBundle(b, cuidadorObservation);
             cuidadorObservation.setSubject(new Reference(patient));
 
         }
-        
-        
+             
         for(Observation ob : examenes){
-            IdType obId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(obId.getIdPart())
-                .setResource(ob);  
+            HapiFhirUtils.addResourceToBundle(b, ob);
             ob.setSubject(new Reference(patient));
         }
         
         for(AllergyIntolerance aler : alergias){
-            IdType alerId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(alerId.getIdPart())
-                .setResource(aler);
+            HapiFhirUtils.addResourceToBundle(b, aler);
             aler.setPatient(new Reference(patient));
         }
         
         
-        IdType motId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(motId.getIdPart())
-                .setResource(motivoDerivacion); 
-        motivoDerivacion.setAuthor(new Reference(praRole));
+        HapiFhirUtils.addResourceToBundle(b, motivoDerivacion);
+        motivoDerivacion.setAuthor(new Reference(practitioner));
         motivoDerivacion.setSubject(new Reference(patient));
-        
-        
-        
+          
         for(ServiceRequest s : examenSolicitados){
-            IdType sId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(sId.getIdPart())
-                    .setResource(s); 
+            HapiFhirUtils.addResourceToBundle(b, s);
             s.setSubject(new Reference(patient));
             s.getBasedOn().add(new Reference(sr));
+            s.setRequester(new Reference(practitioner));
         }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -416,7 +381,7 @@ public class BundleIniciarTransformer {
                 ,"1","APS");
         Extension origenIC = HapiFhirUtils.buildExtension(
                 "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionOrigenInterconsulta"
-                , c);
+                , new CodeableConcept(c));
         sr.addExtension(origenIC);
         
         String fundamentoPri = HapiFhirUtils.readStringValueFromJsonNode("fundamentoPriorizacion", node);
@@ -432,10 +397,7 @@ public class BundleIniciarTransformer {
                 new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_REFERENCIA.getCoding()));
         
         sr.addExtension(ext);
-        
-        
-        
-        
+           
         
         return sr;
     }
