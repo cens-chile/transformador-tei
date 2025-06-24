@@ -42,7 +42,7 @@ public class AllergyIntoleranceTransformer {
             CodeableConcept c = new CodeableConcept();
             c.getCodingFirstRep().setCode("active");
             c.getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical");
-            
+            ai.setClinicalStatus(c);
             Coding codingFirstRep = ai.getCode().getCodingFirstRep();
             String code = HapiFhirUtils.readStringValueFromJsonNode("codigoSustancia", aiNode);
             codingFirstRep.setSystem(HapiFhirUtils.snomdeSystem);
