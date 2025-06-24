@@ -218,7 +218,7 @@ public class BundleAtenderTransformer {
         if(node.get("diagnostico")!=null){
             cond = conditionTransformer.transform(node.get("diagnostico"), oo,"diagnostico");
             cond.setSubject(new Reference(patient));
-            cond.setEncounter(new Reference(encounter));
+            //cond.setEncounter(new Reference(encounter));
         }
         else
             HapiFhirUtils.addNotFoundIssue("diagnostico", oo);
@@ -399,9 +399,8 @@ public class BundleAtenderTransformer {
                     codigoEstadoIC,
                     resValidacion));
 
-            Extension extensionEstadoIC = new Extension();
-            extensionEstadoIC.setUrl("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE");
-            extensionEstadoIC.setValue(cc);
+            Extension extensionEstadoIC = new Extension(
+                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",cc);
             sr.addExtension(extensionEstadoIC);
 
         return sr;

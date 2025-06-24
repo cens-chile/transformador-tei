@@ -56,32 +56,6 @@ public class EncounterTransformer {
 
         encounter.setStatus(EncounterStatus.fromCode("finished"));
 
-        /*
-        if (json.has("estado")) {
-            JsonNode estado = json.get("estado");
-            String cod = null;
-            if (estado.has("codigoEstado")) {
-
-                String cs = "http://hl7.org/fhir/encounter-status";
-                String vs = "http://hl7.org/fhir/ValueSet/encounter-status";
-                cod = HapiFhirUtils.readStringValueFromJsonNode("codigoEstado", estado);
-                String resValidacionDest = validator.validateCode(cs,
-                        cod, "", vs);
-
-                if (resValidacionDest == null){
-                    HapiFhirUtils.addErrorIssue(cod,"encuentro.estado.codigoEstado no valido", oo);
-                }
-
-
-                try {
-                    encounter.setStatus(EncounterStatus.fromCode(estado.get("codigoEstado").asText()));
-                } catch (Exception e) {
-                    HapiFhirUtils.addErrorIssue("Estado inválido: " + estado.get("codigoEstado").asText(), "codigoEstado",oo);
-                }
-            }
-        }else HapiFhirUtils.addNotFoundIssue("estado.codigoEstado", oo);
-
-        */
 
         // Clase (modalidadAtencion)
         if (json.has("codigoModalidadAtencion")) {
@@ -103,15 +77,16 @@ public class EncounterTransformer {
 
 
         // Tipo de consulta (type)
-        if (json.has("tipoDeConsulta")) {
-            JsonNode tipoConsulta = json.get("tipoDeConsulta");
+
+            String codigoTipoConsulta = HapiFhirUtils.readStringValueFromJsonNode("codigoTipoDeConsulta",node);
+
             CodeableConcept typeConcept = new CodeableConcept();
             Coding coding = new Coding();
-            coding.setCode(String.valueOf(tipoConsulta.get("codigoTipoConsulta").asInt()));
-            coding.setSystem(tipoConsulta.get("urlTipoConsulta").asText());
+            coding.setCode(String.valueOf());
+            coding.setSystem(cs);
             typeConcept.addCoding(coding);
             encounter.addType(typeConcept);
-        }
+
 
         // Tipo de servicio (serviceType)
         if (json.has("tipoDeServicio")) {
