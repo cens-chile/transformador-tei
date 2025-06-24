@@ -128,10 +128,7 @@ public class EncounterTransformer {
             encounter.setAppointment(List.of(new Reference(json.get("citaMedica").get("referenciaACitaMedica").asText())));
         }
 
-        // Establecimiento
-        if (json.has("establecimiento")) {
-            encounter.setServiceProvider(new Reference(json.get("establecimiento").asText()));
-        }
+
 
         // Período
         if (json.has("periodo")) {
@@ -195,11 +192,6 @@ public class EncounterTransformer {
             encounter.addExtension(extMotivo);
         }
 
-        // Agregar BasedOn
-        if (node.has("solicitudIC")) {
-            encounter.addBasedOn(new Reference(HapiFhirUtils.readStringValueFromJsonNode("referenciaSIC",
-                    node.get("solicitudIC"))));
-        }else HapiFhirUtils.addNotFoundIssue("solicitudIC.ReferenciaSIC",oo);
     }
     
     

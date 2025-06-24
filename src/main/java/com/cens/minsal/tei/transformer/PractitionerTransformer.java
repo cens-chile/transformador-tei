@@ -82,25 +82,29 @@ public class PractitionerTransformer {
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
         if (identificadores != null) {
-            addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-            if (tipoPractitioner.equals("profesional")) {
+            String run  = HapiFhirUtils.readStringValueFromJsonNode("RUN",identificadores);
+            String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI",identificadores);
+            if (run == null && rnpi == null){
+                HapiFhirUtils.addErrorIssue("RNPI y RUN", "Debe existir al menos un o de los 2 identificadores", oo);
+            }
+            if (run != null) {
+                addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
+            }
+            if (tipoPractitioner.equals("profesional") && rnpi != null) {
                 addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
             }
         }
-
-
-        // Activo
-        if (HapiFhirUtils.readBooleanValueFromJsonNode("activo", node) != null) {
-            practitioner.setActive(Boolean.TRUE.equals(HapiFhirUtils.readBooleanValueFromJsonNode("activo", node)));
-        }
+        practitioner.setActive(true);
 
         // Nombre
         JsonNode nombreCompleto = node.get("nombreCompleto");
         if (nombreCompleto != null) {
             HumanName name = new HumanName();
             name.setUse(HumanName.NameUse.OFFICIAL);
-            name.setFamily(HapiFhirUtils.readStringValueFromJsonNode("primerApellido", nombreCompleto));
-
+            String apellido = HapiFhirUtils.readStringValueFromJsonNode("primerApellido", nombreCompleto);
+            if(apellido != null) {
+                name.setFamily(apellido);
+            }else HapiFhirUtils.addNotFoundIssue("Prestador.nombrecompleto.primerApellido", oo);
             // Segundo apellido como extensión
             String segundoApellido = HapiFhirUtils.readStringValueFromJsonNode("segundoApellido", nombreCompleto);
             if (segundoApellido != null) {
@@ -115,7 +119,8 @@ public class PractitionerTransformer {
                 for (JsonNode nombre : nombres) {
                     name.addGiven(nombre.asText());
                 }
-            }
+            } else HapiFhirUtils.addNotFoundIssue("Prestador.nombrecompleto.nombres", oo);
+
             practitioner.addName(name);
         }
 
@@ -140,10 +145,12 @@ public class PractitionerTransformer {
                 try {
                     practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
                 } catch (ParseException e) {
+                    HapiFhirUtils.addErrorIssue("Prestador.fechaNacimiento", "error de formato de fecha", oo);
                     throw new RuntimeException(e);
                 }
-            }
+            } else HapiFhirUtils.addNotFoundIssue("prestador.fechaNacimiento", oo);
         } catch (ParseException e) {
+            HapiFhirUtils.addErrorIssue("Prestador.fechaNacimiento", "error de formato de fecha", oo);
             throw new RuntimeException(e);
         }
         // Contacto
@@ -203,9 +210,6 @@ public class PractitionerTransformer {
                 direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",cc));
             }
-
-
-            //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
 
             if (direccionNode.has("provincia")) {
 
@@ -304,23 +308,30 @@ public class PractitionerTransformer {
                                     .setDisplay(valido)
                     ).setText(valido));
                     // Periodo
-                    String start = null;
                     try {
-                        start = HapiFhirUtils.transformarFecha(HapiFhirUtils.readStringValueFromJsonNode("fechaEmision", q));
-                    } catch (ParseException e) {
+                        Date start = HapiFhirUtils.readDateValueFromJsonNode("fechaEmision", q);
+
+                        if (start != null) {
+                            Period period = new Period();
+                            period.setStartElement(new DateTimeType(start));
+                            qual.setPeriod(period);
+                        }
+                    }catch (ParseException e){
+                        HapiFhirUtils.addErrorIssue("Prestador.Titulosprofesionales.fechaEmision",
+                                "fechaEmision No valida",oo);
                         throw new RuntimeException(e);
                     }
 
-                    if (start != null) {
-                        Period period = new Period();
-                        period.setStartElement(new DateTimeType(start));
-                        qual.setPeriod(period);
-                    }
-
-                    // Institución emisora
                     String issuer = HapiFhirUtils.readStringValueFromJsonNode("institucion", q);
                     if (issuer != null) {
                         qual.setIssuer(new Reference().setDisplay(issuer));
+                    }
+
+                    String mencion = HapiFhirUtils.readStringValueFromJsonNode("mencion", q);
+                    if (mencion != null){
+                        qual.addExtension(new Extension(
+                                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/Mencion",
+                                new StringType(mencion)));
                     }
 
                     p.addQualification(qual);

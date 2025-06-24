@@ -43,13 +43,7 @@ public class PatientTransformer {
         patient.getMeta().setLastUpdated(new Date());
 
         String vs =""; String cs =""; String valido = "";
-        // ID
-        //patient.setId(node.get("id").asText());
 
-        // Identificadores
-        /*String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento", node);
-        if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
-        */
         JsonNode identificadores = node.get("identificadores");
         if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
         for (JsonNode identificador: identificadores){
@@ -120,14 +114,13 @@ public class PatientTransformer {
             valido = validator.validateCode(cs, genero, "", vs);
 
             if (valido != null) {
-
                 Coding cod = new Coding(cs, genero, valido);
                 CodeableConcept cc = new CodeableConcept(cod);
                 Extension extIDGen = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/IdentidadDeGenero",
                         cc);
                 patient.addExtension(extIDGen);
-            } else HapiFhirUtils.addNotFoundIssue("paciente.identidadGenero", oo);
-        }
+            } else HapiFhirUtils.addNotFoundCodeIssue("paciente.identidadGenero", oo);
+        } else HapiFhirUtils.addNotFoundIssue("paciente.identidadGenero", oo);
 
         if(node.has("estadoCivil")){
             String ec = HapiFhirUtils.readStringValueFromJsonNode("estadoCivil", node);
@@ -155,7 +148,7 @@ public class PatientTransformer {
                 }
             }
 
-        }
+        } else HapiFhirUtils.addNotFoundIssue("paciente.Fallecimiento", oo);
 
         if(node.has("religion")){
             String religion  = HapiFhirUtils.readStringValueFromJsonNode("religion", node);
@@ -201,7 +194,8 @@ public class PatientTransformer {
             Extension nacionalidadExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",
                     cc);
             patient.addExtension(nacionalidadExt);
-            }else HapiFhirUtils.addNotFoundIssue("paciente.nacionalidad",oo);
+        }
+        else HapiFhirUtils.addNotFoundIssue("paciente.nacionalidad",oo);
 
         if(node.has("paisOrigen")){
             String paisOrigen = HapiFhirUtils.readStringValueFromJsonNode("paisOrigen", node);
@@ -211,15 +205,13 @@ public class PatientTransformer {
                     paisOrigen,"",
                     vs);
 
-            if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.paisOrigen",oo);
+            if(valido == null) HapiFhirUtils.addNotFoundCodeIssue("paciente.paisOrigen",oo);
             Coding coding = new Coding(cs,paisOrigen,valido);
             CodeableConcept cc = new CodeableConcept(coding);
             Extension paisOrigenExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PaisOrigenMPI",
                     cc);
             patient.addExtension(paisOrigenExt);
         }else HapiFhirUtils.addNotFoundIssue("paciente.paisOrigen",oo);
-
-        //dePuebloOriginario
 
         if(node.has("pueblosOriginariosPerteneciente")){
             Boolean pueblosOriginariosPerteneciente = HapiFhirUtils.readBooleanValueFromJsonNode("pueblosOriginariosPerteneciente", node);
@@ -235,7 +227,6 @@ public class PatientTransformer {
                 if (valido != null) {
                     Coding coding = new Coding(cs, pueblosOriginarios, valido);
                     CodeableConcept cc = new CodeableConcept(coding);
-                    //String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode("otroPuebloOriginario",node);
                     if(pueblosOriginarios.equals(10)){
                         if (node.has("otroPuebloOriginario")){
                             String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode(
@@ -273,7 +264,7 @@ public class PatientTransformer {
             } catch (ParseException e) {
                 e.printStackTrace(); // Manejo simple de error
             }
-        }
+        } else HapiFhirUtils.addNotFoundIssue("paciente.fechaNacimiento", oo);
 
         // Dirección
         if (node.has("direcciones")) {
@@ -384,7 +375,6 @@ public class PatientTransformer {
                 contactPointList.add(cp);
             }
             patient.setTelecom(contactPointList);
-            patient.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
         }
         else HapiFhirUtils.addNotFoundIssue("paciente.contacto", oo);
 
