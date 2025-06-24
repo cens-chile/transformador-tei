@@ -184,11 +184,12 @@ public class ServiceRequestTransformer {
             id = id.replace(":","").replace("-","");
             ser.setId(id);
             try {
-                Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitud", node);
+                Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
+                if(fechaSolicitud==null)
+                    HapiFhirUtils.addNotFoundCodeIssue("solicitudExamen["+i+"].fechaSolicitudIC", oo);
                 ser.setAuthoredOn(fechaSolicitud);
             } catch (ParseException ex) {
-                Logger.getLogger(ServiceRequestTransformer.class.getName()).log(Level.SEVERE, null, ex);
-                HapiFhirUtils.addErrorIssue("solicitudExamen["+i+"].fechaSolicitud", ex.getMessage(), oo);
+                HapiFhirUtils.addErrorIssue("solicitudExamen["+i+"].fechaSolicitudIC", ex.getMessage(), oo);
             }
 
             ser.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
@@ -212,6 +213,8 @@ public class ServiceRequestTransformer {
                 coding.setSystem(HapiFhirUtils.loincSystem);
                 coding.setCode(codigo);
             }
+            else
+                HapiFhirUtils.addNotFoundIssue("examenSolicitadoCodigo", oo);
 
             if(examenSolicitado!=null){
                 coding.setDisplay(examenSolicitado);

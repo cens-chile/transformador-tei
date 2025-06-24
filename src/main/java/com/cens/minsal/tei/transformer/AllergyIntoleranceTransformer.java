@@ -39,6 +39,10 @@ public class AllergyIntoleranceTransformer {
         for(JsonNode aiNode: alergias){
             AllergyIntolerance ai = new AllergyIntolerance();
             ai.getMeta().addProfile(profile);
+            CodeableConcept c = new CodeableConcept();
+            c.getCodingFirstRep().setCode("active");
+            c.getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical");
+            
             Coding codingFirstRep = ai.getCode().getCodingFirstRep();
             String code = HapiFhirUtils.readStringValueFromJsonNode("codigoSustancia", aiNode);
             codingFirstRep.setSystem(HapiFhirUtils.snomdeSystem);
