@@ -13,6 +13,8 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  *
  * @author José <jose.m.andrade@gmail.com>
@@ -29,7 +31,10 @@ public class ConditionTransformer {
 
     public Condition transform(JsonNode node, OperationOutcome oo,String parentPath){
         Condition cond = new Condition();
-        
+
+        cond.getMeta().addProfile(profile);
+        cond.getMeta().setLastUpdated(new Date());
+
         String code = HapiFhirUtils.readStringValueFromJsonNode("code", node);
         cond.setCode(new CodeableConcept(new Coding()));
         if(code!=null)
