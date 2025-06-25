@@ -160,6 +160,27 @@ public class HapiFhirUtils {
             return get.asText();
         return null;
     }
+    
+    public static String readObjectValueFromJsonNode(String value, JsonNode node){
+        
+        JsonNode get = node.get(value);
+        if(get!=null && !get.asText().isBlank() && get.isTextual())
+            return get.asText();
+        return null;
+    }
+    
+    public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo){
+        boolean res = true;
+        if(node==null){
+            HapiFhirUtils.addNotFoundIssue("datosSistema", oo);
+            res = false;
+        }
+        else if(!node.isObject()){
+            HapiFhirUtils.addInvalidIssue("datosSistema", oo);
+            res=false;
+        }
+        return res;
+    }
 
 
 

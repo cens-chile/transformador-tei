@@ -112,14 +112,12 @@ public class BundleIniciarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        ((ObjectNode)get).put("tipoEvento", "iniciar");
-
-
-        if(get!=null)
-            messageHeader = 
-                messageHeaderTransformer.transform(node.get("datosSistema"), out);
-        else
-            HapiFhirUtils.addNotFoundIssue("datosSistema", out);
+        
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out);
+        if(validate){
+            ((ObjectNode)get).put("tipoEvento", "iniciar");
+            messageHeader = messageHeaderTransformer.transform(node.get("datosSistema"), out);
+        }
 
         JsonNode paciente = node.get("paciente");
         Patient patient = null;

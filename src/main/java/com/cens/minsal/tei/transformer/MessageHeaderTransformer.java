@@ -74,19 +74,19 @@ public class MessageHeaderTransformer {
         if(software!=null)
             m.getSource().setSoftware(software);
         else 
-            HapiFhirUtils.addNotFoundIssue("software", oo);
+            HapiFhirUtils.addNotFoundIssue("datosSistema.software", oo);
         
-        String endpoint = HapiFhirUtils.readStringValueFromJsonNode("endpoint", node);
+        String endpoint = HapiFhirUtils.readStringValueFromJsonNode("datosSistema.endpoint", node);
         if(endpoint!=null){
             try {
                 URI uri = new URI(endpoint);
                 m.getSource().setEndpoint(endpoint);
             } catch (URISyntaxException ex) {
-                HapiFhirUtils.addInvalidIssue("endpoint", oo);
+                HapiFhirUtils.addInvalidIssue("datosSistema.endpoint", oo);
             }
         }
         else 
-            HapiFhirUtils.addNotFoundIssue("endpoint", oo);
+            HapiFhirUtils.addNotFoundIssue("datosSistema.endpoint", oo);
          
         return m;
     }
