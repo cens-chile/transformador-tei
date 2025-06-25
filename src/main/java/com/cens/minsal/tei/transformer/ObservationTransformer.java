@@ -110,7 +110,7 @@ public class ObservationTransformer {
 
             String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", resultadoEx);
             if(codigo!=null){
-                String cs = "https://loinc.org/";
+                String cs = HapiFhirUtils.loincSystem;
                 String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/CodigoExamen";
                 ob.getCode().getCodingFirstRep().setCode(codigo);
                 ob.getCode().getCodingFirstRep().setSystem(cs);

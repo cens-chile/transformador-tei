@@ -236,13 +236,16 @@ public class BundleIniciarTransformer {
         
         HapiFhirUtils.addResourceToBundle(b, enc);
         enc.setSubject(new Reference(patient));
+        enc.getDiagnosisFirstRep().setCondition(new Reference(cond));
         
         HapiFhirUtils.addResourceToBundle(b, indiceComorbilidad);
+        indiceComorbilidad.setSubject(new Reference(patient));
             
         HapiFhirUtils.addResourceToBundle(b, org);
             
             
         HapiFhirUtils.addResourceToBundle(b, cond);
+        cond.setSubject(new Reference(patient));
         
         HapiFhirUtils.addResourceToBundle(b, discapacidad);
         
@@ -255,6 +258,7 @@ public class BundleIniciarTransformer {
         for(Observation ob : examenes){
             HapiFhirUtils.addResourceToBundle(b, ob);
             ob.setSubject(new Reference(patient));
+            ob.setEncounter(new Reference(enc));
         }
         
         for(AllergyIntolerance aler : alergias){
