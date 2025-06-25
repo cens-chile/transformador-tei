@@ -65,11 +65,12 @@ public class PatientTransformer {
             vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
             cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
             valido = validator.validateCode(cs,paisEmision,"",vs);
-            Coding coding = new Coding(cs,paisEmision,valido);
-            CodeableConcept cc = new CodeableConcept(coding);
-            Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc);
-            identifier.getType().addExtension(paisEmisionExt);
-
+            if (valido != null) {
+                Coding coding = new Coding(cs, paisEmision, valido);
+                CodeableConcept cc = new CodeableConcept(coding);
+                Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises", cc);
+                identifier.getType().addExtension(paisEmisionExt);
+            }else HapiFhirUtils.addNotFoundCodeIssue("paciente.identificacion.paisEmision",oo);
             identifier.getType().setText(tipo);
             patient.addIdentifier(identifier);
 
@@ -166,10 +167,10 @@ public class PatientTransformer {
             vs = "http://hl7.org/fhir/ValueSet/administrative-gender";
             cs = "http://hl7.org/fhir/administrative-gender";
             String code = HapiFhirUtils.readStringValueFromJsonNode("sexoRegistral", node);
-             valido = validator.validateCode(vs,code,"",vs);
+             valido = validator.validateCode(cs,code,"",vs);
             if(valido != null) {
                     patient.setGender(Enumerations.AdministrativeGender.fromCode(code));
-            }
+            } else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoRegistral",oo);
         }else HapiFhirUtils.addNotFoundIssue("paciente.sexoRegistral",oo);
 
         if (node.has("sexoBiologico")) {
@@ -313,8 +314,8 @@ public class PatientTransformer {
                 }
                 if (direccionNode.has("direccion")) {
                     direccion.setLine(Collections.singletonList(new StringType(
-                            HapiFhirUtils.readStringValueFromJsonNode("descripcion",direccionNode))));
-                } else  HapiFhirUtils.addNotFoundIssue("Paciente.direccion.descripcion", oo);
+                            HapiFhirUtils.readStringValueFromJsonNode("direccion",direccionNode))));
+                } else  HapiFhirUtils.addNotFoundIssue("Paciente.direccion.direccion", oo);
 
                 if (direccionNode.has("pais")) {
                      vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";

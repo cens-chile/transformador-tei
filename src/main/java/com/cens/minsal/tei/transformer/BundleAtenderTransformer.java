@@ -152,14 +152,18 @@ public class BundleAtenderTransformer {
         }
 
 
-         get = node.get("paciente");
+/*         get = node.get("paciente");
          Patient patient = null;
          if(get != null){
             PatientTransformer pt = new PatientTransformer(validator);
              patient = pt.transform(get, oo);
          } else HapiFhirUtils.addNotFoundIssue("paciente", oo);
 
-        AllergyIntolerance allergyIntolerance  = new AllergyIntolerance();
+*/
+        String patient = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
+        if(patient == null){
+            HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
+        }
         AllergyIntoleranceTransformer at = new AllergyIntoleranceTransformer(validator);
 
         List<AllergyIntolerance> alergias = new ArrayList();
@@ -197,7 +201,7 @@ public class BundleAtenderTransformer {
 
         sr.getPerformer().add(new Reference(resolutor));
 
-        HapiFhirUtils.addResourceToBundle(b,patient);
+        //HapiFhirUtils.addResourceToBundle(b,patient);
         HapiFhirUtils.addResourceToBundle(b,practitioner);
         HapiFhirUtils.addResourceToBundle(b,resolutor);
         HapiFhirUtils.addResourceToBundle(b,organization);
