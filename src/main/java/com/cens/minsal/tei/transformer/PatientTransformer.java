@@ -284,23 +284,23 @@ public class PatientTransformer {
                     String usoDir = HapiFhirUtils.readStringValueFromJsonNode("codigoUso", direccionNode);
                     boolean uso = false;
                     switch (usoDir) { // lo puse en español, pero en la guia está en inglés (core CL)
-                        case "hogar": {
+                        case "home": {
                             direccion.setUse(Address.AddressUse.HOME);
                             uso=true;
                             break;
                         }
-                        case "trabajo": {
+                        case "work": {
                             direccion.setUse(Address.AddressUse.WORK);
                             uso=true;
 
                             break;
                         }
-                        case "temporal": {
+                        case "temp": {
                             direccion.setUse(Address.AddressUse.TEMP);
                             uso=true;
                             break;
                         }
-                        case "antiguo": {
+                        case "old": {
                             direccion.setUse(Address.AddressUse.OLD);
                             uso=true;
                             break;
