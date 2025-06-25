@@ -24,7 +24,7 @@ public class AppointmentTransformer {
 
     public Appointment transform(JsonNode nodeOrigin, OperationOutcome oo) {
         Appointment appointment = new Appointment();
-        appointment.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/AppointmentLE");
+        appointment.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/AppointmentAgendarLE");
 
         JsonNode node = nodeOrigin.get("cita");
         // Identificador
@@ -47,7 +47,7 @@ public class AppointmentTransformer {
             String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSMediodeContacto";
             String medioDeContacto = HapiFhirUtils.readStringValueFromJsonNode("medioDeContacto", node);
             String valido = validator.validateCode(cs,medioDeContacto,"",vs);
-            Coding mcCod = new Coding(vs,medioDeContacto,valido);
+            Coding mcCod = new Coding(cs,medioDeContacto,valido);
             CodeableConcept cc = new CodeableConcept(mcCod);
             Extension mcExt = new Extension(
                     "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMediodeContacto", cc);
@@ -60,6 +60,19 @@ public class AppointmentTransformer {
             String estado = node.get("estado").asText();
             try {
                 appointment.setStatus(Appointment.AppointmentStatus.fromCode(estado));
+                if(estado.equalsIgnoreCase("cancelled") || estado.equalsIgnoreCase("no-show")){
+                    if(node.has("motivoCancelacionCita")){
+                        String vs ="http://hl7.org/fhir/ValueSet/appointment-cancellation-reason";
+                        String cs = "http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason";
+                        String code = HapiFhirUtils.readStringValueFromJsonNode("motivoCancelacionCita",node);
+                        String valido = validator.validateCode(cs,code,"",vs);
+                        if(valido != null && valido.equalsIgnoreCase("pat") || valido.equalsIgnoreCase("prov") || valido.equalsIgnoreCase("other")) {
+                            Coding coding = new Coding(cs, estado, valido);
+                            CodeableConcept cc = new CodeableConcept(coding);
+                            appointment.setCancelationReason(cc);
+                        }else HapiFhirUtils.addNotFoundCodeIssue("cita.motivoCancelacionCita",oo);
+                    }else HapiFhirUtils.addNotFoundIssue("Cita.Estado cancelled o no-show implica que debe existir motivoCancelacionCita", oo);
+                }
             } catch (Exception e) {
                 HapiFhirUtils.addErrorIssue("Estado inválido: " + estado, "Cita.estado", oo);
             }
@@ -116,7 +129,7 @@ public class AppointmentTransformer {
 
                     }else HapiFhirUtils.addNotFoundIssue("Cita.ContactadoLE.motivoNoContactabilidad", oo);
                 } else{
-                    contactadoLEExt.setValue(contactadoBExt);
+                    contactadoLEExt.addExtension(contactadoBExt);
                 }
                 appointment.addExtension(contactadoLEExt);
 
@@ -131,44 +144,35 @@ public class AppointmentTransformer {
             Reference pacienteRef = new Reference("Patient/"
                     +HapiFhirUtils.readStringValueFromJsonNode("id",nodeOrigin.get("paciente")));
             String vs ="http://hl7.org/fhir/ValueSet/resource-types";
-            String cs = "http://hl7.org/fhir/ValueSet/resource-types";
+            String cs = "http://hl7.org/fhir/resource-types";
 
-            //String valido = validator.validateCode(cs,"Patient","Patient",vs);
             Coding coding = new Coding(cs, "Patient", "Patient");
-            CodeableConcept cc = new CodeableConcept();
+            CodeableConcept cc = new CodeableConcept(coding);
             List<CodeableConcept> ccList = new ArrayList<>();
             ccList.add(cc);
             switch (eap) {
                 case ("accepted"):
                     appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                            .setActor(pacienteRef)
-                            .setStatus(Appointment.ParticipationStatus.ACCEPTED).setType(ccList));
+                            .setActor(pacienteRef.setType(coding.getCode()))
+                            .setStatus(Appointment.ParticipationStatus.ACCEPTED));
                     break;
                 case ("declined"):
                     appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                            .setActor(pacienteRef)
-                            .setStatus(Appointment.ParticipationStatus.DECLINED).setType(ccList));
+                            .setActor(pacienteRef.setType(coding.getCode()))
+                            .setStatus(Appointment.ParticipationStatus.DECLINED));
                     break;
                 case ("tentative"):
                     appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                            .setActor(pacienteRef).setStatus(Appointment.ParticipationStatus.TENTATIVE).setType(ccList));
+                            .setActor(pacienteRef.setType(coding.getCode())).setStatus(Appointment.ParticipationStatus.TENTATIVE));
                     break;
                 case ("needs-action"):
                     appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                            .setActor(pacienteRef).setStatus(Appointment.ParticipationStatus.NEEDSACTION).setType(ccList));
+                            .setActor(pacienteRef.setType(coding.getCode())).setStatus(Appointment.ParticipationStatus.NEEDSACTION));
                     break;
             }
         } else HapiFhirUtils.addNotFoundIssue("Cita.estadoActorPaciente",oo);
 
-        if(node.has("motivoCancelacionCita")){
-            String vs ="http://hl7.org/fhir/ValueSet/appointment-cancellation-reason";
-            String cs = "http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason";
-            String code = HapiFhirUtils.readStringValueFromJsonNode("motivoCancelacionCita",node);
-            String valido = validator.validateCode(cs,code,"",vs);
-            Coding coding = new Coding(cs, "pat", valido);
-            CodeableConcept cc = new CodeableConcept(coding);
-            appointment.setCancelationReason(cc);
-        }
+
 
         return appointment;
     }

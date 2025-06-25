@@ -90,7 +90,7 @@ public class BundleAgendarTransformer {
         }
 
         // Patient
-        JsonNode pacienteNode = node.get("paciente");
+        /*JsonNode pacienteNode = node.get("paciente");
         ((ObjectNode)pacienteNode).put("tipoEvento", "agendar");
 
         Patient patient = null;
@@ -98,7 +98,7 @@ public class BundleAgendarTransformer {
             patient = patientTransformer.transform(pacienteNode, oo);
         } else {
             HapiFhirUtils.addNotFoundIssue("paciente", oo);
-        }
+        }*/
 
         // Practitioner (Profesional)
         JsonNode prestadorProfesional = node.get("prestadorProfesional");
@@ -164,7 +164,7 @@ public class BundleAgendarTransformer {
         PractitionerRole practitionerRoleResolutor = null;
         if(rolProfesionalResolutor != null) {
             practitionerRoleResolutor = practitionerRoleTransformer.transform(rolProfesionalResolutor, oo);
-            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "resolutor", "Resolutor");
+            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "atendedor", "atendedor");
             CodeableConcept cc = new CodeableConcept(roleCode);
             practitionerRoleResolutor.addCode(cc);
 
@@ -188,20 +188,15 @@ public class BundleAgendarTransformer {
             // Set patient reference
 
             String vs ="http://hl7.org/fhir/ValueSet/resource-types";
-            String cs = "http://hl7.org/fhir/ValueSet/resource-types";
+            String cs = "http://hl7.org/fhir/resource-types";
 
-            //String valido = validator.validateCode(cs,"Patient","Patient",vs);
             Coding coding = new Coding(cs, "PractitionerRole", "PractitionerRole");
-            CodeableConcept cc = new CodeableConcept();
-            List<CodeableConcept> ccList = new ArrayList<>();
-            ccList.add(cc);
+            CodeableConcept cc = new CodeableConcept(coding);
 
             if (practitionerRoleResolutor != null){
-                Appointment.AppointmentParticipantComponent apc = new Appointment.AppointmentParticipantComponent();
                 appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                        .setActor(new Reference(practitionerRoleResolutor))
-                        .setStatus(Appointment.ParticipationStatus.ACCEPTED).setType(ccList));
-
+                        .setActor(new Reference(practitionerRoleResolutor).setType(coding.getCode()))
+                        .setStatus(Appointment.ParticipationStatus.ACCEPTED));
             }
 
             // Set service request reference
@@ -218,33 +213,14 @@ public class BundleAgendarTransformer {
         }
 
         // Add resources to bundle with their respective UUIDs
-        IdType mHId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(mHId.getIdPart()).setResource(messageHeader);
-
-        IdType sRId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(sRId.getIdPart()).setResource(sr);
-
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart()).setResource(patient);
-
-        IdType pProfId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pProfId.getIdPart()).setResource(practitionerProfesional);
-
-        IdType pAdminId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pAdminId.getIdPart()).setResource(practitionerAdmin);
-
-
-        IdType orgResolutorId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(orgResolutorId.getIdPart()).setResource(organization);
-
-        IdType pracRolAgendadorId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracRolAgendadorId.getIdPart()).setResource(practitionerRoleAgendador);
-
-        IdType pracRolResolutorId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracRolResolutorId.getIdPart()).setResource(practitionerRoleResolutor);
-
-        IdType appId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(appId.getIdPart()).setResource(appointment);
+        HapiFhirUtils.addResourceToBundle(b,messageHeader);
+        HapiFhirUtils.addResourceToBundle(b,sr);
+        HapiFhirUtils.addResourceToBundle(b,practitionerProfesional);
+        HapiFhirUtils.addResourceToBundle(b,practitionerAdmin);
+        HapiFhirUtils.addResourceToBundle(b,organization);
+        HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
+        HapiFhirUtils.addResourceToBundle(b,practitionerRoleResolutor);
+        HapiFhirUtils.addResourceToBundle(b,appointment);
 
         // Set MessageHeader references
         setMessageHeaderReferences(messageHeader,
@@ -267,7 +243,7 @@ public class BundleAgendarTransformer {
         ServiceRequest sr = new ServiceRequest();
         sr.getMeta().addProfile(profile);
 
-        sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+        sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
