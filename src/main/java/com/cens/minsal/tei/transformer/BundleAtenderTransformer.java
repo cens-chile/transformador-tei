@@ -174,9 +174,6 @@ public class BundleAtenderTransformer {
             a.setPatient(new Reference(patient));
         }
 
-
-
-
         //Se agrega exámen solicitado
         List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, oo);
 

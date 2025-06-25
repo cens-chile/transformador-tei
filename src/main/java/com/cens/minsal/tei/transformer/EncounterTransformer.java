@@ -78,15 +78,19 @@ public class EncounterTransformer {
 
         // Tipo de consulta (type)
 
-            String codigoTipoConsulta = HapiFhirUtils.readStringValueFromJsonNode("codigoTipoDeConsulta",node);
+            String codigoTipoConsulta = HapiFhirUtils.readStringValueFromJsonNode("codigoTipoDeConsulta",json);
 
             CodeableConcept typeConcept = new CodeableConcept();
-            Coding coding = new Coding();
-            coding.setCode(String.valueOf());
-            coding.setSystem(cs);
-            typeConcept.addCoding(coding);
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTipoConsulta";
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTipoConsulta";
+            String valido = validator.validateCode(cs,codigoTipoConsulta,"",vs);
+            if(valido != null) {
+                Coding coding = new Coding(cs, codigoTipoConsulta, valido);
+                typeConcept.addCoding(coding);
+            }else {
+                HapiFhirUtils.addNotFoundCodeIssue("Encuentro.codigoTipoDeConsulta", oo);
+            }
             encounter.addType(typeConcept);
-
 
         // Tipo de servicio (serviceType)
         if (json.has("tipoDeServicio")) {

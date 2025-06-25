@@ -10,6 +10,7 @@ import com.cens.minsal.tei.utils.HapiFhirUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.models.info.Contact;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -68,9 +69,6 @@ public class PatientTransformer {
             CodeableConcept cc = new CodeableConcept(coding);
             Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc);
             identifier.getType().addExtension(paisEmisionExt);
-
-
-
 
             identifier.getType().setText(tipo);
             patient.addIdentifier(identifier);
@@ -164,6 +162,16 @@ public class PatientTransformer {
             }
         }
 
+        if(node.has("sexoRegistral")){
+            vs = "http://hl7.org/fhir/ValueSet/administrative-gender";
+            cs = "http://hl7.org/fhir/administrative-gender";
+            String code = HapiFhirUtils.readStringValueFromJsonNode("sexoRegistral", node);
+             valido = validator.validateCode(vs,code,"",vs);
+            if(valido != null) {
+                    patient.setGender(Enumerations.AdministrativeGender.fromCode(code));
+            }
+        }else HapiFhirUtils.addNotFoundIssue("paciente.sexoRegistral",oo);
+
         if (node.has("sexoBiologico")) {
             String sexoBiologico = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico",node);
              cs = "http://hl7.org/fhir/administrative-gender";
@@ -180,14 +188,12 @@ public class PatientTransformer {
              }else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoBiologico",oo);
 
         }
+
         if(node.has("nacionalidad")){
             String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
             cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
             vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
-             valido = validator.validateCode(cs,
-                    nacionalidad,"",
-                    vs);
-
+             valido = validator.validateCode(cs,nacionalidad,"", vs);
             if(valido == null) HapiFhirUtils.addInvalidIssue("paciente.nacionalidad",oo);
             Coding coding = new Coding(cs,nacionalidad,valido);
             CodeableConcept cc = new CodeableConcept(coding);
@@ -275,72 +281,95 @@ public class PatientTransformer {
                 Address direccion = new Address();
                 if (direccionNode.has("codigoUso")) {
                     String usoDir = HapiFhirUtils.readStringValueFromJsonNode("codigoUso", direccionNode);
+                    boolean uso = false;
                     switch (usoDir) { // lo puse en español, pero en la guia está en inglés (core CL)
                         case "hogar": {
                             direccion.setUse(Address.AddressUse.HOME);
+                            uso=true;
                             break;
                         }
                         case "trabajo": {
                             direccion.setUse(Address.AddressUse.WORK);
+                            uso=true;
+
                             break;
                         }
                         case "temporal": {
                             direccion.setUse(Address.AddressUse.TEMP);
+                            uso=true;
                             break;
                         }
                         case "antiguo": {
                             direccion.setUse(Address.AddressUse.OLD);
-                        break;
+                            uso=true;
+                            break;
                         }
+
                     }
-                    //direccion.setUse(Address.AddressUse.HOME);
+                    if(!uso){
+                        HapiFhirUtils.addNotFoundCodeIssue("Paciente.Direccion.codigoUso", oo);
+                    }
                     direccion.setType(Address.AddressType.PHYSICAL);
                 }
                 if (direccionNode.has("direccion")) {
-                    direccion.setLine(Collections.singletonList(new StringType(direccionNode.get("direccion").asText())));
+                    direccion.setLine(Collections.singletonList(new StringType(
+                            HapiFhirUtils.readStringValueFromJsonNode("descripcion",direccionNode))));
+                } else  HapiFhirUtils.addNotFoundIssue("Paciente.direccion.descripcion", oo);
+
+                if (direccionNode.has("pais")) {
+                     vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
+                     cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
+                    String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
+                     valido = validator.validateCode(cs,codigo,"",vs);
+                    Coding coding = new Coding(cs,codigo,valido);
+                    CodeableConcept cc = new CodeableConcept(coding);
+                    if (valido != null){
+                        direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
+                                "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc));
+
+                    }
                 }
-                    if (direccionNode.has("pais")) {
-                         vs ="";
-                         cs = "";
-                        String code = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
-                    }
 
-                    if (direccionNode.has("region")) {
-                        String codigo = direccionNode.get("region").get("codigo").asText();
-                        valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL",
-                                codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL");
-                        if (valido == null) HapiFhirUtils.addInvalidIssue("region.codigo", oo);
-                        direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",
-                                new CodeType(codigo)));
-                    }
-
-                    //https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL
+                if (direccionNode.has("region")) {
+                    String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("region"));
+                     vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL";
+                     cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL";
+                     valido = validator.validateCode(cs, codigo, "", vs);
+                    if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("Paciente.direccion.region.codigo", oo);
+                    Coding coding = new Coding(cs,codigo,valido);
+                    CodeableConcept cc = new CodeableConcept(coding);
+                    direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",cc));
+                }
 
                 if (direccionNode.has("provincia")) {
-                    String codigo = direccionNode.get("provincia").get("codigo").asText();
-                    valido = validator.validateCode("https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL",
-                            codigo, "", "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL");
-                    if (valido == null) HapiFhirUtils.addInvalidIssue("provincia.codigo", oo);
+                    String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("provincia"));
+                     vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL";
+                     cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL";
+                     valido = validator.validateCode(cs, codigo, "", vs);
+                    if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("Paciente.direccion.provincia.codigo", oo);
+                    Coding coding = new Coding(cs,codigo,valido);
+                    CodeableConcept cc = new CodeableConcept(coding);
                     direccion.getDistrictElement().addExtension(HapiFhirUtils.buildExtension(
-                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",
-                            new CodeType(codigo)));
+                            "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",cc));
                 }
 
-                    if (direccionNode.has("comuna")) {
-                        JsonNode comunaJ = direccionNode.get("comuna");
-                        String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",comunaJ);
-                         vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
-                         cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
+                if (direccionNode.has("comuna")) {
+                    JsonNode comunaJ = direccionNode.get("comuna");
+                    String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",comunaJ);
+                     vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
+                     cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
 
-                         valido = validator.validateCode(cs,codigo,"",vs);
-                         if (valido != null){
-                             Coding coding = new Coding(cs,codigo,valido);
-                             CodeableConcept cc = new CodeableConcept(coding);
-                             direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
-                                     "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
-                                     cc));
-                         } else HapiFhirUtils.addNotFoundCodeIssue("Paciente.direcciones.comuna.codigo", oo);
-                    }
+                     valido = validator.validateCode(cs,codigo,"",vs);
+                    if (valido != null){
+                        Coding coding = new Coding(cs,codigo,valido);
+                        CodeableConcept cc = new CodeableConcept(coding);
+                        direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
+                                "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
+                                cc));
+                    } else HapiFhirUtils.addNotFoundCodeIssue("Paciente.direccion.comuna.codigo", oo);
+                }
+
                     if (direccionNode.has("situacionCalle")) {
                     Boolean sitCalleB = HapiFhirUtils.readBooleanValueFromJsonNode("situacionCalle", direccionNode);
                     Extension sitCalleExt =

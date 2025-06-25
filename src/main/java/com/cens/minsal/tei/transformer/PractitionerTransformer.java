@@ -187,7 +187,7 @@ public class PractitionerTransformer {
             if (direccionNode.has("pais")) {
                 String vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
-                String code = HapiFhirUtils.readStringValueFromJsonNode("prestador.direccion.pais.codigo", direccionNode.get("pais"));
+                String code = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
                 String valido = validator.validateCode(cs,code,"",vs);
                 Coding coding = new Coding(cs,code,valido);
                 CodeableConcept cc = new CodeableConcept(coding);
