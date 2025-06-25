@@ -116,7 +116,7 @@ public class BundlePriorizarTransformer {
         }
 
 
-        get = node.get("paciente");
+        /*get = node.get("paciente");
         Patient patient = null;
         if(get != null){
             ((ObjectNode)get).put("tipoEvento", "priorizar");
@@ -124,7 +124,7 @@ public class BundlePriorizarTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos del paciente", out);
         }
-
+*/
         get = node.get("establecimiento");
         Organization organization = null;
         if(get != null){
@@ -152,40 +152,19 @@ public class BundlePriorizarTransformer {
         priorizador.setOrganization(new Reference(organization));
 
         //Agrega recursos con sus respectivos UUID al bundle de respuesta
-        IdType mHId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(mHId.getIdPart())
-                .setResource(messageHeader);
 
-        IdType pracRolId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracRolId.getIdPart())
-                .setResource(priorizador);
+        HapiFhirUtils.addResourceToBundle(b,messageHeader);
+        HapiFhirUtils.addResourceToBundle(b,priorizador);
+        String referenciaPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",node);
+        if (referenciaPaciente == null) HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
+        sr.setSubject(new Reference(referenciaPaciente));
+        HapiFhirUtils.addResourceToBundle(b,sr);
+        HapiFhirUtils.addResourceToBundle(b,practitioner);
+        //HapiFhirUtils.addResourceToBundle(b,patient);
+        HapiFhirUtils.addResourceToBundle(b,organization);
 
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(priorizador));
 
-        // agrega referencias en ServiceRequest
-        sr.setSubject(new Reference(patient));
-        sr.addPerformer(new Reference(pracRolId));
-        IdType sRId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(sRId.getIdPart())
-                .setResource(sr);
-
-        IdType pAId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pAId.getIdPart())
-                .setResource(practitioner);
-
-
-
-
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
-
-        IdType orgId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(orgId.getIdPart())
-                .setResource(organization);
-
-        setMessageHeaderReferences(messageHeader, new Reference(sRId.getValue()), new Reference(pracRolId.getValue()));
-
-        
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }
