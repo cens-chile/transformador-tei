@@ -76,7 +76,7 @@ public class MessageHeaderTransformer {
         else 
             HapiFhirUtils.addNotFoundIssue("datosSistema.software", oo);
         
-        String endpoint = HapiFhirUtils.readStringValueFromJsonNode("datosSistema.endpoint", node);
+        String endpoint = HapiFhirUtils.readStringValueFromJsonNode("endpoint", node);
         if(endpoint!=null){
             try {
                 URI uri = new URI(endpoint);
