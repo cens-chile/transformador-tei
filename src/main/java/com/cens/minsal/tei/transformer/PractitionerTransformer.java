@@ -189,13 +189,13 @@ public class PractitionerTransformer {
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
                 String code = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
                 String valido = validator.validateCode(cs,code,"",vs);
+
                 Coding coding = new Coding(cs,code,valido);
                 CodeableConcept cc = new CodeableConcept(coding);
                 if (valido != null){
                     direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
                             "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc));
-
-                }
+                } else HapiFhirUtils.addNotFoundCodeIssue("Prestador.direccion.pais",oo);
             }
 
             if (direccionNode.has("region")) {

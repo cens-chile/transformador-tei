@@ -133,22 +133,42 @@ public class PatientTransformer {
             }else HapiFhirUtils.addErrorIssue(ec, "codigo de estadoCivil no valido", oo);
         }
 
-        if(node.has("fallecimiento")){
+        if (node.has("fallecimiento")) {
             JsonNode fallecimiento = node.get("fallecimiento");
-            if(fallecimiento.has("fallecido")){
-                Boolean fallecido = HapiFhirUtils.readBooleanValueFromJsonNode("fallecido",fallecimiento);
-                patient.setDeceased(new BooleanType(fallecido));
-            } else if (fallecimiento.has("fechaFallecimiento")){
-                try {
-                    Date fechaFallecimiento = HapiFhirUtils.readDateValueFromJsonNode("fechaFallecimiento", fallecimiento);
-                    patient.setDeceased(new DateTimeType(fechaFallecimiento));
-                } catch (Exception e){
-                    HapiFhirUtils.addErrorIssue("fechaFallecimiento", "fecha de fallecimiento no válida", oo);
+
+            if (fallecimiento != null && fallecimiento.isObject()) {
+
+                if (fallecimiento.has("fallecido")) {
+                    JsonNode fallecidoNode = fallecimiento.get("fallecido");
+
+                    if (fallecidoNode != null && fallecidoNode.isBoolean()) {
+                        boolean fallecido = fallecidoNode.booleanValue();
+                        patient.setDeceased(new BooleanType(fallecido));
+
+                        if (fallecido && fallecimiento.has("fechaFallecimiento")) {
+                            try {
+                                Date fechaFallecimiento = HapiFhirUtils.readDateValueFromJsonNode("fechaFallecimiento", fallecimiento);
+                                patient.setDeceased(new DateTimeType(fechaFallecimiento));
+                            } catch (Exception e) {
+                                HapiFhirUtils.addErrorIssue("fechaFallecimiento", "fecha de fallecimiento no válida", oo);
+                            }
+                        }
+
+                    } else {
+                        HapiFhirUtils.addErrorIssue("Paciente.fallecimiento.fallecido", "debe ser Booleano", oo);
+                    }
+
+                } else {
+                    HapiFhirUtils.addNotFoundIssue("Paciente.fallecimiento.fallecido", oo);
                 }
+
+            } else {
+                HapiFhirUtils.addErrorIssue("paciente.Fallecimiento", "debe ser un objeto JSON", oo);
             }
 
-        } else HapiFhirUtils.addNotFoundIssue("paciente.Fallecimiento", oo);
-
+        } else {
+            HapiFhirUtils.addNotFoundIssue("paciente.Fallecimiento", oo);
+        }
         if(node.has("religion")){
             String religion  = HapiFhirUtils.readStringValueFromJsonNode("religion", node);
              vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSReligion";
