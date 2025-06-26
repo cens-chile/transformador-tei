@@ -35,11 +35,16 @@ public class PractitionerTransformer {
         Practitioner practitioner = new Practitioner();
         practitioner.getMeta().setLastUpdated(new Date());
 
-        if (tipoPractitioner.equals("administrativo")) {
-            practitioner.getMeta().addProfile(prestadorAdm);
-        } else {
+        switch (tipoPractitioner){
+        case "administrativo":
+        practitioner.getMeta().addProfile(prestadorAdm);
+            break;
+        case "profesional":
             practitioner.getMeta().addProfile(prestadorPro);
+            break;
+        default: HapiFhirUtils.addNotFoundCodeIssue("Prestador.tipoPrestador",oo);
         }
+
 
 
         // ID
@@ -81,30 +86,41 @@ public class PractitionerTransformer {
         }
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
-        if (identificadores != null) {
-            String run  = HapiFhirUtils.readStringValueFromJsonNode("RUN",identificadores);
-            String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI",identificadores);
-            if (run == null && rnpi == null){
+        Boolean validoB = HapiFhirUtils.validateObjectInJsonNode("Prestador.identificadores", identificadores,oo);
+        if(!validoB) HapiFhirUtils.addNotFoundIssue("Prestador.identificadores",oo);
+        String run  = HapiFhirUtils.readStringValueFromJsonNode("RUN",identificadores);
+        String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI",identificadores);
+        if(run != null && !identificadores.get("RUN").isTextual()) HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RUN",
+                "Si existe, Debe ser texto(string)", oo);
+
+        if(rnpi != null && !identificadores.get("RNPI").isTextual()) HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RNPI",
+                "Si existe, Debe ser texto(string)", oo);
+
+
+
+
+        if (run == null && rnpi == null)
                 HapiFhirUtils.addErrorIssue("RNPI y RUN", "Debe existir al menos un o de los 2 identificadores", oo);
+
+        if(run != null) addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
+
+        if (tipoPractitioner.equals("profesional") && rnpi != null) {
+            addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
             }
-            if (run != null) {
-                addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-            }
-            if (tipoPractitioner.equals("profesional") && rnpi != null) {
-                addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
-            }
-        }
+
         practitioner.setActive(true);
 
         // Nombre
         JsonNode nombreCompleto = node.get("nombreCompleto");
-        if (nombreCompleto != null) {
+        Boolean valido = HapiFhirUtils.validateObjectInJsonNode("Practitioner.nombreCompleto", nombreCompleto,oo);
+
+        if (valido) {
             HumanName name = new HumanName();
             name.setUse(HumanName.NameUse.OFFICIAL);
             String apellido = HapiFhirUtils.readStringValueFromJsonNode("primerApellido", nombreCompleto);
-            if(apellido != null) {
+            if(apellido != null && nombreCompleto.get("primerApellido").isTextual()) {
                 name.setFamily(apellido);
-            }else HapiFhirUtils.addNotFoundIssue("Prestador.nombrecompleto.primerApellido", oo);
+            }else HapiFhirUtils.addNotFoundIssue("Prestador.nombreCompleto.primerApellido", oo);
             // Segundo apellido como extensión
             String segundoApellido = HapiFhirUtils.readStringValueFromJsonNode("segundoApellido", nombreCompleto);
             if (segundoApellido != null) {
@@ -115,7 +131,8 @@ public class PractitionerTransformer {
 
             // Nombres
             JsonNode nombres = nombreCompleto.get("nombres");
-            if (nombres != null && nombres.isArray()) {
+            Boolean validNombres = HapiFhirUtils.validateArrayInJsonNode("prestador.nombrecompleto.nombres", nombres,oo);
+            if (validNombres) {
                 for (JsonNode nombre : nombres) {
                     name.addGiven(nombre.asText());
                 }
@@ -124,8 +141,21 @@ public class PractitionerTransformer {
             practitioner.addName(name);
         }
 
+
+
+        if(node.has("sexoRegistral")){
+            String vs = "http://hl7.org/fhir/ValueSet/administrative-gender";
+            String cs = "http://hl7.org/fhir/administrative-gender";
+            String code = HapiFhirUtils.readStringValueFromJsonNode("sexoRegistral", node);
+            String validoS = validator.validateCode(cs,code,"",vs);
+            if(validoS != null) {
+                practitioner.setGender(Enumerations.AdministrativeGender.fromCode(code));
+            } else HapiFhirUtils.addNotFoundCodeIssue("practitioner.sexoRegistral",oo);
+        }else HapiFhirUtils.addNotFoundIssue("practitioner.sexoRegistral",oo);
+
+
         // Género
-        String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
+        /* String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
         if(genero != null) {
             if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) ||
                     "hombre".equalsIgnoreCase(genero)) {
@@ -138,6 +168,7 @@ public class PractitionerTransformer {
                 practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
             }
         }
+        */
 
         // Fecha de nacimiento
         try {
@@ -153,6 +184,7 @@ public class PractitionerTransformer {
             HapiFhirUtils.addErrorIssue("Prestador.fechaNacimiento", "error de formato de fecha", oo);
             throw new RuntimeException(e);
         }
+
         // Contacto
         JsonNode contacto = node.get("contacto");
         if (contacto != null) {
@@ -188,9 +220,9 @@ public class PractitionerTransformer {
                 String vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
                 String code = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
-                String valido = validator.validateCode(cs,code,"",vs);
+                 String validoS = validator.validateCode(cs,code,"",vs);
 
-                Coding coding = new Coding(cs,code,valido);
+                Coding coding = new Coding(cs,code,validoS);
                 CodeableConcept cc = new CodeableConcept(coding);
                 if (valido != null){
                     direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
@@ -203,9 +235,9 @@ public class PractitionerTransformer {
                 String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("region"));
                 String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL";
-                String valido = validator.validateCode(cs, codigo, "", vs);
+                String validoS = validator.validateCode(cs, codigo, "", vs);
                 if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("prestador.direccion.region.codigo", oo);
-                Coding coding = new Coding(cs,codigo,valido);
+                Coding coding = new Coding(cs,codigo,validoS);
                 CodeableConcept cc = new CodeableConcept(coding);
                 direccion.getStateElement().addExtension(HapiFhirUtils.buildExtension(
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/RegionesCl",cc));
@@ -216,9 +248,9 @@ public class PractitionerTransformer {
                 String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("provincia"));
                 String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL";
-                String valido = validator.validateCode(cs, codigo, "", vs);
+                String validoS = validator.validateCode(cs, codigo, "", vs);
                 if (valido == null) HapiFhirUtils.addNotFoundCodeIssue("prestador.direccion.provincia.codigo", oo);
-                Coding coding = new Coding(cs,codigo,valido);
+                Coding coding = new Coding(cs,codigo,validoS);
                 CodeableConcept cc = new CodeableConcept(coding);
                 direccion.getDistrictElement().addExtension(HapiFhirUtils.buildExtension(
                         "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ProvinciasCl",cc));
@@ -231,9 +263,9 @@ public class PractitionerTransformer {
                 String vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
                 String cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
 
-                String valido = validator.validateCode(cs,codigo,"",vs);
+                String validoS = validator.validateCode(cs,codigo,"",vs);
                 if (valido != null){
-                    Coding coding = new Coding(cs,codigo,valido);
+                    Coding coding = new Coding(cs,codigo,validoS);
                     CodeableConcept cc = new CodeableConcept(coding);
                     direccion.getCityElement().addExtension(HapiFhirUtils.buildExtension(
                             "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/ComunasCl",
@@ -246,7 +278,8 @@ public class PractitionerTransformer {
 
         if (tipoPractitioner.equals("profesional")) {
             JsonNode tits = node.get("titulosProfesionales");
-            if (tits != null) {
+            validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo);
+            if (validoB) {
                 addQualifications(practitioner, node.get("titulosProfesionales"),
                         "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional",
                         "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional",
@@ -254,26 +287,42 @@ public class PractitionerTransformer {
             }
             if (tipoPractitioner.equals("profesional")) {
                 // Calificaciones (títulos, especialidades, subespecialidades, etc.)
-                addQualifications(practitioner, node.get("especialidadesMedicas"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                        "esp",oo);
-                addQualifications(practitioner, node.get("subespecialidadesMedicas"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                        "subesp",oo);
-                addQualifications(practitioner, node.get("especialidadesOdontologicas"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadOdont",
-                        "EspOdo",oo);
-                addQualifications(practitioner, node.get("especialidadesBioquimicas"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadBioqca",
-                        "EspBioQ",oo);
-                addQualifications(practitioner, node.get("especialidadesFarmacologicas"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadFarma",
-                        "EspFarma",oo);
+                if(node.has("especialidadesMedicas")) {
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesMedicas", node.get("especialidadesMedicas"), oo);
+                    addQualifications(practitioner, node.get("especialidadesMedicas"),
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
+                            "esp", oo);
+                }
+                if(node.has("subespecialidadesMedicas")) {
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("subespecialidadesMedicas", node.get("subespecialidadesMedicas"), oo);
+                    addQualifications(practitioner, node.get("subespecialidadesMedicas"),
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
+                            "subesp", oo);
+                }
+                if(node.has("especialidadesOdontologicas")) {
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesOdontologicas", node.get("especialidadesOdontologicas"), oo);
+                    addQualifications(practitioner, node.get("especialidadesOdontologicas"),
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont",
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadOdont",
+                            "EspOdo", oo);
+                }
+                if(node.has("especialidadesBioquimicas")) {
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesBioquimicas", node.get("especialidadesBioquimicas"), oo);
+                    addQualifications(practitioner, node.get("especialidadesBioquimicas"),
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca",
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadBioqca",
+                            "EspBioQ", oo);
+                }
+
+                if(node.has("especialidadesFarmacologicas")) {
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesFarmacologicas", node.get("especialidadesFarmacologicas"), oo);
+                    addQualifications(practitioner, node.get("especialidadesFarmacologicas"),
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma",
+                            "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadFarma",
+                            "EspFarma", oo);
+                }
             }
         }
         return practitioner;

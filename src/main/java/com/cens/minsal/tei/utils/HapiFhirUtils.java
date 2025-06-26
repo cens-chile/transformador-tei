@@ -182,6 +182,19 @@ public class HapiFhirUtils {
         return res;
     }
 
+    public static boolean validateArrayInJsonNode(String value, JsonNode node, OperationOutcome oo){
+        boolean res = true;
+        if(node==null || node.size() == 0){
+            HapiFhirUtils.addNotFoundIssue(value, oo);
+            res = false;
+        }
+        else if(!node.isArray()){
+            HapiFhirUtils.addInvalidIssue(value, oo);
+            res=false;
+        }
+        return res;
+    }
+
 
 
     public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException {
