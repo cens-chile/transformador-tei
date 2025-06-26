@@ -79,41 +79,28 @@ public class BundlePriorizarTransformer {
 
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        MessageHeaderTransformer messageHeaderTransformer = new MessageHeaderTransformer(validator);
-        ((ObjectNode)get).put("tipoEvento", "priorizar");
-
-
-        if(get!=null)
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out);
+        if(validate){
+            ((ObjectNode)get).put("tipoEvento", "priorizar");
             messageHeader = messageHeaderTransformer.transform(get, out);
-        else
-            HapiFhirUtils.addNotFoundIssue("datosSistema", out);
-
+        }
 
         get = node.get("solicitudIC");
+        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out);
+
         ServiceRequest sr = null;
-
-
-        if(get!=null)
+        if(validate)
             sr = buildServiceRequest(node, out);
-        else
-            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
-
-
-
-
 
         get = node.get("prestadorProfesional");
+        validate = HapiFhirUtils.validateObjectInJsonNode("prestadorProfesional", get, out);
 
         String tipoPrestador = "profesional";
-
         Practitioner practitioner = null;
-
-        if(get!=null && tipoPrestador != null){
+        if(validate){
             practitioner = practitionerTransformer.transform(tipoPrestador,get, out);
         }
-        else{
-            HapiFhirUtils.addNotFoundIssue("PrestadorProfesional", out);
-        }
+
 
 
         /*get = node.get("paciente");
@@ -134,10 +121,7 @@ public class BundlePriorizarTransformer {
         }
 
 
-        if (!out.getIssue().isEmpty()) {
-            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
-            return res;
-        }
+
 
         //Rol del Profesional (practitionerRol)
 
@@ -165,6 +149,10 @@ public class BundlePriorizarTransformer {
 
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(priorizador));
 
+        if (!out.getIssue().isEmpty()) {
+            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
+            return res;
+        }
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }
@@ -288,9 +276,10 @@ public class BundlePriorizarTransformer {
         }
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
-        Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
-        sr.getCategoryFirstRep().addCoding(coding);
-
+        if(modalidadAtencion != null) {
+            Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
+            sr.getCategoryFirstRep().addCoding(coding);
+        }
         return sr;
     }
 }
