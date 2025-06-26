@@ -37,11 +37,12 @@ public class EncounterTransformer {
             encKey = "encuentroAtender";
             
         
+        
         json = node.get(encKey);
-        if(json==null){
-            HapiFhirUtils.addNotFoundIssue(encKey, oo);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode(encKey, json, oo);
+        if(!validate)
             return null;
-        }
+        
             
         
         

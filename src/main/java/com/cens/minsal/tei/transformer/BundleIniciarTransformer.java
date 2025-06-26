@@ -120,22 +120,26 @@ public class BundleIniciarTransformer {
         }
 
         JsonNode paciente = node.get("paciente");
+        validate = HapiFhirUtils.validateObjectInJsonNode("paciente", paciente, out);
         Patient patient = null;
-        if(paciente!=null)
+        if(validate)
             patient = patientTr.transform(paciente, out);
         else
             HapiFhirUtils.addNotFoundIssue("paciente", out);
             
+        
         get = node.get("profesionalClinicoSolicita");
+        validate = HapiFhirUtils.validateObjectInJsonNode("profesionalClinicoSolicita", get, out);
         Practitioner practitioner = null;
-        if(get!=null){
+        if(validate){
             practitioner = praTransformer.transform("profesional", get, out);
         }else
             HapiFhirUtils.addNotFoundIssue("profesionalClinicoSolicita", out);
         
         get = node.get("solicitudIC");
+        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out);
         ServiceRequest sr = null;
-        if(get!=null)
+        if(validate)
             sr = buildServiceRequest(get, out);  
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
@@ -148,6 +152,7 @@ public class BundleIniciarTransformer {
         
         //Construir Organización que inicia la IC
         Organization org = null;
+        validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get, out);
         try{
             get = node.get("establecimiento").get("origen");
             org = orgTransformer.transform(get, out,"establecimiento.origen");   

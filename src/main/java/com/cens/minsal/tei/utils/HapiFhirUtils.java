@@ -172,11 +172,11 @@ public class HapiFhirUtils {
     public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo){
         boolean res = true;
         if(node==null){
-            HapiFhirUtils.addNotFoundIssue("datosSistema", oo);
+            HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
         else if(!node.isObject()){
-            HapiFhirUtils.addInvalidIssue("datosSistema", oo);
+            HapiFhirUtils.addInvalidIssue(value, oo);
             res=false;
         }
         return res;
