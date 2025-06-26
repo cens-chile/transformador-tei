@@ -189,7 +189,7 @@ public class BundleIniciarTransformer {
         //Se agregan resultados exámenes realizados
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
-        validate = HapiFhirUtils.validateArrayInJsonNode("resultadoExamenes", node, out, false);
+        validate = HapiFhirUtils.validateArrayInJsonNode("resultadoExamenes", resultados, out, false);
         if(validate){
             ObservationTransformer ot = new ObservationTransformer(validator);
             examenes = ot.buildResultadoExamen(resultados, out);
@@ -199,7 +199,8 @@ public class BundleIniciarTransformer {
         //Se agregan alergias
         List<AllergyIntolerance> alergias = new ArrayList();
         JsonNode allNode = node.get("alergias");
-        if(allNode!=null){
+        validate = HapiFhirUtils.validateArrayInJsonNode("alergias", allNode, out, false);
+        if(validate){
             alergias = allInTransformer.transform(allNode, out);
         }
         
