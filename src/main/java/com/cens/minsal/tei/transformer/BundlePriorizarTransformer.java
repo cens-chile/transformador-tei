@@ -79,21 +79,21 @@ public class BundlePriorizarTransformer {
 
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out,true);
         if(validate){
             ((ObjectNode)get).put("tipoEvento", "priorizar");
             messageHeader = messageHeaderTransformer.transform(get, out);
         }
 
         get = node.get("solicitudIC");
-        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out);
+        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out,true);
 
         ServiceRequest sr = null;
         if(validate)
             sr = buildServiceRequest(node, out);
 
         get = node.get("prestadorProfesional");
-        validate = HapiFhirUtils.validateObjectInJsonNode("prestadorProfesional", get, out);
+        validate = HapiFhirUtils.validateObjectInJsonNode("prestadorProfesional", get, out,true);
 
         String tipoPrestador = "profesional";
         Practitioner practitioner = null;

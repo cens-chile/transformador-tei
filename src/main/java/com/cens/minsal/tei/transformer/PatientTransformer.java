@@ -83,7 +83,7 @@ public class PatientTransformer {
             JsonNode nombreCompleto = node.get("nombreCompleto");
             if (nombreCompleto.has("nombres")) {
                 Boolean validNombres = HapiFhirUtils.validateArrayInJsonNode("paciente.nombreCompleto.nombres"
-                        , nombreCompleto.get("nombres"),oo);
+                        , nombreCompleto.get("nombres"),oo,true);
                 for (JsonNode n : nombreCompleto.get("nombres")) {
                     nombre.addGiven(n.asText());
                 }

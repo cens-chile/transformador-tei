@@ -39,7 +39,7 @@ public class EncounterTransformer {
         
         
         json = node.get(encKey);
-        boolean validate = HapiFhirUtils.validateObjectInJsonNode(encKey, json, oo);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode(encKey, json, oo,true);
         if(!validate)
             return null;
         
