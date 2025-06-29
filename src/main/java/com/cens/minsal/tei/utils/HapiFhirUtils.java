@@ -169,7 +169,7 @@ public class HapiFhirUtils {
         return null;
     }
     
-    public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo){
+    public static boolean validateObjectInJsonNode(String value, JsonNode node, boolean obligatorio, OperationOutcome oo){
         boolean res = true;
         if(node==null){
             HapiFhirUtils.addNotFoundIssue(value, oo);
