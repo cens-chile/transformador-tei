@@ -183,15 +183,16 @@ public class HapiFhirUtils {
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
-        if (required && node != null) {
-            if (node.size() == 0) {
-                HapiFhirUtils.addErrorIssue(value, "no puede ser nulo", oo);
-                res = false;
-            }
+        if (node != null) {
             if (!node.isObject()) {
                 HapiFhirUtils.addInvalidIssue(value, oo);
                 res = false;
             }
+            else if (node.size() == 0) {
+                HapiFhirUtils.addErrorIssue(value, "no puede ser vacio", oo);
+                res = false;
+            }
+            
         }
         return res;
     }
@@ -202,12 +203,14 @@ public class HapiFhirUtils {
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
-        else if(!node.isArray()){
-            HapiFhirUtils.addInvalidIssue(value, oo);
-            res=false;
-        }
-        else if(node.size() == 0){
-            addArrayEmptyIssue(value, oo);
+        if (node != null) {  
+            if(!node.isArray()){
+                HapiFhirUtils.addInvalidIssue(value, oo);
+                res=false;
+            }
+            else if(node.size() == 0){
+                addArrayEmptyIssue(value, oo);
+            }
         }
         return res;
     }

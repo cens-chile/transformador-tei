@@ -336,7 +336,8 @@ public class PatientTransformer {
                          CodeableConcept cc = new CodeableConcept(coding);
                          direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
                                 "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc));
-                     }
+                     }else
+                         HapiFhirUtils.addInvalidIssue("paciente.direcciones.codigo", oo);
                 }
 
                 if (direccionNode.has("region")) {
