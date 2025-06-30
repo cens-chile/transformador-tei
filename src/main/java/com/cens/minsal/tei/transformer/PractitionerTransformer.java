@@ -50,9 +50,6 @@ public class PractitionerTransformer {
         // ID
 
         practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
-        if(practitioner.getId() == null){
-            HapiFhirUtils.addNotFoundIssue("prestador.id", oo);
-        }
 
         if (node.has("identidadGenero")) {
             String genero = HapiFhirUtils.readStringValueFromJsonNode("identidadGenero", node);

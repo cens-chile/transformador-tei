@@ -47,6 +47,7 @@ public class PatientTransformer {
 
         JsonNode identificadores = node.get("identificadores");
         HapiFhirUtils.validateArrayInJsonNode("paciente.identificadores", identificadores,oo,true);
+        boolean existeRun = false;
         for (JsonNode identificador: identificadores){
             String code = HapiFhirUtils.readStringValueFromJsonNode("codigo",identificador);
             String valor = HapiFhirUtils.readStringValueFromJsonNode("valor",identificador);
@@ -54,18 +55,22 @@ public class PatientTransformer {
             Identifier identifier = new Identifier();
             cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador";
             vs =  "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSTipoIdentificador";
-                identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
-                identifier.setValue(valor);
             valido =validator.validateCode(cs,code,"",vs);
+            if(valido.equalsIgnoreCase("RUN")) existeRun = true;
             if(valido == null) HapiFhirUtils.addNotFoundCodeIssue("paciente.identificadores.codigo",oo);
+            identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+            identifier.setValue(valor);
+            Coding codingIdentifier = new Coding(cs,code,valido);
+            identifier.getType().addCoding(codingIdentifier);
+            identifier.setValue(valor);
 
-            identifier.getType().addCoding().setSystem(cs).setCode(code).setDisplay(valido);
 
             String paisEmision = HapiFhirUtils.readStringValueFromJsonNode("paisEmision", identificador);
             vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
             cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
             valido = validator.validateCode(cs,paisEmision,"",vs);
             if (valido != null) {
+                identifier.setAssigner(new Reference().setDisplay(valido));
                 Coding coding = new Coding(cs, paisEmision, valido);
                 CodeableConcept cc = new CodeableConcept(coding);
                 Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises", cc);
@@ -75,6 +80,7 @@ public class PatientTransformer {
             patient.addIdentifier(identifier);
 
         }
+        if(!existeRun)HapiFhirUtils.addErrorIssue("paciente.identificadores", "No existe identificador tipo RUN", oo);
         // Nombre
         HumanName nombre = new HumanName();
         nombre.setUse(HumanName.NameUse.OFFICIAL);
