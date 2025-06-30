@@ -46,7 +46,7 @@ public class PatientTransformer {
         String vs =""; String cs =""; String valido = "";
 
         JsonNode identificadores = node.get("identificadores");
-        if(identificadores == null) HapiFhirUtils.addNotFoundIssue("paciente.identificadores", oo);
+        HapiFhirUtils.validateArrayInJsonNode("paciente.identificadores", identificadores,oo,true);
         for (JsonNode identificador: identificadores){
             String code = HapiFhirUtils.readStringValueFromJsonNode("codigo",identificador);
             String valor = HapiFhirUtils.readStringValueFromJsonNode("valor",identificador);
@@ -79,23 +79,23 @@ public class PatientTransformer {
         HumanName nombre = new HumanName();
         nombre.setUse(HumanName.NameUse.OFFICIAL);
 
-        if (node.has("nombreCompleto")) {
+
             JsonNode nombreCompleto = node.get("nombreCompleto");
+            HapiFhirUtils.validateObjectInJsonNode("nombreCompleto",nombreCompleto,oo,false);
             if (nombreCompleto.has("nombres")) {
-                Boolean validNombres = HapiFhirUtils.validateArrayInJsonNode("paciente.nombreCompleto.nombres"
-                        , nombreCompleto.get("nombres"),oo,true);
+                HapiFhirUtils.validateArrayInJsonNode("paciente.nombreCompleto.nombres",
+                        nombreCompleto.get("nombres"),oo,true);
                 for (JsonNode n : nombreCompleto.get("nombres")) {
                     nombre.addGiven(n.asText());
                 }
-            } else HapiFhirUtils.addNotFoundIssue("nombres",oo);
-            if (nombreCompleto.has("primerApellido")) {
-                nombre.setFamily(nombreCompleto.get("primerApellido").asText());
-            } else HapiFhirUtils.addNotFoundIssue("primerApellido",oo);
-            if (nombreCompleto.has("segundoApellido")) {
-                String primerApellido = nombre.hasFamily() ? nombre.getFamily() : "";
-                nombre.setFamily(primerApellido + " " + nombreCompleto.get("segundoApellido").asText());
             }
-        } else HapiFhirUtils.addNotFoundIssue("nombreCompleto",oo);
+            if (nombreCompleto.has("primerApellido")) {
+                nombre.setFamily(HapiFhirUtils.readStringValueFromJsonNode("primerApellido",nombreCompleto));
+                if (nombreCompleto.has("segundoApellido")) {
+                nombre.getFamilyElement().addExtension(new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/SegundoApellido",
+                                new StringType(HapiFhirUtils.readStringValueFromJsonNode("segundoApellido",nombreCompleto))));
+                }
+            } else HapiFhirUtils.addNotFoundIssue("primerApellido",oo);
 
         patient.addName(nombre);
 
@@ -135,15 +135,12 @@ public class PatientTransformer {
             }else HapiFhirUtils.addErrorIssue(ec, "codigo de estadoCivil no valido", oo);
         }
 
-        if (node.has("fallecimiento")) {
             JsonNode fallecimiento = node.get("fallecimiento");
-
-            if (fallecimiento != null && fallecimiento.isObject()) {
+            HapiFhirUtils.validateObjectInJsonNode("paciente.fallecimiento", fallecimiento,oo,true);
 
                 if (fallecimiento.has("fallecido")) {
                     JsonNode fallecidoNode = fallecimiento.get("fallecido");
 
-                    if (fallecidoNode != null && fallecidoNode.isBoolean()) {
                         boolean fallecido = fallecidoNode.booleanValue();
                         patient.setDeceased(new BooleanType(fallecido));
 
@@ -160,17 +157,8 @@ public class PatientTransformer {
                         HapiFhirUtils.addErrorIssue("Paciente.fallecimiento.fallecido", "debe ser Booleano", oo);
                     }
 
-                } else {
-                    HapiFhirUtils.addNotFoundIssue("Paciente.fallecimiento.fallecido", oo);
-                }
 
-            } else {
-                HapiFhirUtils.addErrorIssue("paciente.Fallecimiento", "debe ser un objeto JSON", oo);
-            }
 
-        } else {
-            HapiFhirUtils.addNotFoundIssue("paciente.Fallecimiento", oo);
-        }
         if(node.has("religion")){
             String religion  = HapiFhirUtils.readStringValueFromJsonNode("religion", node);
              vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSReligion";
@@ -272,9 +260,6 @@ public class PatientTransformer {
 
         }else HapiFhirUtils.addNotFoundIssue("paciente.pueblosOriginariosPerteneciente",oo);
 
-
-//puebloAfroPertenencia
-
         if(node.has("puebloAfroPertenencia")){
             Boolean puebloAfroPertenencia = HapiFhirUtils.readBooleanValueFromJsonNode("puebloAfroPertenencia", node);
             Extension puebloAfroPertenenciaExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PueblosAfrodescendiente",
@@ -283,8 +268,6 @@ public class PatientTransformer {
 
         }
 
-
-        // Fecha de nacimiento
         if (node.has("fechaNacimiento")) {
             try {
                 String fechaStr = node.get("fechaNacimiento").asText();
@@ -298,6 +281,7 @@ public class PatientTransformer {
         // Dirección
         if (node.has("direcciones")) {
             JsonNode direcciones= node.get("direcciones");
+            HapiFhirUtils.validateArrayInJsonNode("Paciente.direcciones",direcciones,oo,false);
             List<Address> addressList = new ArrayList<>();
 
             for (JsonNode direccionNode : direcciones){
@@ -342,18 +326,21 @@ public class PatientTransformer {
                 if (direccionNode.has("pais")) {
                      vs ="https://hl7chile.cl/fhir/ig/clcore/ValueSet/CodPais";
                      cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CodPais";
-                    String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
+                     JsonNode pais = direccionNode.get("pais");
+                     HapiFhirUtils.validateObjectInJsonNode("paciente.direcciones.pais", pais, oo,false);
+                     String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("pais"));
                      valido = validator.validateCode(cs,codigo,"",vs);
-                    Coding coding = new Coding(cs,codigo,valido);
-                    CodeableConcept cc = new CodeableConcept(coding);
-                    if (valido != null){
+                     Coding coding = new Coding(cs,codigo,valido);
+                     CodeableConcept cc = new CodeableConcept(coding);
+                     if (valido != null){
                         direccion.getCountryElement().addExtension(HapiFhirUtils.buildExtension(
                                 "https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises",cc));
-
-                    }
+                     }
                 }
 
                 if (direccionNode.has("region")) {
+                    JsonNode region = direccionNode.get("region");
+                    HapiFhirUtils.validateObjectInJsonNode("paciente.direcciones.region", region,oo, false);
                     String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("region"));
                      vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosRegionesCL";
                      cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodRegionCL";
@@ -366,6 +353,8 @@ public class PatientTransformer {
                 }
 
                 if (direccionNode.has("provincia")) {
+                    JsonNode provincia = direccionNode.get("provincia");
+                    HapiFhirUtils.validateObjectInJsonNode("paciente.direcciones.provincia", provincia,oo, false);
                     String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", direccionNode.get("provincia"));
                      vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosProvinciasCL";
                      cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodProvinciasCL";
@@ -379,6 +368,7 @@ public class PatientTransformer {
 
                 if (direccionNode.has("comuna")) {
                     JsonNode comunaJ = direccionNode.get("comuna");
+                    HapiFhirUtils.validateObjectInJsonNode("paciente.direcciones.comuna", comunaJ,oo, false);
                     String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",comunaJ);
                      vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSCodigosComunaCL";
                      cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSCodComunasCL";
@@ -408,8 +398,8 @@ public class PatientTransformer {
 
 
         // Contacto
-        if (node.has("contacto")) {
             JsonNode contactos = node.get("contacto");
+            HapiFhirUtils.validateArrayInJsonNode("paciente.contacto", contactos,oo,true);
             List<ContactPoint> contactPointList  = new ArrayList<>();
             for (JsonNode contacto: contactos) {
                 ContactPoint cp = new ContactPoint();
@@ -427,8 +417,7 @@ public class PatientTransformer {
                 contactPointList.add(cp);
             }
             patient.setTelecom(contactPointList);
-        }
-        else HapiFhirUtils.addNotFoundIssue("paciente.contacto", oo);
+
 
         return patient;
     }

@@ -50,7 +50,9 @@ public class PractitionerTransformer {
         // ID
 
         practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
-
+        if(practitioner.getId() == null){
+            HapiFhirUtils.addNotFoundIssue("prestador.id", oo);
+        }
 
         if (node.has("identidadGenero")) {
             String genero = HapiFhirUtils.readStringValueFromJsonNode("identidadGenero", node);
@@ -86,28 +88,49 @@ public class PractitionerTransformer {
         }
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
-        Boolean validoB = HapiFhirUtils.validateObjectInJsonNode("Prestador.identificadores", identificadores,oo,true);
-        if(!validoB) HapiFhirUtils.addNotFoundIssue("Prestador.identificadores",oo);
-        String run  = HapiFhirUtils.readStringValueFromJsonNode("RUN",identificadores);
-        String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI",identificadores);
-        if(run != null && !identificadores.get("RUN").isTextual()) HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RUN",
-                "Si existe, Debe ser texto(string)", oo);
+        if(identificadores!= null) {
+            Boolean validoB = HapiFhirUtils.validateObjectInJsonNode("Prestador.identificadores", identificadores, oo, true);
+            if (!validoB) HapiFhirUtils.addNotFoundIssue("Prestador.identificadores", oo);
+            String run = HapiFhirUtils.readStringValueFromJsonNode("RUN", identificadores);
 
-        if(rnpi != null && !identificadores.get("RNPI").isTextual()) HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RNPI",
-                "Si existe, Debe ser texto(string)", oo);
-
-
-
-
-        if (run == null && rnpi == null)
-                HapiFhirUtils.addErrorIssue("RNPI y RUN", "Debe existir al menos un o de los 2 identificadores", oo);
-
-        if(run != null) addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
-
-        if (tipoPractitioner.equals("profesional") && rnpi != null) {
-            addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
+            String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI", identificadores);
+            if (run != null && !identificadores.get("RUN").isTextual()) {
+                HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RUN",
+                        "Si existe, Debe ser texto(string)", oo);
             }
 
+            if (identificadores.has("RNPI")) {
+                try {
+                    boolean a = identificadores.get("RNPI").isTextual();
+                    if(!a) HapiFhirUtils.addErrorIssue("prestador.RNPI", "debe ser texto", oo);
+                } catch (Exception e) {
+                    HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RNPI",
+                            "Si existe, Debe ser texto(string)", oo);
+                    throw new RuntimeException(e);
+                }
+            }
+
+            if (identificadores.has("RUN")) {
+                try {
+                    boolean a = identificadores.get("RUN").isTextual();
+                    if(!a) HapiFhirUtils.addErrorIssue("prestador.RUN", "debe ser texto", oo);
+                } catch (Exception e) {
+                    HapiFhirUtils.addErrorIssue("Prestador.Identificadores.RUN",
+                            "Si existe, Debe ser texto(string)", oo);
+                    throw new RuntimeException(e);
+                }
+            }
+
+
+            if (run == null && rnpi == null)
+                HapiFhirUtils.addErrorIssue("RNPI y RUN", "Debe existir al menos un o de los 2 identificadores", oo);
+
+            if (run != null) addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
+
+            if (tipoPractitioner.equals("profesional") && rnpi != null) {
+                addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
+            }
+        } else HapiFhirUtils.addNotFoundIssue("prestador.identificadores", oo);
         practitioner.setActive(true);
 
         // Nombre
@@ -154,23 +177,7 @@ public class PractitionerTransformer {
         }else HapiFhirUtils.addNotFoundIssue("practitioner.sexoRegistral",oo);
 
 
-        // Género
-        /* String genero = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico", node);
-        if(genero != null) {
-            if ("masculino".equalsIgnoreCase(genero) || "male".equalsIgnoreCase(genero) ||
-                    "hombre".equalsIgnoreCase(genero)) {
-                practitioner.setGender(Enumerations.AdministrativeGender.MALE);
-            } else if ("femenino".equalsIgnoreCase(genero) || "mujer".equalsIgnoreCase(genero) || "female".equalsIgnoreCase(genero)) {
-                practitioner.setGender(Enumerations.AdministrativeGender.FEMALE);
-            } else if ("otro".equalsIgnoreCase(genero) || "other".equalsIgnoreCase(genero)) {
-                practitioner.setGender(Enumerations.AdministrativeGender.OTHER);
-            } else {
-                practitioner.setGender(Enumerations.AdministrativeGender.UNKNOWN);
-            }
-        }
-        */
 
-        // Fecha de nacimiento
         try {
             if (HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
                 try {
@@ -278,7 +285,7 @@ public class PractitionerTransformer {
 
         if (tipoPractitioner.equals("profesional")) {
             JsonNode tits = node.get("titulosProfesionales");
-            validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo,true);
+            boolean validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo,true);
             if (validoB) {
                 addQualifications(practitioner, node.get("titulosProfesionales"),
                         "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional",
