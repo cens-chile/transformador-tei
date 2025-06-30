@@ -35,7 +35,7 @@ public class PractitionerRoleTransformer {
             role.setId(id);
         }
 
-        Boolean activo = HapiFhirUtils.readBooleanValueFromJsonNode("Activo", inputNode);
+        Boolean activo = HapiFhirUtils.readBooleanValueFromJsonNode("activo", inputNode);
         if (activo != null) {
             role.setActive(activo);
         }

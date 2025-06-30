@@ -108,7 +108,7 @@ public class HapiFhirUtils {
         issue.setDiagnostics(value+" have errors in definition ["+message+"]");
         out.getIssue().add(issue);
     }
-    
+
     public static void addArrayEmptyIssue(String value, OperationOutcome out){
         OperationOutcome.OperationOutcomeIssueComponent issue;
         issue = new OperationOutcome.OperationOutcomeIssueComponent();
@@ -177,15 +177,21 @@ public class HapiFhirUtils {
         return null;
     }
     
-    public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo,boolean required){
+    public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo,boolean required) {
         boolean res = true;
-        if(required && node==null){
+        if (required && node == null) {
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
-        else if(!node.isObject()){
-            HapiFhirUtils.addInvalidIssue(value, oo);
-            res=false;
+        if (required && node != null) {
+            if (node.size() == 0) {
+                HapiFhirUtils.addErrorIssue(value, "no puede ser nulo", oo);
+                res = false;
+            }
+            if (!node.isObject()) {
+                HapiFhirUtils.addInvalidIssue(value, oo);
+                res = false;
+            }
         }
         return res;
     }

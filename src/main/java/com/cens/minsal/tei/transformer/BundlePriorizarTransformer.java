@@ -101,27 +101,14 @@ public class BundlePriorizarTransformer {
             practitioner = practitionerTransformer.transform(tipoPrestador,get, out);
         }
 
-
-
-        /*get = node.get("paciente");
-        Patient patient = null;
-        if(get != null){
-            ((ObjectNode)get).put("tipoEvento", "priorizar");
-            patient = patientTransformer.transform(get, out);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("No se encontraron datos del paciente", out);
-        }
-*/
         get = node.get("establecimiento");
+        HapiFhirUtils.validateObjectInJsonNode("establecimiento",get,out,true);
         Organization organization = null;
         if(get != null){
             organization = organizationTransformer.transform(get, out,"");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
         }
-
-
-
 
         //Rol del Profesional (practitionerRol)
 
@@ -141,12 +128,18 @@ public class BundlePriorizarTransformer {
         HapiFhirUtils.addResourceToBundle(b,priorizador);
         String referenciaPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",node);
         if (referenciaPaciente == null) HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
-        sr.setSubject(new Reference(referenciaPaciente));
-        HapiFhirUtils.addResourceToBundle(b,sr);
-        HapiFhirUtils.addResourceToBundle(b,practitioner);
-        //HapiFhirUtils.addResourceToBundle(b,patient);
-        HapiFhirUtils.addResourceToBundle(b,organization);
 
+        if(sr != null) {
+            sr.setSubject(new Reference(referenciaPaciente));
+            HapiFhirUtils.addResourceToBundle(b, sr);
+        }
+        if(practitioner != null) {
+            HapiFhirUtils.addResourceToBundle(b, practitioner);
+        }
+        //HapiFhirUtils.addResourceToBundle(b,patient);
+        if(organization != null) {
+            HapiFhirUtils.addResourceToBundle(b, organization);
+        }
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(priorizador));
 
         if (!out.getIssue().isEmpty()) {
@@ -172,12 +165,13 @@ public class BundlePriorizarTransformer {
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 
         JsonNode node = nodeOrigin.get("solicitudIC");
+        HapiFhirUtils.validateObjectInJsonNode("solicitudIC", node,oo,true);
         try {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
         } catch (ParseException ex) {
-            Logger.getLogger(BundlePriorizarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
+            Logger.getLogger(BundlePriorizarTransformer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);

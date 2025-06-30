@@ -38,7 +38,7 @@ public class OrganizationTransformer {
         if(nombre!=null)
             org.setName(nombre);
         else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+".nombreLegal", oo);
+            HapiFhirUtils.addNotFoundIssue(parentPath+"establecimiento.nombreLegal", oo);
 
         String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
         String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";
@@ -48,7 +48,7 @@ public class OrganizationTransformer {
             org.getIdentifierFirstRep().setSystem(csDest);
         }
         else {
-            HapiFhirUtils.addNotFoundIssue("establecimientoAPS->codigoDEIS", oo);
+            HapiFhirUtils.addNotFoundIssue("establecimiento.codigoDEIS", oo);
         }
         /*
         String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
