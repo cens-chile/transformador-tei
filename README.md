@@ -1,4 +1,4 @@
-# transformador-tei (TEI FHIR Server)
+# Transformador-tei (TEI FHIR Server)
 
 ## Prerequisitos
 
@@ -7,26 +7,30 @@
 
 ## Configuración
 
-- Para configuración la base de datos y otras opciones editar application.yaml
+- Para configuración de otras opciones editar application.yaml
 
-## RUN
+## DEV
 
-```
+### Puesta en Marcha Local
+
+```bash
 mvn spring-boot:run
 ```
 
-La url base del servidor FHIR es localhost:8080/fhir
-
+* La url base del servidor FHIR es http://localhost:8080/fhir
 
 ## Docker Compose
 
-### .ENV
+
+### Crear .ENV
 
 ```
-
+TEI_FHIR_PACKAGE_TEI=package_tei.tgz
+TEI_FHIR_PACKAGE_CORE=package_core.tgz
+SERVER_PORT=8080
 ```
 
-### Run
+### Puesta en Marcha
 
 ```bash
 docker compose up -d
