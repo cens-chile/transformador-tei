@@ -1,39 +1,15 @@
 version: '3.7'
 
 networks:
-  fic-externo-net:
+  transformador-net:
 
 services:
-  postgres:
-    image: postgres:13
-    restart: always
-    ports:
-      - ${POSTGRES_PORT:?err}:5432
-    networks:
-      - fic-externo-net
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-  receptor-externo-server:
-    image: receptor-externo-rayen:${TAG}
+  transformador-server:
     build: .
     networks:
-      - fic-externo-net
+      - transformador-net
     ports:
       - "${SERVER_PORT:?err}:8080"
-    depends_on:
-      - postgres
     environment:
-      - spring.datasource.url=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      - spring.datasource.username=${POSTGRES_USER}
-      - spring.datasource.password=${POSTGRES_PASSWORD}
-      - spring.datasource.driverClassName=org.postgresql.Driver
-      - spring.jpa.properties.hibernate.search.enabled=true
-      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-      - hibernate.search.backend.analysis.configurer="ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers$$HapiLuceneAnalysisConfigurer"
-      - hibernate.search.backend.directory.type=local-filesystem
-      - hibernate.search.backend.directory.root=target/lucenefiles
-      - hibernate.search.backend.lucene_version=lucene_current
+      TEI_FHIR_PACKAGE_TEI: ${TEI_FHIR_PACKAGE_TEI:?err}
+      TEI_FHIR_PACKAGE_CORE: ${TEI_FHIR_PACKAGE_CORE:?err}
