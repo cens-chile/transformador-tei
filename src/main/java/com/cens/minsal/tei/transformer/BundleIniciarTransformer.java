@@ -113,32 +113,31 @@ public class BundleIniciarTransformer {
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
         
-        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out,true);
         if(validate){
             ((ObjectNode)get).put("tipoEvento", "iniciar");
             messageHeader = messageHeaderTransformer.transform(node.get("datosSistema"), out);
         }
 
         JsonNode paciente = node.get("paciente");
+        validate = HapiFhirUtils.validateObjectInJsonNode("paciente", paciente, out,true);
         Patient patient = null;
-        if(paciente!=null)
+        if(validate)
             patient = patientTr.transform(paciente, out);
-        else
-            HapiFhirUtils.addNotFoundIssue("paciente", out);
             
+        
         get = node.get("profesionalClinicoSolicita");
+        validate = HapiFhirUtils.validateObjectInJsonNode("profesionalClinicoSolicita", get, out,true);
         Practitioner practitioner = null;
-        if(get!=null){
+        if(validate){
             practitioner = praTransformer.transform("profesional", get, out);
-        }else
-            HapiFhirUtils.addNotFoundIssue("profesionalClinicoSolicita", out);
+        }
         
         get = node.get("solicitudIC");
+        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out,true);
         ServiceRequest sr = null;
-        if(get!=null)
+        if(validate)
             sr = buildServiceRequest(get, out);  
-        else
-            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
         
         
@@ -148,11 +147,13 @@ public class BundleIniciarTransformer {
         
         //Construir Organización que inicia la IC
         Organization org = null;
-        try{
-            get = node.get("establecimiento").get("origen");
-            org = orgTransformer.transform(get, out,"establecimiento.origen");   
-        }catch(NullPointerException ex){
-            HapiFhirUtils.addNotFoundIssue("establecimiento.origen", out);
+        get = node.get("establecimiento");
+        validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get, out,true);
+        if(validate){
+            get = get.get("origen");
+            validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento.origen", get, out,true);
+            if(validate)
+                org = orgTransformer.transform(get, out,"establecimiento.origen");      
         }
         //Contruir Indice Comorbilidad
         Observation indiceComorbilidad  = null;
@@ -162,12 +163,12 @@ public class BundleIniciarTransformer {
         
         //Construir Diagnostico
         ConditionTransformer conditionTransformer = new ConditionTransformer(validator);
+        get = node.get("diagnostico");
+        validate = HapiFhirUtils.validateObjectInJsonNode("diagnostico", get, out,true);
         Condition cond = null;
-        if(node.get("diagnostico")!=null){
+        if(validate){
             cond = conditionTransformer.transform(node.get("diagnostico"), out,"diagnostico");
         }
-        else
-            HapiFhirUtils.addNotFoundIssue("diagnostico", out);
         
         //agregar discapacidad
         Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
@@ -188,7 +189,8 @@ public class BundleIniciarTransformer {
         //Se agregan resultados exámenes realizados
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
-        if(resultados!=null){
+        validate = HapiFhirUtils.validateArrayInJsonNode("resultadoExamenes", resultados, out, false);
+        if(validate){
             ObservationTransformer ot = new ObservationTransformer(validator);
             examenes = ot.buildResultadoExamen(resultados, out);
         }
@@ -197,7 +199,8 @@ public class BundleIniciarTransformer {
         //Se agregan alergias
         List<AllergyIntolerance> alergias = new ArrayList();
         JsonNode allNode = node.get("alergias");
-        if(allNode!=null){
+        validate = HapiFhirUtils.validateArrayInJsonNode("alergias", allNode, out, false);
+        if(validate){
             alergias = allInTransformer.transform(allNode, out);
         }
         

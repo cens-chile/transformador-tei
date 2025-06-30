@@ -86,7 +86,7 @@ public class PractitionerTransformer {
         }
         // Identificadores
         JsonNode identificadores = node.get("identificadores");
-        Boolean validoB = HapiFhirUtils.validateObjectInJsonNode("Prestador.identificadores", identificadores,oo);
+        Boolean validoB = HapiFhirUtils.validateObjectInJsonNode("Prestador.identificadores", identificadores,oo,true);
         if(!validoB) HapiFhirUtils.addNotFoundIssue("Prestador.identificadores",oo);
         String run  = HapiFhirUtils.readStringValueFromJsonNode("RUN",identificadores);
         String rnpi = HapiFhirUtils.readStringValueFromJsonNode("RNPI",identificadores);
@@ -112,7 +112,7 @@ public class PractitionerTransformer {
 
         // Nombre
         JsonNode nombreCompleto = node.get("nombreCompleto");
-        Boolean valido = HapiFhirUtils.validateObjectInJsonNode("Practitioner.nombreCompleto", nombreCompleto,oo);
+        Boolean valido = HapiFhirUtils.validateObjectInJsonNode("Practitioner.nombreCompleto", nombreCompleto,oo,true);
 
         if (valido) {
             HumanName name = new HumanName();
@@ -131,7 +131,7 @@ public class PractitionerTransformer {
 
             // Nombres
             JsonNode nombres = nombreCompleto.get("nombres");
-            Boolean validNombres = HapiFhirUtils.validateArrayInJsonNode("prestador.nombrecompleto.nombres", nombres,oo);
+            Boolean validNombres = HapiFhirUtils.validateArrayInJsonNode("prestador.nombrecompleto.nombres", nombres,oo,true);
             if (validNombres) {
                 for (JsonNode nombre : nombres) {
                     name.addGiven(nombre.asText());
@@ -278,7 +278,7 @@ public class PractitionerTransformer {
 
         if (tipoPractitioner.equals("profesional")) {
             JsonNode tits = node.get("titulosProfesionales");
-            validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo);
+            validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo,true);
             if (validoB) {
                 addQualifications(practitioner, node.get("titulosProfesionales"),
                         "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional",
@@ -288,28 +288,28 @@ public class PractitionerTransformer {
             if (tipoPractitioner.equals("profesional")) {
                 // Calificaciones (títulos, especialidades, subespecialidades, etc.)
                 if(node.has("especialidadesMedicas")) {
-                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesMedicas", node.get("especialidadesMedicas"), oo);
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesMedicas", node.get("especialidadesMedicas"), oo,true);
                     addQualifications(practitioner, node.get("especialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
                             "esp", oo);
                 }
                 if(node.has("subespecialidadesMedicas")) {
-                    validoB = HapiFhirUtils.validateArrayInJsonNode("subespecialidadesMedicas", node.get("subespecialidadesMedicas"), oo);
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("subespecialidadesMedicas", node.get("subespecialidadesMedicas"), oo,false);
                     addQualifications(practitioner, node.get("subespecialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
                             "subesp", oo);
                 }
                 if(node.has("especialidadesOdontologicas")) {
-                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesOdontologicas", node.get("especialidadesOdontologicas"), oo);
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesOdontologicas", node.get("especialidadesOdontologicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesOdontologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadOdont",
                             "EspOdo", oo);
                 }
                 if(node.has("especialidadesBioquimicas")) {
-                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesBioquimicas", node.get("especialidadesBioquimicas"), oo);
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesBioquimicas", node.get("especialidadesBioquimicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesBioquimicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadBioqca",
@@ -317,7 +317,7 @@ public class PractitionerTransformer {
                 }
 
                 if(node.has("especialidadesFarmacologicas")) {
-                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesFarmacologicas", node.get("especialidadesFarmacologicas"), oo);
+                    validoB = HapiFhirUtils.validateArrayInJsonNode("especialidadesFarmacologicas", node.get("especialidadesFarmacologicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesFarmacologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadFarma",

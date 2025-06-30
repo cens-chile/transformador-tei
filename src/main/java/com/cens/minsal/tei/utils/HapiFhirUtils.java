@@ -97,7 +97,7 @@ public class HapiFhirUtils {
         OperationOutcome.OperationOutcomeIssueComponent issue;
         issue = new OperationOutcome.OperationOutcomeIssueComponent();
         issue.setCode(OperationOutcome.IssueType.INVALID);
-        issue.setDiagnostics("The code for de variable "+value+" is invalid");
+        issue.setDiagnostics("The code for variable "+value+" is invalid");
         out.getIssue().add(issue);
     }
     
@@ -106,6 +106,14 @@ public class HapiFhirUtils {
         issue = new OperationOutcome.OperationOutcomeIssueComponent();
         issue.setCode(OperationOutcome.IssueType.EXCEPTION);
         issue.setDiagnostics(value+" have errors in definition ["+message+"]");
+        out.getIssue().add(issue);
+    }
+    
+    public static void addArrayEmptyIssue(String value, OperationOutcome out){
+        OperationOutcome.OperationOutcomeIssueComponent issue;
+        issue = new OperationOutcome.OperationOutcomeIssueComponent();
+        issue.setCode(OperationOutcome.IssueType.INVALID);
+        issue.setDiagnostics("The array is empty for variable "+value+",if the variable isn't required it could be removed.");
         out.getIssue().add(issue);
     }
 
@@ -169,9 +177,9 @@ public class HapiFhirUtils {
         return null;
     }
     
-    public static boolean validateObjectInJsonNode(String value, JsonNode node, boolean obligatorio, OperationOutcome oo){
+    public static boolean validateObjectInJsonNode(String value, JsonNode node,OperationOutcome oo,boolean required){
         boolean res = true;
-        if(node==null){
+        if(required && node==null){
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
@@ -182,15 +190,18 @@ public class HapiFhirUtils {
         return res;
     }
 
-    public static boolean validateArrayInJsonNode(String value, JsonNode node, OperationOutcome oo){
+    public static boolean validateArrayInJsonNode(String value, JsonNode node, OperationOutcome oo, boolean required){
         boolean res = true;
-        if(node==null || node.size() == 0){
+        if(required && node==null){
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
         else if(!node.isArray()){
             HapiFhirUtils.addInvalidIssue(value, oo);
             res=false;
+        }
+        else if(node.size() == 0){
+            addArrayEmptyIssue(value, oo);
         }
         return res;
     }
