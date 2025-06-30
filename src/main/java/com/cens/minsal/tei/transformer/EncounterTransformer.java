@@ -179,9 +179,10 @@ public class EncounterTransformer {
     public void iniciarComplete(Encounter enc, JsonNode node, OperationOutcome oo){
         
         String id = HapiFhirUtils.readStringValueFromJsonNode("identificacionConsultaAPS", node);
-        if(id!=null){
+        if(id!=null)
             enc.getIdentifierFirstRep().setValue(id);
-        }
+        else
+            HapiFhirUtils.addNotFoundIssue("identificacionConsultaAPS", oo);
         String consecSystem="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSConsecuenciaAtencionCodigo";
         Coding cod = new Coding(consecSystem,"3","Derivación");
         HapiFhirUtils.
