@@ -184,7 +184,7 @@ public class ServiceRequestTransformer {
             try {
                 Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
                 if(fechaSolicitud==null)
-                    HapiFhirUtils.addNotFoundCodeIssue("solicitudExamen["+i+"].fechaSolicitudIC", oo);
+                    HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].fechaSolicitudIC", oo);
                 ser.setAuthoredOn(fechaSolicitud);
             } catch (ParseException ex) {
                 HapiFhirUtils.addErrorIssue("solicitudExamen["+i+"].fechaSolicitudIC", ex.getMessage(), oo);

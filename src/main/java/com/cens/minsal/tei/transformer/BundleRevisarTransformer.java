@@ -109,14 +109,12 @@ public class BundleRevisarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        ((ObjectNode)get).put("tipoEvento", "revisar");
 
-
-        if(get!=null)
-            messageHeader = 
-                messageHeaderTransformer.transform(node.get("datosSistema"), out);
-        else
-            HapiFhirUtils.addNotFoundIssue("datosSistema", out);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out,true);
+        if(validate){
+            ((ObjectNode)get).put("tipoEvento", "iniciar");
+            messageHeader = messageHeaderTransformer.transform(node.get("datosSistema"), out);
+        }
 
         JsonNode paciente = node.get("paciente");
         
@@ -133,37 +131,36 @@ public class BundleRevisarTransformer {
             
         //Se construye Prestador
         get = node.get("prestadorRevisor");
+        validate = HapiFhirUtils.validateObjectInJsonNode("prestadorRevisor", get, out,true);
         Practitioner practitioner = null;
-        if(get!=null){
+        if(validate)
                 practitioner = praTransformer.transform("profesional", get, out);
-        }else
-            HapiFhirUtils.addNotFoundIssue("prestadorRevisor", out);
+       
+                
         
         get = node.get("solicitudIC");
+        validate = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get, out,true);
         ServiceRequest sr = null;
-        if(get!=null)
+        if(validate)
             sr = buildServiceRequest(get, out);  
-        else
-            HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
-        //Construir Organización que revisa
-        Organization org = null;
-        try{
-            get = node.get("establecimiento").get("origen");
-            if(get!=null)
-                org = orgTransformer.transform(get, out,"establecimiento.origen");   
-        }catch(NullPointerException ex){
-            HapiFhirUtils.addNotFoundIssue("establecimiento.origen", out);
-        }
         
-        //Construir Organización de destino
+        Organization org = null;
         Organization orgDest = null;
-        try{
-            get = node.get("establecimiento").get("destino");
-            if(get!=null)
-                orgDest = orgTransformer.transform(get, out,"establecimiento.destino");   
-        }catch(NullPointerException ex){
-            HapiFhirUtils.addNotFoundIssue("establecimiento.destino", out);
+        JsonNode establecimientos = node.get("establecimiento");
+        validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento", establecimientos, out,true);
+        if(validate){
+            //Construir Organización que revisa
+            get = establecimientos.get("origen");
+            validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento.origen", get, out,true);
+            if(validate)
+                org = orgTransformer.transform(get, out,"establecimiento.origen");
+            //Construir Organización de destino
+            get = establecimientos.get("destino");
+            validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento.destino", get, out,true);
+            if(validate)
+                orgDest = orgTransformer.transform(get, out,"establecimiento.destino");
+            
         }
         
         //Se agrega exámen solicitado
@@ -174,41 +171,31 @@ public class BundleRevisarTransformer {
             return res;
         }
 
-        PractitionerRole referenciador = referenciadorTransformer.buildPractitionerRole("revisor", org, practitioner);
+        PractitionerRole revisor = referenciadorTransformer.buildPractitionerRole("revisor", org, practitioner);
         PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("atendedor", orgDest, null);
         
-        IdType mHId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(mHId.getIdPart())
-                .setResource(messageHeader);
-        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(referenciador));
+        HapiFhirUtils.addResourceToBundle(b, messageHeader);
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(revisor));
         
-        IdType patId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(patId.getIdPart())
-                .setResource(patient);
+        HapiFhirUtils.addResourceToBundle(b, patient,HapiFhirUtils.getUrlBaseFullUrl()+"/"+refPatText);
         
-        HapiFhirUtils.addResourceToBundle(b, sr,"ServiceRequest/"+sr.getId());
+        HapiFhirUtils.addResourceToBundle(b, sr,HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId());
         sr.setSubject(new Reference(patient));
         sr.getPerformer().add(new Reference(resolutor));
         
-        IdType pracId = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(pracId.getIdPart())
-                .setResource(practitioner);
+        HapiFhirUtils.addResourceToBundle(b, practitioner);
         
-
-        IdType orgId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(orgId.getIdPart())
-                .setResource(org);            
+        HapiFhirUtils.addResourceToBundle(b, org);
+        
         HapiFhirUtils.addResourceToBundle(b, orgDest);
         
         
-        addResourceToBundle(b,referenciador);
-        addResourceToBundle(b,resolutor);
+        HapiFhirUtils.addResourceToBundle(b,revisor);
+        HapiFhirUtils.addResourceToBundle(b,resolutor);
         
         
         for(ServiceRequest s : examenSolicitados){
-            IdType sId = IdType.newRandomUuid();
-            b.addEntry().setFullUrl(sId.getIdPart())
-                    .setResource(s); 
+            HapiFhirUtils.addResourceToBundle(b, s);
             s.setSubject(patRef);
             s.getBasedOn().add(new Reference(sr));
         }
@@ -451,11 +438,5 @@ public class BundleRevisarTransformer {
             ser.getSupportingInfo().add(new Reference(sol));
         });
         
-    }
-    
-    public void addResourceToBundle(Bundle b, Resource r){
-        IdType id = IdType.newRandomUuid();
-        b.addEntry().setFullUrl(id.getIdPart())
-                .setResource(r);
     }
 }
