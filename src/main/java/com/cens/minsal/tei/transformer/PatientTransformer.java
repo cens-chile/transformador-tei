@@ -113,7 +113,8 @@ public class PatientTransformer {
                         nombre.getFamilyElement().addExtension(new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/SegundoApellido",
                                 new StringType(HapiFhirUtils.readStringValueFromJsonNode("segundoApellido", nombreCompleto))));
                     }
-                }
+                }else
+                    HapiFhirUtils.addNotFoundIssue("paciente.nombreCompleto.primerApellido", oo);
 
                 patient.addName(nombre);
             }
