@@ -183,6 +183,8 @@ public class HapiFhirUtils {
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
+        else if(node == null)
+            res=false;
         if (node != null) {
             if (!node.isObject()) {
                 HapiFhirUtils.addInvalidIssue(value, oo);
@@ -203,6 +205,8 @@ public class HapiFhirUtils {
             HapiFhirUtils.addNotFoundIssue(value, oo);
             res = false;
         }
+        else if(node == null)
+            res=false;
         if (node != null) {  
             if(!node.isArray()){
                 HapiFhirUtils.addInvalidIssue(value, oo);
