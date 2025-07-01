@@ -98,7 +98,7 @@ public class PatientTransformer {
 
 
             JsonNode nombreCompleto = node.get("nombreCompleto");
-            boolean nombreValid = HapiFhirUtils.validateObjectInJsonNode("nombreCompleto",nombreCompleto,oo,false);
+            boolean nombreValid = HapiFhirUtils.validateObjectInJsonNode("nombreCompleto",nombreCompleto,oo,true);
             if(nombreCompleto != null) {
                 if (nombreCompleto.has("nombres")) {
                     HapiFhirUtils.validateArrayInJsonNode("paciente.nombreCompleto.nombres",
