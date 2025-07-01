@@ -81,7 +81,7 @@ public class HapiFhirUtils {
         OperationOutcome.OperationOutcomeIssueComponent issue;
         issue = new OperationOutcome.OperationOutcomeIssueComponent();
         issue.setCode(OperationOutcome.IssueType.NOTFOUND);
-        issue.setDiagnostics(value+" not found or not have a value");
+        issue.setDiagnostics(value+" not found or does not have a value");
         out.getIssue().add(issue);
     }
     
