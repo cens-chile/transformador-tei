@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 public class BundleRevisarTransformer {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleRevisarTransformer.class);
     FhirServerConfig fhirServerConfig;
-    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
+    static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleRevisarLE";
     static final String snomedSystem = "http://snomed.info/sct";
     PatientTransformer patientTr;
     MessageHeaderTransformer messageHeaderTransformer;
@@ -112,16 +112,16 @@ public class BundleRevisarTransformer {
 
         boolean validate = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out,true);
         if(validate){
-            ((ObjectNode)get).put("tipoEvento", "iniciar");
+            ((ObjectNode)get).put("tipoEvento", "revisar");
             messageHeader = messageHeaderTransformer.transform(node.get("datosSistema"), out);
         }
 
         JsonNode paciente = node.get("paciente");
         
-        Patient patient = null;
+        /*Patient patient = null;
         if(paciente!=null){
             patient = patientTr.transform(paciente, out);
-        }
+        }*/
         String refPatText = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         Reference patRef = null;
         if(refPatText!=null)
@@ -177,10 +177,11 @@ public class BundleRevisarTransformer {
         HapiFhirUtils.addResourceToBundle(b, messageHeader);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(revisor));
         
-        HapiFhirUtils.addResourceToBundle(b, patient,HapiFhirUtils.getUrlBaseFullUrl()+"/"+refPatText);
+        //HapiFhirUtils.addResourceToBundle(b, patient,HapiFhirUtils.getUrlBaseFullUrl()+"/"+refPatText);
         
-        HapiFhirUtils.addResourceToBundle(b, sr,HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId());
-        sr.setSubject(new Reference(patient));
+        String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
+        HapiFhirUtils.addResourceToBundle(b, sr,srFullUrl);
+        sr.setSubject(patRef);
         sr.getPerformer().add(new Reference(resolutor));
         
         HapiFhirUtils.addResourceToBundle(b, practitioner);
@@ -198,6 +199,7 @@ public class BundleRevisarTransformer {
             HapiFhirUtils.addResourceToBundle(b, s);
             s.setSubject(patRef);
             s.getBasedOn().add(new Reference(sr));
+            s.setRequester(new Reference(practitioner));
         }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -236,8 +238,8 @@ public class BundleRevisarTransformer {
         String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
         if(modalidadAtencion!=null){
             //VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
-            String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo";
-            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
+            String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
             String validateCode = validator.validateCode(cs, modalidadAtencion, null, vs);
             if(validateCode!=null){
                 Coding c = new Coding(cs,modalidadAtencion,validateCode);
@@ -364,22 +366,22 @@ public class BundleRevisarTransformer {
                 if(get.equals("odontologica"))
                     cs="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont";
                 else if(!get.equals("medica"))
-                    HapiFhirUtils.addErrorIssue("solicitudIC.especialidadMedicaDestino.tipo",
+                    HapiFhirUtils.addErrorIssue("solicitudIC.subEspecialidadMedicaDestino.tipo",
                             "No se conoce el tipo de especialidad", oo);
             }     
             get = HapiFhirUtils.readStringValueFromJsonNode("codigo", subEspecialidad);
             if(get!=null){
                 String validateCode = validator.validateCode(cs, get, null, vs);
                 if(validateCode!=null){
-                    String extUrl ="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEspecialidadMedicaDestinoCodigo";
+                    String extUrl ="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionSubEspecialidadMedicaDestinoCodigo";
                     Coding c = new Coding(cs,get,validateCode);
                     Extension buildExtension = HapiFhirUtils.buildExtension(extUrl,new CodeableConcept(c));
                     sr.getExtension().add(buildExtension);
                 }
                 else
-                    HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.especialidadMedicaDestino.codigo", oo);
+                    HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.subEspecialidadMedicaDestino.codigo", oo);
             }else
-                HapiFhirUtils.addNotFoundIssue("solicitudIC.especialidadMedicaDestino.codigo", oo);
+                HapiFhirUtils.addNotFoundIssue("solicitudIC.subEspecialidadMedicaDestino.codigo", oo);
         }
         
         //Se agrega pertinencia de la interconsulta
