@@ -321,7 +321,7 @@ public class BundleReferenciarTransformer {
                 if(get.equals("odontologica"))
                     cs="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont";
                 else if(!get.equals("medica"))
-                    HapiFhirUtils.addErrorIssue("solicitudIC.especialidadMedicaDestino.tipo",
+                    HapiFhirUtils.addErrorIssue("solicitudIC.subEspecialidadMedicaDestino.tipo",
                             "No se conoce el tipo de especialidad", oo);
             }     
             get = HapiFhirUtils.readStringValueFromJsonNode("codigo", subEspecialidad);
@@ -334,9 +334,9 @@ public class BundleReferenciarTransformer {
                     sr.getExtension().add(buildExtension);
                 }
                 else
-                    HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.especialidadMedicaDestino.codigo", oo);
+                    HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.subEspecialidadMedicaDestino.codigo", oo);
             }else
-                HapiFhirUtils.addNotFoundIssue("solicitudIC.especialidadMedicaDestino.codigo", oo);
+                HapiFhirUtils.addNotFoundIssue("solicitudIC.subEspecialidadMedicaDestino.codigo", oo);
         }
         
         
