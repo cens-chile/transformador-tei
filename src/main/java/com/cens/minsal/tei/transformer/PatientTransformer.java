@@ -59,7 +59,6 @@ public class PatientTransformer {
             if(valido.equalsIgnoreCase("RUN")) existeRun = true;
             if(valido == null) HapiFhirUtils.addNotFoundCodeIssue("paciente.identificadores.codigo",oo);
             identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
-            identifier.setValue(valor);
             Coding codingIdentifier = new Coding(cs,code,valido);
             identifier.getType().addCoding(codingIdentifier);
             identifier.setValue(valor);
