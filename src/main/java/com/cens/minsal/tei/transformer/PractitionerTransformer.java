@@ -122,7 +122,11 @@ public class PractitionerTransformer {
             if (run == null && rnpi == null)
                 HapiFhirUtils.addErrorIssue("RNPI y RUN", "Debe existir al menos uno de los 2 identificadores", oo);
 
-            if (run != null) addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
+            if (run != null) {
+                addIdentifier(practitioner, "01", "RUN", identificadores.get("RUN"), oo);
+            }else {
+                HapiFhirUtils.addNotFoundIssue("prestador.RUN",oo);
+            }
 
             if (tipoPractitioner.equals("profesional") && rnpi != null) {
                 addIdentifier(practitioner, "13", "RNPI", identificadores.get("RNPI"), oo);
@@ -170,8 +174,8 @@ public class PractitionerTransformer {
             String validoS = validator.validateCode(cs,code,"",vs);
             if(validoS != null) {
                 practitioner.setGender(Enumerations.AdministrativeGender.fromCode(code));
-            } else HapiFhirUtils.addNotFoundCodeIssue("practitioner.sexoRegistral",oo);
-        }else HapiFhirUtils.addNotFoundIssue("practitioner.sexoRegistral",oo);
+            } else HapiFhirUtils.addNotFoundCodeIssue("prestador.sexoRegistral",oo);
+        }else HapiFhirUtils.addNotFoundIssue("prestador.sexoRegistral",oo);
 
 
 
