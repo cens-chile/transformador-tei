@@ -399,12 +399,14 @@ public class BundleRevisarTransformer {
                     c.addCoding(cod);
                     Extension perCodeExt = HapiFhirUtils.buildExtension("EvaluacionPertinencia",c);
                     pertinencia.addExtension(perCodeExt);
+                    sr.getExtension().add(pertinencia);
                     if(codigoPertinencia.equals("2"))
                     {
                         String mot = HapiFhirUtils.readStringValueFromJsonNode("motivoNoPertinencia", pertinenciaNode);
-                        if(mot!=null)
+                        if(mot!=null){
                             pertinencia.addExtension(HapiFhirUtils.
-                                    buildExtension("MotivoNoPertinencia",new StringType(mot)));
+                                    buildExtension("MotivoNoPertinencia",new StringType(mot)));    
+                        }
                         else
                             HapiFhirUtils.addNotFoundIssue("solicitudIC.pertinenciaIC.MotivoNoPertinencia", oo);
                     }
