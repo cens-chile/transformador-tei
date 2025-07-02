@@ -59,7 +59,7 @@ public class PatientTransformer {
                 if (valor == null) {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.valor", oo);
                 }
-                String tipo = HapiFhirUtils.readStringValueFromJsonNode("tipo", identificador);
+                //String tipo = HapiFhirUtils.readStringValueFromJsonNode("tipo", identificador);
                 Identifier identifier = new Identifier();
                 cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador";
                 vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSTipoIdentificador";
@@ -86,7 +86,7 @@ public class PatientTransformer {
                     Extension paisEmisionExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/CodigoPaises", cc);
                     identifier.getType().addExtension(paisEmisionExt);
                 } else HapiFhirUtils.addNotFoundCodeIssue("paciente.identificacion.paisEmision", oo);
-                identifier.getType().setText(tipo);
+                //identifier.getType().setText(tipo);
                 patient.addIdentifier(identifier);
 
             }

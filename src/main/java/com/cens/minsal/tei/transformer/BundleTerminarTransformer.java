@@ -87,36 +87,32 @@ public class BundleTerminarTransformer {
         
         JsonNode get = node.get("datosSistema");
         MessageHeader messageHeader = null;
-        MessageHeaderTransformer messageHeaderTransformer = new MessageHeaderTransformer(validator);
-        ((ObjectNode)get).put("tipoEvento", "terminar");
-
-
-        if(get!=null)
+        boolean datosSistemasVal = HapiFhirUtils.validateObjectInJsonNode("datosSistema", get, out,true);
+        if(datosSistemasVal) {
+            MessageHeaderTransformer messageHeaderTransformer = new MessageHeaderTransformer(validator);
+            ((ObjectNode) get).put("tipoEvento", "terminar");
             messageHeader = messageHeaderTransformer.transform(get, out);
-        else
+           }else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
 
         get = node.get("solicitudIC");
         ServiceRequest sr = null;
-
-
-        if(get!=null)
+        boolean srVal = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", get,out,true);
+        if(srVal) {
             sr = buildServiceRequest(get, out);
-        else
+        }else
             HapiFhirUtils.addNotFoundIssue("solicitudIC", out);
 
-
         get = node.get("prestador");
-
-        String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-        if(!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")){
-            HapiFhirUtils.addErrorIssue("prestador.tipoPrestador", "Dato no válido", out);
-        }
-
+        boolean prestadorValid = HapiFhirUtils.validateObjectInJsonNode("prestador", get,out,true);
         Practitioner practitioner = null;
-        if(get!=null && tipoPrestador != null){
-            practitioner = practitionerTransformer.transform(tipoPrestador,get, out);
+        if(prestadorValid) {
+            String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
+            if (!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")) {
+                HapiFhirUtils.addErrorIssue("prestador.tipoPrestador", "Dato no válido", out);
+            }
+            practitioner = practitionerTransformer.transform(tipoPrestador, get, out);
         }
         else{
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
@@ -125,20 +121,25 @@ public class BundleTerminarTransformer {
 
 
         get = node.get("establecimiento");
+        boolean estabValid = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get,out,true);
+
         Organization organization = null;
-        if(get != null){
+        if(estabValid){
             organization = organizationTransformer.transform(get, out,"");
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
         }
-
+        PractitionerRole resolutor = null;
+        if(organization != null && practitioner != null) {
+            resolutor = referenciadorTransformer.buildPractitionerRole("terminador", organization, practitioner);
+        }
 
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
         }
+
         HapiFhirUtils.addResourceToBundle(b, messageHeader);
-        PractitionerRole resolutor = referenciadorTransformer.buildPractitionerRole("terminador", organization, practitioner);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(resolutor));
 
         //Rol del Profesional (practitionerRol)

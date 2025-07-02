@@ -119,6 +119,12 @@ public class BundlePriorizarTransformer {
         //CodeableConcept cc = new CodeableConcept(roleCode);
         //priorizador.addCode(cc);
 
+
+        if (!out.getIssue().isEmpty()) {
+            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
+            return res;
+        }
+
         priorizador.setPractitioner(new Reference(practitioner));
         priorizador.setOrganization(new Reference(organization));
 
@@ -142,10 +148,7 @@ public class BundlePriorizarTransformer {
         }
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(priorizador));
 
-        if (!out.getIssue().isEmpty()) {
-            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
-            return res;
-        }
+
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
     }
