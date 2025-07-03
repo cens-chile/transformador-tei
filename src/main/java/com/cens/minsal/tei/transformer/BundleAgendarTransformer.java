@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,171 +68,121 @@ public class BundleAgendarTransformer {
             throw new FHIRException(ex.getMessage());
         }
 
-        // MessageHeader
         JsonNode datosSistema = node.get("datosSistema");
+        boolean datosValid = HapiFhirUtils.validateObjectInJsonNode("datosSistema", datosSistema,oo,true);
         MessageHeader messageHeader = null;
-        ((ObjectNode)datosSistema).put("tipoEvento", "agendar");
-
-        if(datosSistema != null) {
+        if(datosValid){
+            ((ObjectNode)datosSistema).put("tipoEvento", "agendar");
             messageHeader = messageHeaderTransformer.transform(datosSistema, oo);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("datosSistema", oo);
         }
 
         // ServiceRequest
         JsonNode solicitudIC = node.get("solicitudIC");
         ServiceRequest sr = null;
-        if(solicitudIC != null) {
+        boolean srValid = HapiFhirUtils.validateObjectInJsonNode("solicitudIC", solicitudIC,oo, true);
+        if(srValid) {
             sr = buildServiceRequest(node, oo);
         } else {
             HapiFhirUtils.addNotFoundIssue("solicitudIC", oo);
         }
 
-        // Patient
-        /*JsonNode pacienteNode = node.get("paciente");
-        ((ObjectNode)pacienteNode).put("tipoEvento", "agendar");
-
-        Patient patient = null;
-        if(pacienteNode != null) {
-            patient = patientTransformer.transform(pacienteNode, oo);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("paciente", oo);
-        }*/
-
-        // Practitioner (Profesional)
-        JsonNode prestadorProfesional = node.get("prestadorProfesional");
+        JsonNode prestadorProfesionalNode = node.get("prestadorProfesional");
         Practitioner practitionerProfesional = null;
-        if(prestadorProfesional != null) {
-            practitionerProfesional = practitionerTransformer.transform("profesional", prestadorProfesional, oo);
-        } else {
-            HapiFhirUtils.addNotFoundIssue("prestadorProfesional", oo);
+        boolean practProfValid = HapiFhirUtils.validateObjectInJsonNode("prestadorProfesional", prestadorProfesionalNode,oo, true);
+        if(practProfValid) {
+            practitionerProfesional = practitionerTransformer.transform("profesional", prestadorProfesionalNode, oo);
         }
 
-        // Practitioner (Administrativo)
-        JsonNode prestadorAdmin = node.get("prestadorAdministrativo");
+        JsonNode prestadorAdminNode = node.get("prestadorAdministrativo");
+        boolean presAdminNodeVal = HapiFhirUtils.validateObjectInJsonNode("prestadorAdministrativo", prestadorAdminNode, oo, true);
         Practitioner practitionerAdmin = null;
-        if(prestadorAdmin != null) {
-            practitionerAdmin = practitionerTransformer.transform("administrativo", prestadorAdmin, oo);
+        if(presAdminNodeVal) {
+            practitionerAdmin = practitionerTransformer.transform("administrativo", prestadorAdminNode, oo);
         } else {
             HapiFhirUtils.addNotFoundIssue("prestadorAdministrativo", oo);
         }
 
-        // Organization (Agendador)
-        /*
-        JsonNode establecimientoAgendador = node.get("establecimiento");
-        Organization organizationAgendador = null;
-        if(establecimientoAgendador != null) {
-            organizationAgendador = organizationTransformer.transform(establecimientoAgendador, oo, "agendador");
-        } else {
-            HapiFhirUtils.addNotFoundIssue("establecimientoAgendador", oo);
-        }
-        */
+
 
         // Organization (Resolutor)
         JsonNode establecimiento = node.get("establecimiento");
         Organization organization = null;
-        if(establecimiento != null) {
-            organization = organizationTransformer.transform(establecimiento, oo, "resolutor");
-        } else {
-            HapiFhirUtils.addNotFoundIssue("establecimientoResolutor", oo);
+        boolean validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento", establecimiento, oo,true);
+        if(validate){
+            //Construir Organización de destino
+            organization = organizationTransformer.transform(establecimiento, oo,"establecimiento");
         }
 
         // PractitionerRole (Agendador)
-        JsonNode rolProfesionalAgendador = node.get("rolDelProfesionalAgendador");
         PractitionerRole practitionerRoleAgendador = null;
-        if(rolProfesionalAgendador != null) {
-            practitionerRoleAgendador = practitionerRoleTransformer.transform(rolProfesionalAgendador, oo);
-            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "agendador", "Agendador");
+        if(organization != null && practitionerAdmin != null) {
+            practitionerRoleAgendador = practitionerRoleTransformer.buildPractitionerRole("agendador", organization, practitionerAdmin);
 
-            CodeableConcept cc = new CodeableConcept(roleCode);
-            practitionerRoleAgendador.addCode(cc);
+        } else
+            HapiFhirUtils.addErrorIssue("rol del agendador","error en establecimiento o prestador administrativo", oo);
 
-            if(practitionerProfesional != null) {
-                practitionerRoleAgendador.setPractitioner(new Reference(practitionerProfesional));
-            }
-
-            if(organization != null) {
-                practitionerRoleAgendador.setOrganization(new Reference(organization));
-            }
-        } else {
-            HapiFhirUtils.addNotFoundIssue("rolDelProfesionalAgendador", oo);
-        }
 
         // PractitionerRole (Resolutor)
-        JsonNode rolProfesionalResolutor = node.get("rolDelProfesionalResolutor");
-        PractitionerRole practitionerRoleResolutor = null;
-        if(rolProfesionalResolutor != null) {
-            practitionerRoleResolutor = practitionerRoleTransformer.transform(rolProfesionalResolutor, oo);
-            Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "atendedor", "atendedor");
-            CodeableConcept cc = new CodeableConcept(roleCode);
-            practitionerRoleResolutor.addCode(cc);
-
-            if(practitionerProfesional != null) {
-                practitionerRoleResolutor.setPractitioner(new Reference(practitionerProfesional));
-            }
-
-            if(organization!= null) {
-                practitionerRoleResolutor.setOrganization(new Reference(organization));
-            }
+    PractitionerRole practitionerRoleAtendedor = null;
+    if (organization != null && practitionerProfesional != null){
+           practitionerRoleAtendedor = practitionerRoleTransformer.buildPractitionerRole("atendedor", organization, practitionerProfesional);
         } else {
             HapiFhirUtils.addNotFoundIssue("rolDelProfesionalResolutor", oo);
         }
 
         // Appointment
         JsonNode citaMedica = node.get("cita");
-        Appointment appointment = null;
-        if(citaMedica != null) {
-            appointment = appointmentTransformer.transform(node, oo);
+    boolean citaValid = HapiFhirUtils.validateObjectInJsonNode("cita", citaMedica,oo,true);
 
-            // Set patient reference
+            Appointment appointment = null;
+        if (citaValid){
+                appointment = appointmentTransformer.transform(node, oo);
+                if (practitionerRoleAtendedor != null){
+                    String vs ="http://hl7.org/fhir/ValueSet/resource-types";
+                    String cs = "http://hl7.org/fhir/resource-types";
 
-            String vs ="http://hl7.org/fhir/ValueSet/resource-types";
-            String cs = "http://hl7.org/fhir/resource-types";
+                    Coding coding = new Coding(cs, "PractitionerRole", "PractitionerRole");
+                    CodeableConcept cc = new CodeableConcept(coding);
 
-            Coding coding = new Coding(cs, "PractitionerRole", "PractitionerRole");
-            CodeableConcept cc = new CodeableConcept(coding);
+                    appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
+                            .setActor(new Reference(practitionerRoleAtendedor).setType(coding.getCode()))
+                            .setStatus(Appointment.ParticipationStatus.ACCEPTED));
+                }
 
-            if (practitionerRoleResolutor != null){
-                appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
-                        .setActor(new Reference(practitionerRoleResolutor).setType(coding.getCode()))
-                        .setStatus(Appointment.ParticipationStatus.ACCEPTED));
+                // Set service request reference
+                if(sr != null) {
+                    appointment.addBasedOn(new Reference(sr));
+                }
+            } else {
+                HapiFhirUtils.addNotFoundIssue("citaMedica", oo);
             }
 
-            // Set service request reference
-            if(sr != null) {
-                appointment.addBasedOn(new Reference(sr));
+            if (!oo.getIssue().isEmpty()) {
+                res = HapiFhirUtils.resourceToString(oo, fhirServerConfig.getFhirContext());
+                return res;
             }
-        } else {
-            HapiFhirUtils.addNotFoundIssue("citaMedica", oo);
-        }
 
-        if (!oo.getIssue().isEmpty()) {
-            res = HapiFhirUtils.resourceToString(oo, fhirServerConfig.getFhirContext());
+            // Add resources to bundle with their respective UUIDs
+            HapiFhirUtils.addResourceToBundle(b,messageHeader);
+            HapiFhirUtils.addResourceToBundle(b,sr);
+            HapiFhirUtils.addResourceToBundle(b,practitionerProfesional);
+            HapiFhirUtils.addResourceToBundle(b,practitionerAdmin);
+            HapiFhirUtils.addResourceToBundle(b,organization);
+            HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
+            HapiFhirUtils.addResourceToBundle(b,practitionerRoleAtendedor);
+            HapiFhirUtils.addResourceToBundle(b,appointment);
+
+            // Set MessageHeader references
+            setMessageHeaderReferences(messageHeader,
+                    new Reference(sr),
+                    new Reference(practitionerRoleAgendador),
+                    new Reference(appointment));
+
+            res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
             return res;
         }
-
-        // Add resources to bundle with their respective UUIDs
-        HapiFhirUtils.addResourceToBundle(b,messageHeader);
-        HapiFhirUtils.addResourceToBundle(b,sr);
-        HapiFhirUtils.addResourceToBundle(b,practitionerProfesional);
-        HapiFhirUtils.addResourceToBundle(b,practitionerAdmin);
-        HapiFhirUtils.addResourceToBundle(b,organization);
-        HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
-        HapiFhirUtils.addResourceToBundle(b,practitionerRoleResolutor);
-        HapiFhirUtils.addResourceToBundle(b,appointment);
-
-        // Set MessageHeader references
-        setMessageHeaderReferences(messageHeader,
-                new Reference(sr),
-                new Reference(practitionerRoleAgendador),
-                new Reference(appointment));
-
-        res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
-        return res;
-    }
-
-    public void setMessageHeaderReferences(MessageHeader m, Reference sr, Reference pr, Reference app) {
-        m.setAuthor(pr);
+        public void setMessageHeaderReferences(MessageHeader m, Reference sr, Reference pr, Reference app) {
+            m.setAuthor(pr);
         m.getFocus().add(sr);
         m.getFocus().add(app);
     }
