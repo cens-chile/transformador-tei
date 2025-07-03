@@ -50,9 +50,8 @@ public class PractitionerRoleTransformer {
                 if (end != null) period.setEnd(end);
 
             }catch (Exception e){
-                HapiFhirUtils.addErrorIssue("Rol de profesional","Fecha de inicio y/o fecha de fin", oo);
+                HapiFhirUtils.addErrorIssue("Rol de profesional.periodo.inicio o fin","Error en el formato de la fecha", oo);
             }
-
             role.setPeriod(period);
         }
 

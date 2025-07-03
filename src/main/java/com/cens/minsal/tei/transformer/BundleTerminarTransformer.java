@@ -39,7 +39,6 @@ public class BundleTerminarTransformer {
     PatientTransformer patientTransformer;
     OrganizationTransformer organizationTransformer;
     ValueSetValidatorService validator;
-    PractitionerRoleTransformer referenciadorTransformer;
 
 
 
@@ -49,15 +48,13 @@ public class BundleTerminarTransformer {
                                      PatientTransformer patientTransformer,
                                      PractitionerRoleTransformer practitionerRoleTransformer,
                                      OrganizationTransformer organizationTransformer,
-                                     ValueSetValidatorService validator,
-                                     PractitionerRoleTransformer referenciadorTransformer) {
+                                     ValueSetValidatorService validator) {
         this.fhirServerConfig = fhirServerConfig;
         this.messageHeaderTransformer = messageHeaderTransformer;
         this.practitionerTransformer = practitionerTransformer;
         this.patientTransformer = patientTransformer;
         this.organizationTransformer = organizationTransformer;
         this.practitionerRoleTransformer = practitionerRoleTransformer;
-        this.referenciadorTransformer = referenciadorTransformer;
         this.validator = validator;
     }
     
@@ -118,8 +115,6 @@ public class BundleTerminarTransformer {
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
         }
 
-
-
         get = node.get("establecimiento");
         boolean estabValid = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get,out,true);
 
@@ -129,9 +124,9 @@ public class BundleTerminarTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("No se encontraron datos de la organización", out);
         }
-        PractitionerRole resolutor = null;
+        PractitionerRole terminador = null;
         if(organization != null && practitioner != null) {
-            resolutor = referenciadorTransformer.buildPractitionerRole("terminador", organization, practitioner);
+            terminador = practitionerRoleTransformer.buildPractitionerRole("terminador", organization, practitioner);
         }
 
         if (!out.getIssue().isEmpty()) {
@@ -140,7 +135,7 @@ public class BundleTerminarTransformer {
         }
 
         HapiFhirUtils.addResourceToBundle(b, messageHeader);
-        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(resolutor));
+        setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(terminador));
 
         //Rol del Profesional (practitionerRol)
         String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
@@ -149,11 +144,11 @@ public class BundleTerminarTransformer {
         String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         sr.getSubject().setReference(refPat);
 
-        sr.getPerformer().add(new Reference(resolutor));
+        sr.getPerformer().add(new Reference(terminador));
 
         HapiFhirUtils.addResourceToBundle(b,practitioner);
         HapiFhirUtils.addResourceToBundle(b,organization);
-        HapiFhirUtils.addResourceToBundle(b,resolutor);
+        HapiFhirUtils.addResourceToBundle(b,terminador);
 
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
