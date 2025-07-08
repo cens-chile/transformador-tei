@@ -51,7 +51,7 @@ public class PractitionerTransformer {
 
         // ID
 
-        practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
+        //practitioner.setId(HapiFhirUtils.readStringValueFromJsonNode("id", node));
 
         if (node.has("identidadGenero")) {
             String genero = HapiFhirUtils.readStringValueFromJsonNode("identidadGenero", node);
@@ -314,7 +314,7 @@ public class PractitionerTransformer {
         }
 
 
-        if (tipoPractitioner.equals("profesional")) {
+        if (node.has("titulosProfesionales")) {
             JsonNode tits = node.get("titulosProfesionales");
             boolean validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo,true);
             if (validoB) {
