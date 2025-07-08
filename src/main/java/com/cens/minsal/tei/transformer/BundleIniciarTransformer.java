@@ -307,7 +307,7 @@ public class BundleIniciarTransformer {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
-        String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
+        String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         if(modalidadAtencion!=null){
             VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
             if(fromCode!=null){
@@ -320,7 +320,7 @@ public class BundleIniciarTransformer {
         else
              HapiFhirUtils.addNotFoundIssue("modalidadAtencion", oo);
         
-        String derivadoPara = HapiFhirUtils.readIntValueFromJsonNode("derivadoPara", node);
+        String derivadoPara = HapiFhirUtils.readStringValueFromJsonNode("derivadoPara", node);
         if(derivadoPara!=null){
             VSDerivadoParaEnum fromCode = VSDerivadoParaEnum.fromCode(derivadoPara);
             if(fromCode!=null){

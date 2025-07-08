@@ -235,7 +235,7 @@ public class BundleRevisarTransformer {
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
         
        
-        String modalidadAtencion = HapiFhirUtils.readIntValueFromJsonNode("modalidadAtencion", node);
+        String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         if(modalidadAtencion!=null){
             //VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);
             String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
@@ -249,7 +249,7 @@ public class BundleRevisarTransformer {
                 HapiFhirUtils.addInvalidIssue("solicitudIC.modalidadAtencion", oo);
         }
         
-        String derivadoPara = HapiFhirUtils.readIntValueFromJsonNode("derivadoPara", node);
+        String derivadoPara = HapiFhirUtils.readStringValueFromJsonNode("derivadoPara", node);
         if(derivadoPara!=null){
             VSDerivadoParaEnum fromCode = VSDerivadoParaEnum.fromCode(derivadoPara);
             if(fromCode!=null){
@@ -274,7 +274,7 @@ public class BundleRevisarTransformer {
         }
         
         
-        String destinoAtencion = HapiFhirUtils.readIntValueFromJsonNode("destinoAtencion", node);
+        String destinoAtencion = HapiFhirUtils.readStringValueFromJsonNode("destinoAtencion", node);
         if(destinoAtencion!=null){
             String cs ="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo";
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
