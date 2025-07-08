@@ -454,8 +454,10 @@ public class PatientTransformer {
                             HapiFhirUtils.addInvalidIssue("paciente.contacto.sistemaDeContacto (permitido email y phone)", oo);
                             break;
                     }
-                }
-            }
+                }else
+            HapiFhirUtils.addNotFoundIssue("paciente.contacto.tipoDeContacto & paciente.contacto.valorContacto", oo);
+
+        }
                 if (contactPointList.size() > 0) {
                     patient.setTelecom(contactPointList);
                 } else HapiFhirUtils.addNotFoundIssue("paciente.contacto o email", oo);

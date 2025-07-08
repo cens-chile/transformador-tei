@@ -229,7 +229,7 @@ public class PractitionerTransformer {
                             HapiFhirUtils.addInvalidIssue("prestador.contacto.tipoDeContacto (permitido email y phone)", oo);
                             break;
                     }
-                }
+                }else HapiFhirUtils.addNotFoundIssue("prestador.contacto.tipoDeContacto & prestador.contacto.valorContacto", oo);
             }
             if (contactPointList.size() > 0) {
                 practitioner.setTelecom(contactPointList);
