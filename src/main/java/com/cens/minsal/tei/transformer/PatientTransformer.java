@@ -188,7 +188,7 @@ public class PatientTransformer {
                 patient.addExtension(religionExt);
             }
         }
-
+/*
         if(node.has("sexoRegistral")){
             vs = "http://hl7.org/fhir/ValueSet/administrative-gender";
             cs = "http://hl7.org/fhir/administrative-gender";
@@ -198,7 +198,7 @@ public class PatientTransformer {
                     patient.setGender(Enumerations.AdministrativeGender.fromCode(code));
             } else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoRegistral",oo);
         }else HapiFhirUtils.addNotFoundIssue("paciente.sexoRegistral",oo);
-
+*/
         if (node.has("sexoBiologico")) {
             String sexoBiologico = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico",node);
              cs = "http://hl7.org/fhir/administrative-gender";
@@ -211,6 +211,7 @@ public class PatientTransformer {
                  Extension sexoBioExt = new Extension("https://hl7chile.cl/fhir/ig/clcore/StructureDefinition/SexoBiologico",
                          cc);
                  patient.addExtension(sexoBioExt);
+                 patient.setGender(Enumerations.AdministrativeGender.fromCode(sexoBiologico));
 
              }else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoBiologico",oo);
 
