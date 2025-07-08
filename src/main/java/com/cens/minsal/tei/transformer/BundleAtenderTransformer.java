@@ -354,8 +354,20 @@ public class BundleAtenderTransformer {
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
-        Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
-        sr.getCategoryFirstRep().addCoding(coding);
+        if (modalidadAtencion != null) {
+
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
+            String cs  = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+            String validate = validator.validateCode(cs, modalidadAtencion, "",vs);
+            if(validate != null){
+                Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
+                sr.getCategoryFirstRep().addCoding(coding);
+            } else
+                HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.modalidadAtencion",oo);
+
+        } else {
+            HapiFhirUtils.addNotFoundIssue("modalidadAtencion", oo);
+        }
 
         String idIC = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
         if (idIC == null) HapiFhirUtils.addNotFoundIssue("idInterconsulta", oo);

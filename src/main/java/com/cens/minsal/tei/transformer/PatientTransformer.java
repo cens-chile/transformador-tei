@@ -426,28 +426,39 @@ public class PatientTransformer {
         if(contactosValid) {
             for (JsonNode contacto : contactos) {
                 ContactPoint cp = new ContactPoint();
-                if (contacto.has("telefono")) {
-                    cp.setSystem(ContactPoint.ContactPointSystem.PHONE);
-                    //cp.setUse(ContactPoint.ContactPointUse.MOBILE);
-                    cp.setValue(contacto.get("telefono").asText());
-                    conteoContactos++;
-                    //patient.addTelecom(cp);
-                    contactPointList.add(cp);
+                if (contacto.has("sistemaDeContacto") && contacto.has("valorContacto")) {
+                    String sistemaDeContacto = HapiFhirUtils.readStringValueFromJsonNode("sistemaDeContacto", contacto);
+                    if(sistemaDeContacto == null)
+                        HapiFhirUtils.addErrorIssue("paciente.contacto.sistemaDeContacto", "nulo o vacío", oo);
+                    String valorContacto = HapiFhirUtils.readStringValueFromJsonNode("valorContacto", contacto);
+                    if(valorContacto == null)
+                        HapiFhirUtils.addErrorIssue("paciente.contacto.valorContacto", "nulo o vacío", oo);
 
-                } else if (contacto.has("email")) {
-                    cp.setSystem(ContactPoint.ContactPointSystem.EMAIL);
-                    //cp.setUse(ContactPoint.ContactPointUse.HOME);
-                    cp.setValue(HapiFhirUtils.readStringValueFromJsonNode("email",contacto));
-                    conteoContactos++;
-                    //patient.addTelecom(cp);
-                    contactPointList.add(cp);
+                    switch (sistemaDeContacto) {
+                        case "phone":
+                            cp.setSystem(ContactPoint.ContactPointSystem.PHONE);
+                            cp.setValue(valorContacto);
+                            conteoContactos++;
+                            contactPointList.add(cp);
+                            break;
 
-                } else HapiFhirUtils.addNotFoundIssue("paciente.telefono o email", oo);
+                        case "email":
+                            cp.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+                            cp.setValue(valorContacto);
+                            conteoContactos++;
+                            contactPointList.add(cp);
+                            break;
 
+                        default:
+                            HapiFhirUtils.addInvalidIssue("paciente.contacto.sistemaDeContacto (permitido email y phone)", oo);
+                            break;
+                    }
+                }
             }
-            if(contactPointList.size() >0) {
-                patient.setTelecom(contactPointList);
-            } else HapiFhirUtils.addNotFoundIssue("paciente.contacto.telefono o email", oo);
+                if (contactPointList.size() > 0) {
+                    patient.setTelecom(contactPointList);
+                } else HapiFhirUtils.addNotFoundIssue("paciente.contacto o email", oo);
+
         }
 
         return patient;

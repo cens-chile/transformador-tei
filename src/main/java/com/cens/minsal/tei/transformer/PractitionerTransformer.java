@@ -11,8 +11,10 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -194,22 +196,43 @@ public class PractitionerTransformer {
         }
 
         // Contacto
-        JsonNode contacto = node.get("contacto");
-        if (contacto != null) {
-            String telefono = HapiFhirUtils.readStringValueFromJsonNode("telefono", contacto);
-            if (telefono != null) {
-                practitioner.addTelecom(new ContactPoint()
-                        .setSystem(ContactPoint.ContactPointSystem.PHONE)
-                        .setUse(ContactPoint.ContactPointUse.WORK)
-                        .setValue(telefono));
-            }
+        JsonNode contactos = node.get("contacto");
+        boolean contactosValid = HapiFhirUtils.validateArrayInJsonNode("prestador.contacto", contactos,oo,true);
+        List<ContactPoint> contactPointList  = new ArrayList<>();
+        int conteoContactos = 0;
+        if(contactosValid) {
+            for (JsonNode contacto : contactos) {
+                ContactPoint cp = new ContactPoint();
+                if (contacto.has("tipoDeContacto") && contacto.has("valorContacto")) {
+                    String tipoDeContacto = HapiFhirUtils.readStringValueFromJsonNode("tipoDeContacto", contacto);
+                    if(tipoDeContacto == null)
+                        HapiFhirUtils.addErrorIssue("prestador.contacto.tipoDeContacto", "nulo o vacío", oo);
+                    String valorContacto = HapiFhirUtils.readStringValueFromJsonNode("valorContacto", contacto);
+                    if(valorContacto == null)
+                        HapiFhirUtils.addErrorIssue("prestador.contacto.valorContacto", "nulo o vacío", oo);
 
-            String email = HapiFhirUtils.readStringValueFromJsonNode("email", contacto);
-            if (email != null) {
-                practitioner.addTelecom(new ContactPoint()
-                        .setSystem(ContactPoint.ContactPointSystem.EMAIL)
-                        .setUse(ContactPoint.ContactPointUse.WORK)
-                        .setValue(email));
+                    switch (tipoDeContacto) {
+                        case "phone":
+                            cp.setSystem(ContactPoint.ContactPointSystem.PHONE);
+                            cp.setValue(valorContacto);
+                            conteoContactos++;
+                            contactPointList.add(cp);
+                            break;
+
+                        case "email":
+                            cp.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+                            cp.setValue(valorContacto);
+                            conteoContactos++;
+                            contactPointList.add(cp);
+                            break;
+                        default:
+                            HapiFhirUtils.addInvalidIssue("prestador.contacto.tipoDeContacto (permitido email y phone)", oo);
+                            break;
+                    }
+                }
+            }
+            if (contactPointList.size() > 0) {
+                practitioner.setTelecom(contactPointList);
             }
         }
 
