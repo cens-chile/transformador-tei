@@ -207,8 +207,16 @@ public class BundleAgendarTransformer {
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         if (modalidadAtencion != null) {
-            Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
-            sr.getCategoryFirstRep().addCoding(coding);
+
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSModalidadAtencionCodigo";
+            String cs  = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSModalidadAtencionCodigo";
+            String validate = validator.validateCode(cs, modalidadAtencion, "",vs);
+            if(validate != null){
+                Coding coding = VSModalidadAtencionEnum.fromCode(modalidadAtencion).getCoding();
+                sr.getCategoryFirstRep().addCoding(coding);
+            } else
+                HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.modalidadAtencion",oo);
+
         } else {
             HapiFhirUtils.addNotFoundIssue("modalidadAtencion", oo);
         }

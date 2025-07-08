@@ -422,23 +422,32 @@ public class PatientTransformer {
             JsonNode contactos = node.get("contacto");
         boolean contactosValid = HapiFhirUtils.validateArrayInJsonNode("paciente.contacto", contactos,oo,true);
         List<ContactPoint> contactPointList  = new ArrayList<>();
+        int conteoContactos = 0;
         if(contactosValid) {
             for (JsonNode contacto : contactos) {
                 ContactPoint cp = new ContactPoint();
                 if (contacto.has("telefono")) {
                     cp.setSystem(ContactPoint.ContactPointSystem.PHONE);
-                    cp.setUse(ContactPoint.ContactPointUse.MOBILE);
+                    //cp.setUse(ContactPoint.ContactPointUse.MOBILE);
                     cp.setValue(contacto.get("telefono").asText());
-                    patient.addTelecom(cp);
+                    conteoContactos++;
+                    //patient.addTelecom(cp);
+                    contactPointList.add(cp);
+
                 } else if (contacto.has("email")) {
                     cp.setSystem(ContactPoint.ContactPointSystem.EMAIL);
-                    cp.setUse(ContactPoint.ContactPointUse.HOME);
-                    cp.setValue(contacto.get("email").asText());
-                    patient.addTelecom(cp);
+                    //cp.setUse(ContactPoint.ContactPointUse.HOME);
+                    cp.setValue(HapiFhirUtils.readStringValueFromJsonNode("email",contacto));
+                    conteoContactos++;
+                    //patient.addTelecom(cp);
+                    contactPointList.add(cp);
+
                 } else HapiFhirUtils.addNotFoundIssue("paciente.telefono o email", oo);
-                contactPointList.add(cp);
+
             }
-            patient.setTelecom(contactPointList);
+            if(contactPointList.size() >0) {
+                patient.setTelecom(contactPointList);
+            } else HapiFhirUtils.addNotFoundIssue("paciente.contacto.telefono o email", oo);
         }
 
         return patient;
