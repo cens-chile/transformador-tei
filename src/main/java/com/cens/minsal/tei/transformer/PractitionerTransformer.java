@@ -315,13 +315,30 @@ public class PractitionerTransformer {
 
 
         if (node.has("titulosProfesionales")) {
+
             JsonNode tits = node.get("titulosProfesionales");
             boolean validoB = HapiFhirUtils.validateArrayInJsonNode("titulosProfesionales", tits,oo,true);
             if (validoB) {
+                String vs = "";
+                String cs = "";
+                if(tipoPractitioner.equals("profesional")){
+                    vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional";
+                    cs= "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional";
+                }
+                if (tipoPractitioner.equals("administrativo")){
+                    vs = "http://terminology.hl7.org/ValueSet/v2-2.7-0360";
+                    cs = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
+                    vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional";
+                    cs= "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional";
+                    if(tits.size() >0) {
+                        String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", tits.get(0));
+                        if (codigo == null)
+                            HapiFhirUtils.addNotFoundIssue("prestador.titulosProfesionales.codigo", oo);
+                        String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", tits.get(0));
+                    }
+                }
                 addQualifications(practitioner, node.get("titulosProfesionales"),
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional",
-                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional",
-                        "cert",oo);
+                        cs, vs,"cert",oo);
             }
             if (tipoPractitioner.equals("profesional")) {
                 // Calificaciones (títulos, especialidades, subespecialidades, etc.)
@@ -381,6 +398,7 @@ public class PractitionerTransformer {
 
     private void addQualifications(Practitioner p, JsonNode node, String system, String vs, String identifierValue, OperationOutcome oo) {
         if (node != null && node.isArray()) {
+            int i = 0;
             for (JsonNode q : node) {
                 Practitioner.PractitionerQualificationComponent qual = new Practitioner.PractitionerQualificationComponent();
                 qual.addIdentifier().setValue(identifierValue);
@@ -422,8 +440,8 @@ public class PractitionerTransformer {
                     }
 
                     p.addQualification(qual);
-                } else HapiFhirUtils.addNotFoundCodeIssue("Titulo o especialidad del Prestador["+identifierValue+"].["+nombre+"]",oo);
-
+                } else HapiFhirUtils.addNotFoundCodeIssue("prestador.titulosProfesionales["+i+"].codigo",oo);
+                i++;
             }
         }
     }

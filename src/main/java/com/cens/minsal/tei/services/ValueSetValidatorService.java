@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
@@ -61,8 +62,11 @@ public class ValueSetValidatorService {
         System.out.println("theCodeSystem = " + theCodeSystem);
         System.out.println("theCode = " + theCode);
         CodeValidationResult codeValidationResult2 = validationSupport.validateCode
-        (validationSupportContext, new ConceptValidationOptions(), theCodeSystem, theCode, theDisplay, theValueSetUrl);
-        
+        (validationSupportContext, new ConceptValidationOptions().setInferSystem(true), theCodeSystem, theCode, theDisplay, theValueSetUrl);
+        /*ValueSetExpansionOptions vse = new ValueSetExpansionOptions();
+        vse.setFilter(theCode);
+        IValidationSupport.ValueSetExpansionOutcome vsExp = validationSupport.expandValueSet(validationSupportContext,vse, theValueSetUrl);
+         */
         if (codeValidationResult2 != null) {
           return codeValidationResult2;
         }
