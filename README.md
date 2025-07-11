@@ -259,7 +259,7 @@ No olvides dar una estrella al proyecto! Gracias!
 ### Top contributors:
 
 <a href="https://github.com/cens-chile/transformador-tei/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cens-chile/transformador-tei" />
+  <img src="https://img.shields.io/badge/TOP-CONTRIBUTORS-blue" />
 </a>
 
 <p align="right">(<a href="#readme-top">volver al inicio</a>)</p>
