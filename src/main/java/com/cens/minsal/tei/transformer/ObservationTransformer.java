@@ -123,11 +123,14 @@ public class ObservationTransformer {
                 HapiFhirUtils.addNotFoundIssue("resultadoExamenes["+i+"]"+".codigo", oo);
             
             try {
-                Date date = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", resultadoEx);
-                ob.setEffective(new DateTimeType(date));
+                if(resultadoEx.has("fechaExamen")) {
+                    Date date = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", resultadoEx);
+                    ob.setEffective(new DateTimeType(date));
+                }else
+                    HapiFhirUtils.addNotFoundIssue("resultadoExamenes.fechaExamen", oo);
             } catch (ParseException ex) {
-                Logger.getLogger(ObservationTransformer.class.getName()).log(Level.SEVERE, null, ex);
                 HapiFhirUtils.addErrorIssue("resultadoExamenes["+i+"]"+".fechaExamen", ex.getMessage(), oo);
+                Logger.getLogger(ObservationTransformer.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             String resultado = HapiFhirUtils.readStringValueFromJsonNode("resultado", resultadoEx);

@@ -45,7 +45,7 @@ public class FhirTermsValidatorConfig {
       UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport = new UnknownCodeSystemWarningValidationSupport(
           ctx);
       unknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(
-          IssueSeverity.INFORMATION);
+          IssueSeverity.ERROR);
       ValidationSupportChain validationSupportChain = new ValidationSupportChain(
           npmPackageSupport,
           new DefaultProfileValidationSupport(ctx),

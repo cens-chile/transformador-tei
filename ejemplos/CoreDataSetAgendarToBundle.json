@@ -1,0 +1,280 @@
+{
+    "datosSistema": {
+        "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
+        "endpoint": "sadsadsa.org" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
+    },
+    "referenciaPaciente": "Patient/id_paciente-ejemplo-001", // (Requerido)corresponde a "Patient/<id del paciente en sistema de Tiempos de Espera Interoperable>"
+    "solicitudIC": { // (Requerido) Datos de la interconsulta
+        "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
+        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato dd-MM-yyyy HH:mm:ss, dd-MM-yyyy o yyyy-MM-dd 
+        "modalidadAtencion": "3" // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
+    },
+    "prestadorProfesional": {
+        "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
+        "identificadores": { // (Requerido) Al menos debe contar con RUN.
+            "RUN": "11111111-1", //(Requerido)
+            "RNPI": "99999" //(Opcional)
+        },
+        "nombreCompleto": { // (Requerido)
+            "nombres": [ //(Requerido) separar por comas cada nombre.
+                "María"
+            ],
+            "primerApellido": "López", //(Requerido)
+            "segundoApellido": "Ramírez" //(Opcional)
+        },
+        "identidadDeGenero": "no revelado", //(Opcional)
+        "sexoRegistral": "male", //(Requerido)  https://hl7.org/fhir/R4/valueset-administrative-gender.html
+        "nacionalidad": "056", // (Opcional) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+        "contacto": [
+            { // (Opcional)
+                "tipoDeContacto": "phone", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "+56996794733" // (Requerido para cada contacto).
+            },
+            {
+                "tipoDeContacto": "email", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "maria.lopez.profesional@example.com" // (Requerido para cada contacto).
+            }
+        ],
+        "direccion": { //(Opcional)
+            "descripcion": "Calle Del prestador 456", //(Requerido)
+            "comuna": { // (Opcional)
+                "nombre": "Providencia", //(Opcional)
+                "codigo": "13115" // (Requerido) Código desde https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosComunaCL.html
+            },
+            "region": { // (Opcional)
+                "nombre": "Región Metropolitana", //(Opcional)
+                "codigo": "13" // (Requerido) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosRegionesCL.html
+            },
+            "provincia": { //(Opcional)
+                "nombre": "Talagante", //(Opcional)
+                "codigo": "136" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosProvinciasCL.html
+            },
+            "pais": { // (Opcional)
+                "nombre": "Chile", //(Opcional)
+                "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+            }
+        },
+        "fechaNacimiento": "01-01-1975", // (Requerido) fecha en formato dd-MM-YYYY
+        "titulosProfesionales": [ // (Requerido)
+            {
+                "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
+                "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
+                "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
+            }
+        ],
+        "especialidadesMedicas": [ // (Opcional) 
+            {
+                "nombre": "CARDIOLOGÍA", // (Opcional)
+                "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1982", // (Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
+            }
+        ],
+        "subespecialidadesMedicas": [ //(Opcional)
+            {
+                "nombre": "ANESTESIOLOGÍA", //(Opcional)
+                "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1983", //(Opcional)  fecha en formato dd-MM-YYYY
+                "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
+            }
+        ],
+        "especialidadesOdontologicas": [ //(Opcional)
+            {
+                "nombre": "Odontopediatría", //(Opcional)
+                "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
+                "fechaEmision": "15-05-1984", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesBioquimicas": [ //(Opcional)
+            {
+                "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Salud Pública", //(Opcional) 
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            },
+            {
+                "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Laboratorio Forense", //(Opcional)  
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesFarmacologicas": [ //(Opcional)
+            {
+                "nombre": "Laboratorio Clínicooo", //(Opcional)
+                "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
+                "fechaEmision": "15-05-1986", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ]
+    },
+    "establecimiento": {
+        //"identificador": "est-002",  //(Opcional) Corresponde al identificador de la organización en el sistema de TEI
+        //"sistema": "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino",
+        //"valor": "456456456",
+        "nombreLegal": "Centro de Salud Familiar Ejemplo agendador",
+        "codigoDEIS": "133558"
+        //"tipo": "CESFAM",
+        //"activo": true,
+        /*"direccion": {
+            "linea": "Av. Salud 321",
+            "comuna": {
+                "nombre": "Providencia",
+                "codigo": "13114"
+            },
+            "region": {
+                "nombre": "Región Metropolitana",
+                "codigo": "13"
+            },
+            "pais": {
+                "nombre": "Chile",
+                "codigo": "132"
+            }
+        }*/
+    },
+    "rolDelProfesionalAgendador": {
+        "ID": "rol-agendador-001"
+    },
+    "rolDelProfesionalResolutor": {
+        "ID": "rol-Resolutor-001"
+    },
+    "cita": {
+        "identificador": "cita-agendada-001", // se elimina
+        "estado": "booked", // Revisar si es en español o inglés. Esrto debiera ser un código
+        "motivo": {
+            "codigo": "409073007",
+            "glosa": "Chequeo general",
+            "sistema": "http://snomed.info/sct"
+        },
+        "fechaInicio": "10-06-2025 09:00:00",
+        "fechaFin": "10-06-2025 09:30:00",
+        "estadoActorPaciente": "tentative", // accepted declined tentative needs-action.
+        "medioDeContacto": "1", //  1 Correo 2 SMS 3 Llamada 4 Whatsapp 5 Presencial
+        "motivoCancelacionCita": "pat",
+        "contactadoLE": {
+            "contactado": true,
+            "motivoNoContactabilidad": "1"
+        },
+        "ubicacion": "Location/id_ubicacion_centro_salud"
+    },
+    "prestadorAdministrativo": { //(Requerido) Corresponde a quien está agendando la cita médica, no al profesional que atenderá al paciente.
+        "identificadores": { // (Requerido) Al menos debe existir el RUN
+            "RUN": "11111111-1" // (Requerido) 
+        },
+        "nombreCompleto": { // (Requerido) Al menos debe contar con un nombre y primer apellido
+            "nombres": [ // (Requerido) Nombres entre comillas separados por una ","
+                "María administrativa"
+            ],
+            "primerApellido": "López administrativa", // (Requerdido) Apellido del prestador
+            "segundoApellido": "Ramírez administrativa" // (Opcional) Segundo apellido del prestador
+        },
+        "sexoRegistral": "male", // (Requerido) Corresponde al sexo biológico. Alternativas: male | female | other | unknown (http://hl7.org/fhir/R4/valueset-administrative-gender.html)
+        "contacto": [ //(Opcional) Forma de contactar al prestador
+            {
+                "tipoDeContacto": "email", // (Requerido) Acepta email y phone.
+                "valorContacto": "maria.lopezadministrativa@example.com" //(Requerido) 
+            },
+            {
+                "tipoDeContacto": "phone", // (Requerido) Acepta email y phone.
+                "valorContacto": "2255664488" //(Requerido)
+            }
+        ],
+        "direccion": { // (Opcional) Corresponde a la direción del prestador administrativo
+            "descripcion": "Calle Verdadera 456 administrativa", // (opcional) Calle y numeración de la dirección
+            "comuna": { // (Opcional) Describe Comuna de la dirección
+                "nombre": "Providencia", // (Opcional) Nombre de la comuna.
+                "codigo": "13114" //(Requerido) Del conjunto válido que se describe en https://hl7chile.cl/fhir/ig/clcore/1.9.2/StructureDefinition-ComunasCl.html
+            },
+            "provincia": { // (Opcional) Describe la Provincia de la dirección
+                "nombre": "Santiago", // (Opcional) Nombre de la provincia
+                "codigo": "131" //(Requerido) Del conjunto válido que se describe en  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosProvinciasCL.html
+            },
+            "region": { // (Opcional) Describe la región de la dirección
+                "nombre": "Región Metropolitana", // (Opcional) Nombre de la región.
+                "codigo": "13" //(Requerido) Del conjunto válido que se describe en https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosRegionesCL.html
+            },
+            "pais": { // (Opcional) Describe el país asociado a la dirección
+                "nombre": "Chile", // (Opcional) Nombre del país
+                "codigo": "132" //  //(Requerido) Del conjunto válido que se describe en https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+            }
+        },
+        "fechaNacimiento": "01-01-1975", // (Opcional) Nacimiento del prestador
+        "titulosProfesionales": [ // (Opcional) Título(s) del prestador 
+            {
+                "nombre": "Associate of Artssadas", // (Opcional) Nombre de la profesión del prestador
+                "codigo": "sdfsdfAA", // (Requerido) Del conjunto válido que se describe en https://hl7.org/fhir/R4/v2/0360/2.7/index.html
+                "fechaEmision": "01-01-2000", // (Opcional) fehca en formato "dd-MM-YYYY o YYYY-MM-dd"
+                "institucion": "Universidad Católica" //(Opcional) Institucion que emite el certificado. Este campo se maneja como texto, sin validación.
+            }
+        ]
+    },
+     "paciente": {
+        "identidadGenero": "1" //(Requerido) Código de valor que debe pertenecer a la tabla en el siguiente link:https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSIdentidaddeGenero.html
+        /*"sexoBiologico": "female", // O */
+        ,"nacionalidad": "064", //(Requerido) Código de la nacionalidad que informa el paciente.
+        "paisOrigen": "024", //(Requerido) Código del pais de naciemiento del paciente.
+        //"religion": "8", //(Opcional) - Código de la religión que declara el paciente.
+        "pueblosOriginariosPerteneciente": true, //(Requerido) Se indica si el paciente pertenece a un pueblo originario.
+        /*"puebloAfroPertenencia": true, //(Opcional) Se indica si el paciente pertenece al pueblo tribal afrodescendiente 
+        "pueblosOriginarios": "04", //(Requerido) si pueblosOriginariosPerteneciente es true 
+        */"identificadores": [ //(Requerido) el identificador Run de código 01 es obligatorio.
+            {
+                "valor": "98765432-1", //(Requerido) Número del documento.
+                "codigo": "01", //(Requerido) Código del tipo de documento.
+                "paisEmision": "136" //(Requerido) Pais que emitio el documento.
+            }
+        ],
+        "nombreCompleto": {//(Requerido)
+            "nombres": [
+                "María" //(Requerido)
+            ],
+            "primerApellido": "López", //(Requerido)
+            "segundoApellido": "Rivas" //(Opcional)
+        },
+        "nombreSocial": "unNombreSocialCualquieraDelPaciente", //(Opcional) Nombre social o con cual se siente representado el paciente.
+        "contacto": [ //(Requerido) al menos uno
+            {
+                "sistemaDeContacto": "phone",//(Requerido) Tipo de contacto puede ser "phone" o "email"
+                "valorContacto": "+569555555553" //(Requerido) valor del contacto
+            },
+            {
+                "sistemaDeContacto": "email",//(Requerido) Tipo de contacto puede ser "phone" o "email"
+                "valorContacto": "alalalala@gmail.com" //(Requerido) valor del contacto
+            }
+        ],
+        "sexoRegistral": "female", //(Requerido) Sexo del paciente al nacer.
+        "fechaNacimiento": "01-01-1970", //(Requerido) 
+        
+        "fallecimiento": {//(Requerido) 
+            "fallecido": false/*, //(Requerido)  
+            "fechaFallecimiento":"15-05-2010"*/
+        },
+        "estadoCivil": "01",//(Opcional) Estado civil del paciente
+        "direcciones": [ //(Opcional) se indica la dirección de contacto que entrega el paciente
+            {
+                "direccion": "Calle Verdadera 456", //(Requerido) Indica nombre de calle o avenida y numeración de la vivienda 
+                "codigoUso": "home", //(Requerido) Definición del tipo de domicilio home | work | temp | old 
+                "comuna": {
+                    "nombre": "Providencia", //(Opcional) Indica la provincia de residencia del usuario
+                    "codigo": "13115" //(Requerido) 
+                },
+                "provincia": {//(Opcional)
+                    "nombre": "Santiago", //(Opcional) Indica la comuna de residencia del usuario
+                    "codigo": "131" //(Requerido) 
+                },
+                "region": {//(Opcional)
+                    "nombre": "Región Metropolitana", //(Opcional)
+                    "codigo": "13" //(Requerido) 
+                },
+                "pais": {//(Opcional)
+                    "nombre":"Chile", //(Opcional) Indica la región de residencia del usuario
+                    "codigo":"056" //(Requerido) 
+                },
+                "situacionCalle":false//Opcional
+            }
+        ]
+    }
+}

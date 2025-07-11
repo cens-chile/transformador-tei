@@ -1,0 +1,217 @@
+{
+    "datosSistema": {
+        "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
+        "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
+    },
+    "referenciaPaciente": "Patient/id_paciente-ejemplo-001", // (Requerido) Indica el paciente en de la solicitud de Interconsulta
+    "planDeAtencion": { // (Requerido) Plan de atención del paciente.
+        "descripcion": "Plan de atención para hipertensión arterial", // (Requerido) Describe el plan de atención como texto libre.
+        "requiereExamen": true, // (Requerido) Indica si requiere exámenes.
+        "recetas": [ // (Opcional) 
+            {
+                "referenciaReceta": "MedicationRequest/id_receta" // (Requerido)
+            }
+        ]
+    } /*
+    "solicitudExamen": [
+        {
+            "fechaSolicitudIC": "13-05-2025 10:20:22", //fecha con formato: dd-MM-yyyy HH:mm:ss
+            "razonSolicitud": "sospecha de escoliosis", //Razón de la solicitud del exámen
+            "examenSolicitadoCodigo": "100000-9", // código LOINC
+            "examenSolicitadoGlosa": "sad", //Nombre del examen segun el estándar
+            "examenSolicitadoDescripcion": "descripcion del examen solicitado en texto libre"
+        }
+    ],*/,
+    "solicitudIC": {
+        "idSolicitudServicio": "aaaa",
+        "idInterconsulta": "id inter consulta",
+        "fechaSolicitudIC": "13-05-2025 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: dd-MM-yyyy HH:mm:ss
+        "modalidadAtencion": "2", //(Requerido) Valor entre: 1,2 o 3
+        "derivadoPara": "1", //(Requerido) Valor entre: 1,2,3,4 o 5
+        "prioridadIc": "routine", //(Requerido) Valor entre: routine o urgent
+        "atencionPreferente": false, //(Opcional) Indica si corresponde a atención preferente.
+        "resolutividadAPS": true, //(Opcional) Indica si corresponde aun problema se salud que es posible resolver por programa de      resolutividad en el nivel primario
+        "fundamentoPriorizacion": "1" //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
+    },
+    "alergias": [ //(Opcional) puede ser más de uno.
+        {
+            "codigoSustancia": "186002", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia 
+            "descripcionAlergia": "frutilla", //(Requerido) Descripción en texto libre de la alergia del paciente 
+            "glosaSustancia": "Uridyl diphosphate galactose" // (Opcional) Texto libre para describir la sustancia
+        },
+        {
+            "codigoSustancia": "187006", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia 
+            "descripcionAlergia": "asd", //(Requerido) Descripción en texto libre de la alergia del paciente
+            "glosaSustancia": "Uridyl diphosphate galactose" // (Opcional) Texto libre para describir la sustancia
+        }
+    ],
+    "establecimiento": {
+        "origen": {
+            "nombreLegal": "Hospital Clínico Ejemplo", //(Requerido) Nombre del establecimiento.
+            "codigoDEIS": "133558" //(Requerido) Código del establecimiento.
+        }
+    } ,
+    "encuentroAtender": {  // (Requerido) Describe la atención que recibió el paciente
+        "identificadorConsultaEspecialidad": "id consulta especialidad", // con esto sacamos el ID y creamos un identifier************
+        "pertinencia": false, // (Requerido) 	Pertinencia de la atención al ser evaluado por el profesional especialista , soporta true || false
+        "codigoModalidadAtencion": "1", //(Requerido)  1=presencial 2=remota 3=Telemedicina
+        /*" ": "1", // (Opcional)
+        "motivoNoPertinencia": "defunción del paciente", // (Opcional)
+        "identificador": "identificador e n sistema-del encuentro ", // (Opcional)
+        "estado": { // (Opcional)
+            "codigoEstado": "planned", //(Requerido) 
+        },
+        "codigoTipoConsulta": 1, //(Opcional) Tipo de consulta 1 = nueva 2=control 
+        "tipoDeServicio": //(opcional)
+        {
+            "codigo": "nedINTA" //(requerido)  Tipo de servicio que se realiza en el Encuentro, como por ejemplo los listados en https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSTiposServicio.html
+        },
+        "citaMedica": { //(Opcional)
+            "referenciaACitaMedica": "Appointment/id_appointment" //(Requerido) referencia a la cita que generada en la Interconsulta.
+        },*/
+        "periodo": { //(Requerido)
+            "fechaInicio": "01-01-2023 09:00:00",// (Requerido) Momento de inicio de la atencion, en formato dd-MM-yyyy HH:mm:SS
+            "fechaFin": "01-01-2024 10:00:00" // (Opcional) Momento de fin de la atencion, en formato dd-MM-yyyy HH:mm:SS
+        }/*,
+        "codigoRazonDelEncuentro": [  //
+            {
+                "codigoRazon": "109006", //SNOMED
+                "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason"
+            }
+        ],
+        "diagnosticos": [
+            {
+                "referenciaDiagnostico": "Condition/id_condition"
+            }
+        ]*/
+    },
+ "diagnostico": { //(Requerido)
+        "code": "A03",//(Requerido) Código del diagnóstico en SNOMED o CIE-10 
+        "system": "http://hl7.org/fhir/sid/icd-10",//(Requerido) valor entre: http://hl7.org/fhir/sid/icd-10 o http://snomed.info/sct
+        "glosa": "", //(Opcional)Corresponde a la glosa asociada al código  del diagnóstico según la terminología utilizada
+        "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
+        "estadoDiagnostico": "active",//(Requerido) Estado clinico del diagnostico.
+        "estadoVerificacion": "confirmed",//(Requerido) Estado de verificación del diagnóstico. 
+        "categoria": "encounter-diagnosis",//(Requerido) Categoría del diagnóstico de origen.
+        "severidad": "24484000"//(Opcional) Indica la severidad del diagnóstico Severo=2448400 Moderado =6736007 leve=255604002
+    }, 
+"resultadoExamenes": [//Opcional
+        {
+            "codigo": "100010-8",//(Requerido) Código que identifica el exámen realizado 
+            "resultado": "ad",//(Requerido)Indica el resultado codificado de los exámenes realizados 
+            "fechaExamen": "13-05-2030 10:20:22"//(Requerido) Indica cuando se tomó el examen, formato: dd-MM-yyyy HH:mm:ss   
+        }
+    
+],
+"solicitudMedicamento": { //(Opcional)
+    "medicamento": "261000",  //(Requerido) Código de medicamento, según la terminología que defina el establecimiento, por ejemplo: https://hl7.org/fhir/R4/valueset-medication-codes.html
+   "nombreMedicamento": "aspirina", // (Opcional) Nombre del medicamento
+    "indicacion": "indicacion de uso en Solicitud de Medicamento" //(Requerido) describe cómo debe usarse el medicamento, frecuencia, dosis, etc.
+},
+/*"anamnesis": {
+    "resultadoExamen": "resultado de exámen ----",
+    "fechaExamen": "13-05-2025 10:20:22"
+},*/
+    "prestador": {
+        "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
+        "identificadores": { // (Requerido) Al menos debe contar con RUN.
+            "RUN": "11111111-1", //(Requerido)
+            "RNPI": "99999" //(Opcional)
+        },
+        "nombreCompleto": { // (Requerido)
+            "nombres": [ //(Requerido) separar por comas cada nombre.
+                "María"
+            ],
+            "primerApellido": "López", //(Requerido)
+            "segundoApellido": "Ramírez" //(Opcional)
+        },
+        "identidadDeGenero": "no revelado", //(Opcional)
+        "sexoRegistral": "male", //(Requerido)  https://hl7.org/fhir/R4/valueset-administrative-gender.html
+        "nacionalidad": "056", // (Opcional) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+        "contacto": [
+            { // (Opcional)
+                "tipoDeContacto": "phone", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "+56996794733" // (Requerido para cada contacto).
+            },
+            {
+                "tipoDeContacto": "email", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "maria.lopez.profesional@example.com" // (Requerido para cada contacto).
+            }
+        ],
+        "direccion": { //(Opcional)
+            "descripcion": "Calle Del prestador 456", //(Requerido)
+            "comuna": { // (Opcional)
+                "nombre": "Providencia", //(Opcional)
+                "codigo": "13115" // (Requerido) Código desde https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosComunaCL.html
+            },
+            "region": { // (Opcional)
+                "nombre": "Región Metropolitana", //(Opcional)
+                "codigo": "13" // (Requerido) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosRegionesCL.html
+            },
+            "provincia": { //(Opcional)
+                "nombre": "Talagante", //(Opcional)
+                "codigo": "136" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosProvinciasCL.html
+            },
+            "pais": { // (Opcional)
+                "nombre": "Chile", //(Opcional)
+                "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+            }
+        },
+        "fechaNacimiento": "01-01-1975", // (Requerido) fecha en formato dd-MM-YYYY
+        "titulosProfesionales": [ // (Requerido)
+            {
+                "nombre": "MÉDICO CIRUJANO", //(Opcional)
+                "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
+                "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
+            }
+        ],
+        "especialidadesMedicas": [ // (Opcional)
+            {
+                "nombre": "CARDIOLOGÍA", // (Opcional)
+                "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1982", // (Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
+            }
+        ],
+        "subespecialidadesMedicas": [ //(Opcional)
+            {
+                "nombre": "ANESTESIOLOGÍA", //(Opcional)
+                "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1983", //(Opcional)  fecha en formato dd-MM-YYYY
+                "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
+            }
+        ],
+        "especialidadesOdontologicas": [ //(Opcional)
+            {
+                "nombre": "Odontopediatría", //(Opcional)
+                "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
+                "fechaEmision": "15-05-1984", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesBioquimicas": [ //(Opcional)
+            {
+                "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Salud Pública", //(Opcional)
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            },
+            {
+                "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Laboratorio Forense", //(Opcional)
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesFarmacologicas": [ //(Opcional)
+            {
+                "nombre": "Laboratorio Clínicooo", //(Opcional)
+                "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
+                "fechaEmision": "15-05-1986", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ]
+    }
+}

@@ -197,7 +197,7 @@ public class PractitionerTransformer {
 
         // Contacto
         JsonNode contactos = node.get("contacto");
-        boolean contactosValid = HapiFhirUtils.validateArrayInJsonNode("prestador.contacto", contactos,oo,true);
+        boolean contactosValid = HapiFhirUtils.validateArrayInJsonNode("prestador.contacto", contactos,oo,false);
         List<ContactPoint> contactPointList  = new ArrayList<>();
         int conteoContactos = 0;
         if(contactosValid) {
@@ -324,21 +324,20 @@ public class PractitionerTransformer {
                 if(tipoPractitioner.equals("profesional")){
                     vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional";
                     cs= "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional";
+                    addQualifications(practitioner, tits, cs, vs,"cert",oo, true);
+
                 }
                 if (tipoPractitioner.equals("administrativo")){
-                    vs = "http://terminology.hl7.org/ValueSet/v2-2.7-0360";
-                    cs = "http://terminology.hl7.org/CodeSystem/v2-0360|2.7";
-                    vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional";
-                    cs= "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional";
+                    vs = "";
+                    cs = "";
                     if(tits.size() >0) {
                         String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo", tits.get(0));
                         if (codigo == null)
                             HapiFhirUtils.addNotFoundIssue("prestador.titulosProfesionales.codigo", oo);
-                        String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", tits.get(0));
+                        //String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", tits.get(0));
+                        addQualifications(practitioner, tits, cs, vs,"cert",oo, false);
                     }
                 }
-                addQualifications(practitioner, node.get("titulosProfesionales"),
-                        cs, vs,"cert",oo);
             }
             if (tipoPractitioner.equals("profesional")) {
                 // Calificaciones (títulos, especialidades, subespecialidades, etc.)
@@ -347,28 +346,28 @@ public class PractitionerTransformer {
                     addQualifications(practitioner, node.get("especialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                            "esp", oo);
+                            "esp", oo,true);
                 }
                 if(node.has("subespecialidadesMedicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("subespecialidadesMedicas", node.get("subespecialidadesMedicas"), oo,false);
                     addQualifications(practitioner, node.get("subespecialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                            "subesp", oo);
+                            "subesp", oo,true);
                 }
                 if(node.has("especialidadesOdontologicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("especialidadesOdontologicas", node.get("especialidadesOdontologicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesOdontologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadOdont",
-                            "EspOdo", oo);
+                            "EspOdo", oo,true);
                 }
                 if(node.has("especialidadesBioquimicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("especialidadesBioquimicas", node.get("especialidadesBioquimicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesBioquimicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadBioqca",
-                            "EspBioQ", oo);
+                            "EspBioQ", oo,true);
                 }
 
                 if(node.has("especialidadesFarmacologicas")) {
@@ -376,7 +375,7 @@ public class PractitionerTransformer {
                     addQualifications(practitioner, node.get("especialidadesFarmacologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadFarma",
-                            "EspFarma", oo);
+                            "EspFarma", oo,true);
                 }
             }
         }
@@ -396,7 +395,7 @@ public class PractitionerTransformer {
         }
     }
 
-    private void addQualifications(Practitioner p, JsonNode node, String system, String vs, String identifierValue, OperationOutcome oo) {
+    private void addQualifications(Practitioner p, JsonNode node, String system, String vs, String identifierValue, OperationOutcome oo, boolean validateCode) {
         if (node != null && node.isArray()) {
             int i = 0;
             for (JsonNode q : node) {
@@ -404,8 +403,15 @@ public class PractitionerTransformer {
                 qual.addIdentifier().setValue(identifierValue);
                 String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",q);
                 String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", q);
-                String valido = validator.validateCode(system,codigo,nombre,vs);
-                if(valido != null) {
+                String valido = "";
+
+                if(validateCode) {
+                    valido = validator.validateCode(system, codigo, nombre, vs);
+                }
+                if(valido != null || !validateCode) {
+                    if(nombre != null){
+                        valido = nombre;
+                    }
                     qual.setCode(new CodeableConcept().addCoding(
                             new Coding()
                                     .setSystem(system)

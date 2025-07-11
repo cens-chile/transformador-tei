@@ -455,7 +455,7 @@ public class PatientTransformer {
                             break;
                     }
                 }else
-            HapiFhirUtils.addNotFoundIssue("paciente.contacto.tipoDeContacto & paciente.contacto.valorContacto", oo);
+            HapiFhirUtils.addNotFoundIssue("paciente.contacto.sistemaDeContacto & paciente.contacto.valorContacto", oo);
 
         }
                 if (contactPointList.size() > 0) {

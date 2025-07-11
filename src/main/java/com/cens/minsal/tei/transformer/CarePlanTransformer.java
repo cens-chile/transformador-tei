@@ -35,12 +35,6 @@ public class CarePlanTransformer {
 
         CarePlan carePlan = new CarePlan();
 
-        // ID [2]
-        String id = HapiFhirUtils.readStringValueFromJsonNode("id", node);
-        if (id != null) {
-            carePlan.setId(id);
-        }
-
         // Meta.profile [2]
         carePlan.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/CarePlanAtenderLE");
         carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);

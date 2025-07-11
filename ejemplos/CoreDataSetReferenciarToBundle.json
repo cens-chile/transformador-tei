@@ -1,0 +1,135 @@
+{
+    "datosSistema": {
+        "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
+        "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
+    },
+    "referenciaPaciente": "Patient/id_paciente-ejemplo-001",
+    "prestadorReferenciador":{
+        "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
+        "identificadores": { // (Requerido) Al menos debe contar con RUN.
+            "RUN": "11111111-1", //(Requerido)
+            "RNPI": "99999" //(Opcional)
+        },
+        "nombreCompleto": { // (Requerido)
+            "nombres": [ //(Requerido) separar por comas cada nombre.
+                "María"
+            ],
+            "primerApellido": "López", //(Requerido)
+            "segundoApellido": "Ramírez" //(Opcional)
+        },
+        "identidadDeGenero": "no revelado", //(Opcional)
+        "sexoRegistral": "male", //(Requerido)  https://hl7.org/fhir/R4/valueset-administrative-gender.html
+        "nacionalidad": "056", // (Opcional) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+        "contacto": [
+            { // (Opcional)
+                "tipoDeContacto": "phone", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "+56996794733" // (Requerido para cada contacto).
+            },
+            {
+                "tipoDeContacto": "email", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "maria.lopez.profesional@example.com" // (Requerido para cada contacto).
+            }
+        ],
+        "direccion": { //(Opcional)
+            "descripcion": "Calle Del prestador 456", //(Requerido)
+            "comuna": { // (Opcional)
+                "nombre": "Providencia", //(Opcional)
+                "codigo": "13115" // (Requerido) Código desde https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosComunaCL.html
+            },
+            "region": { // (Opcional)
+                "nombre": "Región Metropolitana", //(Opcional)
+                "codigo": "13" // (Requerido) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosRegionesCL.html
+            },
+            "provincia": { //(Opcional)
+                "nombre": "Talagante", //(Opcional)
+                "codigo": "136" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosProvinciasCL.html
+            },
+            "pais": { // (Opcional)
+                "nombre": "Chile", //(Opcional)
+                "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
+            }
+        },
+        "fechaNacimiento": "01-01-1975", // (Requerido) fecha en formato dd-MM-YYYY
+        "titulosProfesionales": [ // (Requerido)
+            {
+                "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
+                "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
+                "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
+            }
+        ],
+        "especialidadesMedicas": [ // (Opcional) 
+            {
+                "nombre": "CARDIOLOGÍA", // (Opcional)
+                "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1982", // (Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
+            }
+        ],
+        "subespecialidadesMedicas": [ //(Opcional)
+            {
+                "nombre": "ANESTESIOLOGÍA", //(Opcional)
+                "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "15-05-1983", //(Opcional)  fecha en formato dd-MM-YYYY
+                "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
+            }
+        ],
+        "especialidadesOdontologicas": [ //(Opcional)
+            {
+                "nombre": "Odontopediatría", //(Opcional)
+                "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
+                "fechaEmision": "15-05-1984", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesBioquimicas": [ //(Opcional)
+            {
+                "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Salud Pública", //(Opcional) 
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            },
+            {
+                "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
+                "nombre": "Laboratorio Forense", //(Opcional)  
+                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ],
+        "especialidadesFarmacologicas": [ //(Opcional)
+            {
+                "nombre": "Laboratorio Clínicooo", //(Opcional)
+                "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
+                "fechaEmision": "15-05-1986", //(Opcional) fecha en formato dd-MM-YYYY
+                "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
+            }
+        ]
+    },
+    "establecimiento": {
+        "origen": {
+            "nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
+            "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
+        },
+        "destino": {
+            "nombreLegal": "vvvads", //(Requerido) Nombre del establecimiento.
+            "codigoDEIS": "adsvvv" //(Requerido) Código del establecimiento.
+        }
+    },
+    "solicitudIC": {
+        "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
+        "idIntercosulta": "identificador", //identificador de la interconsulta asignado desde nivel central
+        "idLocalIC": "", //opcional,
+        "modalidadAtencion": 2, //valor entero entre: 1,2 o 3
+        "destinoAtencion": "4",  // (Requerido) valor de "1" a "5" desde https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSDestinoReferenciaCodigo.html
+        "resolutividadAPS": true, //boolean (opcional)
+        "especialidadMedicaDestino": {
+            "codigo": "14",
+            "tipo": "medica" //medica o odontologica (por defecto medica)
+        },
+        "subEspecialidadMedicaDestino": {
+            "codigo": "14",
+            "tipo": "medica" //medica o odontologica (por defecto medica)
+        }
+    }
+}

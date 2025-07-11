@@ -97,11 +97,18 @@ public class EncounterTransformer {
         // Tipo de servicio (serviceType)
         if (json.has("tipoDeServicio")) {
             JsonNode servicio = json.get("tipoDeServicio");
-            CodeableConcept serviceType = new CodeableConcept();
-            serviceType.addCoding(new Coding()
-                    .setCode(servicio.get("codigo").asText())
-                    .setSystem(servicio.get("urlTipoServicio").asText()));
-            encounter.setServiceType(serviceType);
+            boolean tipoSerValid = HapiFhirUtils.validateObjectInJsonNode("encuentroAtender.tipoDeServicio", servicio,oo,false);
+            if(tipoSerValid) {
+                String codigo = HapiFhirUtils.readStringValueFromJsonNode("codigo",servicio);
+                if(codigo!= null) {
+                    CodeableConcept serviceType = new CodeableConcept();
+                    serviceType.addCoding(new Coding()
+                            .setCode(servicio.get("codigo").asText())
+                            .setSystem("https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSTiposServicio"));
+                    encounter.setServiceType(serviceType);
+                }else
+                    HapiFhirUtils.addNotFoundIssue("encuentroAtender.tipoDeServicio.codigo", oo);
+            }
         }
 
         // Cita médica
@@ -109,18 +116,19 @@ public class EncounterTransformer {
             encounter.setAppointment(List.of(new Reference(json.get("citaMedica").get("referenciaACitaMedica").asText())));
         }
 
-
-
         // Período
         if (json.has("periodo")) {
             JsonNode periodo = json.get("periodo");
-            try {
-                Period period = new Period();
-                period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode( "fechaInicio",periodo,"dd-MM-yyyy HH:mm:SS"));
-                period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode( "fechaFin",periodo,"dd-MM-yyyy HH:mm:SS"));
-                encounter.setPeriod(period);
-            } catch (Exception e) {
-                HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);
+            boolean periodoVal = HapiFhirUtils.validateObjectInJsonNode("periodo", periodo,oo,true);
+            if(periodoVal) {
+                try {
+                    Period period = new Period();
+                    period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", periodo, "dd-MM-yyyy HH:mm:SS"));
+                    period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", periodo, "dd-MM-yyyy HH:mm:SS"));
+                    encounter.setPeriod(period);
+                } catch (Exception e) {
+                    HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);
+                }
             }
         } else HapiFhirUtils.addNotFoundIssue("periodo", oo);
 

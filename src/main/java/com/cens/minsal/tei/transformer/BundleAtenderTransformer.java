@@ -124,12 +124,16 @@ public class BundleAtenderTransformer {
             } else HapiFhirUtils.addNotFoundIssue("prestador.tipoPrestador", oo);
         }
 
-        get = node.get("establecimiento");
-        boolean estableValid = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get,oo,true);
+        //Construir Organización de origen
         Organization organization = null;
-        if(estableValid){
-            organization = organizationTransformer.transform(get, oo,"");
+        try{
+            get = node.get("establecimiento").get("origen");
+            if(get!=null)
+                organization = organizationTransformer.transform(get, oo,"establecimiento.origen");
+        }catch(NullPointerException ex){
+            HapiFhirUtils.addNotFoundIssue("establecimiento.origen", oo);
         }
+
 
 
         String patient = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);

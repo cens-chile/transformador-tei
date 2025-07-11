@@ -9,6 +9,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import com.cens.minsal.tei.utils.HapiFhirUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
@@ -50,9 +54,8 @@ public class ValueSetValidatorService {
         System.out.println("theCode = " + theCode);
         CodeValidationResult codeValidationResult2 = validationSupport.validateCode
         (validationSupportContext, new ConceptValidationOptions(), theCodeSystem, theCode, theDisplay, theValueSetUrl);
-        
-        if (codeValidationResult2 != null) {
-          return codeValidationResult2.getDisplay();
+        if (codeValidationResult2 != null && codeValidationResult2.isOk()) {
+            return codeValidationResult2.getDisplay();
         }
         return null;
     }

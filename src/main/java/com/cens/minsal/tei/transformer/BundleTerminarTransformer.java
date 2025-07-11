@@ -208,7 +208,7 @@ public class BundleTerminarTransformer {
         sr.getCategoryFirstRep().addCoding(coding);
 
         String codigoMotivoCierreIC = HapiFhirUtils.readStringValueFromJsonNode("codigoMotivoCierreIC", nodeOrigin);
-        if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("codigoMotivoCierreIC", oo);
+        if(codigoMotivoCierreIC == null) HapiFhirUtils.addNotFoundIssue("solicitudIC.codigoMotivoCierreIC", oo);
         String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSMotivoCierreInterconsulta";
         String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSMotivoCierreInterconsulta";
         String resValidacion = validator.validateCode(cs,codigoMotivoCierreIC,"",vs);

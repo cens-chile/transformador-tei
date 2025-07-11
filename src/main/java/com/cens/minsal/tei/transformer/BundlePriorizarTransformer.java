@@ -133,11 +133,14 @@ public class BundlePriorizarTransformer {
         HapiFhirUtils.addResourceToBundle(b,messageHeader);
         HapiFhirUtils.addResourceToBundle(b,priorizador);
         String referenciaPaciente = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",node);
-        if (referenciaPaciente == null) HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
+        if (referenciaPaciente == null || referenciaPaciente.isEmpty()) {
+            HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
+        }else{
 
-        if(sr != null) {
-            sr.setSubject(new Reference(referenciaPaciente));
-            HapiFhirUtils.addResourceToBundle(b, sr);
+            if(sr != null) {
+                sr.setSubject(new Reference(referenciaPaciente));
+                HapiFhirUtils.addResourceToBundle(b, sr);
+            }
         }
         if(practitioner != null) {
             HapiFhirUtils.addResourceToBundle(b, practitioner);
@@ -148,6 +151,10 @@ public class BundlePriorizarTransformer {
         }
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(priorizador));
 
+        if (!out.getIssue().isEmpty()) {
+            res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
+            return res;
+        }
 
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
         return res;
