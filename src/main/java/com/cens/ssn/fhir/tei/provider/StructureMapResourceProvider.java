@@ -90,40 +90,38 @@ public class StructureMapResourceProvider implements IResourceProvider{
         if (source == null || source.length <= 0) {
             throw new InvalidRequestException("source parameter not found.");
         }
-        //String collect = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        //System.out.println("collect = " + collect);
-        
+
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         String res = "";
-        if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetIniciarToBundle")){
+        if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/IniciarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleIniciarTransformer.buildBundle(data);
             
-        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetReferenciarToBundle")){
+        }else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/ReferenciarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleReferenciarTransformer.buildBundle(data);
 
-        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetRevisarToBundle")){
+        }else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/RevisarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleRevisarTransformer.buildBundle(data);
 
-        }else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetTerminarToBundle")){
+        }else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/TerminarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleTerminarTransformer.buildBundle(data);
 
         }
-        else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetAtenderToBundle")){
+        else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/AtenderToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleAtenderTransformer.buildBundle(data);
         }
-        else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetAgendarToBundle")){
+        else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/AgendarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundleAgendarTransformer.buildBundle(data);
         }
 
-        else if(source[0].equals("http://worldhealthorganization.github.io/tei/StructureMap/CoreDataSetPriorizarToBundle")){
+        else if(source[0].equals("http://interoperabilidad.minsal.gob.cl/tei/PriorizarToBundle")){
             String data = theServletRequest.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             res = bundlePriorizarTransformer.buildBundle(data);
         }
