@@ -258,8 +258,8 @@ No olvides dar una estrella al proyecto! Gracias!
 
 ### Top contributors:
 
-<a href="https://github.com/cens-chile/mensajeria-productor-tei/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cens-chile/mensajeria-productor-tei" />
+<a href="https://github.com/cens-chile/transformador-tei/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cens-chile/transformador-tei" />
 </a>
 
 <p align="right">(<a href="#readme-top">volver al inicio</a>)</p>
