@@ -244,12 +244,6 @@ public class BundleAtenderTransformer {
                 careplan.setEncounter(new Reference(encounter));
             }
 
-            String descripcionPlan = HapiFhirUtils.readStringValueFromJsonNode("descripcion",get);
-            if(descripcionPlan == null){
-                HapiFhirUtils.addNotFoundIssue("plandeAtencion.descripcion", oo);
-            } else{
-                careplan.setDescription(descripcionPlan);
-            }
         }
 
         //  - recetas (MedicationRequest)
@@ -274,7 +268,10 @@ public class BundleAtenderTransformer {
             CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
             carePlanActivityComponent.setReference(new Reference(medReq));
             assert careplan != null;
-            careplan.addActivity(carePlanActivityComponent);
+            if (careplan != null) {
+                careplan.addActivity(carePlanActivityComponent);
+
+            }
         }
         if(examenSolicitados != null) {
             for (ServiceRequest examenSolicitado : examenSolicitados) {

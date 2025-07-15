@@ -207,7 +207,7 @@
         "estadoDiagnostico": "active",//(Requerido) Estado clinico del diagnostico.
         "estadoVerificacion": "confirmed",//(Requerido) Estado de verificación del diagnóstico. 
         "categoria": "encounter-diagnosis",//(Requerido) Categoría del diagnóstico de origen.
-        "severidad": "leve"//(Opcional) Indica la severidad del diagnóstico
+        "severidad": "24484000"//(Opcional) Indica la severidad del diagnóstico
     },
     "resultadoExamenes": [//Opcional
         {
@@ -236,7 +236,7 @@
         {
             "fechaSolicitudIC": "13-05-2025 10:20:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: dd-MM-yyyy HH:mm:ss
             "razonSolicitud": "asddsadsadsa", //(Requerido) Indica la justificación para la solicitud de exámen
-            "examenSolicitadoCodigo": "100003-3", //(Opcional) Indica el código de SNOMED para el exámen solicitado
+            "examenSolicitadoCodigo": "100003-3", //(Requerido) Indica el código de SNOMED para el exámen solicitado
             "examenSolicitadoGlosa": "sad" //(Opcional) Exámen solicitado en texto libre
         }
     ]

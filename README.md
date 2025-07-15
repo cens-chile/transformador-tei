@@ -140,8 +140,8 @@ Inicialmente se necesita un servidor donde desplegar el componente de mensajerí
 
 ### Hardware recomendado
 
-* 4 GB
-* 10 GB o más de espacio de disco duro.
+* 1 GB de RAM
+* 1 GB o más de espacio de disco duro.
 
 ### Prerrequisitos
 
@@ -213,25 +213,25 @@ Puedes encontrar un ejemplo de cada JSON de entrada en
 El json de entrada que confecciones en base a los ejemplos anteriores se entrega por POST 
 a la API del servicio de Transformacion de Mensajes, usando las siguientes URL:
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/IniciarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/IniciarToBundle ```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/ReferenciarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/ReferenciarToBundle```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/RevisarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/RevisarToBundle ```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/PriorizarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/PriorizarToBundle ```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/AgendarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/AgendarToBundle ```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/AtenderToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/AtenderToBundle ```
 
 
-- <localhost:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/TerminarToBundle>
+- ``` <nombreDelServidor>:8080/fhir/StructureMap/$transform?source=http://interoperabilidad.minsal.gob.cl/tei/TerminarToBundle ```
 
 <p align="right">(<a href="#readme-top">volver al inicio</a>)</p>
 

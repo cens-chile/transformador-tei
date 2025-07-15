@@ -115,15 +115,17 @@ public class ConditionTransformer {
             system = "http://snomed.info/sct";
             String validateCode = validator.validateCode(system, severity, "", categoryVS);
             //if(validateCode!=null){
+            if(severity.equals("24484000") || severity.equals("6736007") || severity.equals("255604002")){
                 cond.getSeverity().getCodingFirstRep().setCode(severity);
                 cond.getSeverity().getCodingFirstRep().setSystem(system);
                 cond.getSeverity().getCodingFirstRep().setDisplay(validateCode);
+                }
+            else{
+                HapiFhirUtils.addNotFoundCodeIssue("diagnostico.severidad solo acepta los valores " +
+                        "Severo=2448400 Moderado =6736007 leve=255604002 ", oo);
+            }
 
-            //}else
-             //   HapiFhirUtils.addErrorIssue(severity, "error al validar en Diagnostico.severidad", oo);
         }
-        
-        
         return cond;
     }
 

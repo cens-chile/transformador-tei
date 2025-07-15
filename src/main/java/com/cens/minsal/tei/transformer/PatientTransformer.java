@@ -215,7 +215,7 @@ public class PatientTransformer {
 
              }else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoBiologico",oo);
 
-        }
+        } else HapiFhirUtils.addNotFoundIssue("paciente.sexoBiologico", oo);
 
         if(node.has("nacionalidad")){
             String nacionalidad = HapiFhirUtils.readStringValueFromJsonNode("nacionalidad", node);
@@ -229,7 +229,8 @@ public class PatientTransformer {
                     cc);
             patient.addExtension(nacionalidadExt);
         }
-        else HapiFhirUtils.addNotFoundIssue("paciente.nacionalidad",oo);
+        else
+            HapiFhirUtils.addNotFoundIssue("paciente.nacionalidad",oo);
 
         if(node.has("paisOrigen")){
             String paisOrigen = HapiFhirUtils.readStringValueFromJsonNode("paisOrigen", node);
@@ -425,7 +426,9 @@ public class PatientTransformer {
         List<ContactPoint> contactPointList  = new ArrayList<>();
         int conteoContactos = 0;
         if(contactosValid) {
+            int i=0;
             for (JsonNode contacto : contactos) {
+                i++;
                 ContactPoint cp = new ContactPoint();
                 if (contacto.has("sistemaDeContacto") && contacto.has("valorContacto")) {
                     String sistemaDeContacto = HapiFhirUtils.readStringValueFromJsonNode("sistemaDeContacto", contacto);
@@ -454,9 +457,14 @@ public class PatientTransformer {
                             HapiFhirUtils.addInvalidIssue("paciente.contacto.sistemaDeContacto (permitido email y phone)", oo);
                             break;
                     }
-                }else
-            HapiFhirUtils.addNotFoundIssue("paciente.contacto.sistemaDeContacto & paciente.contacto.valorContacto", oo);
-
+                }else {
+                    if(!contacto.has("sistemaDeContacto")){
+                        HapiFhirUtils.addNotFoundIssue("paciente.contacto["+i+"].sistemaDeContacto", oo);
+                    }
+                    if(!contacto.has("valorContacto")){
+                        HapiFhirUtils.addNotFoundIssue("paciente.contacto["+i+"].valorContacto", oo);
+                    }
+                }
         }
                 if (contactPointList.size() > 0) {
                     patient.setTelecom(contactPointList);
