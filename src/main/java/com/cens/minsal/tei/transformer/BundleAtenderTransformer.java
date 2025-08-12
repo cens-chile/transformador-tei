@@ -7,6 +7,7 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
+import com.cens.minsal.tei.utils.JsonUniqueKeyValidator;
 import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,8 +84,8 @@ public class BundleAtenderTransformer {
 
         JsonNode node;
         try {
+            JsonUniqueKeyValidator.validateUniqueKeys(cmd, oo);
             node = mapper.readTree(cmd);
-
         } catch (JsonProcessingException ex) {
             Logger.getLogger(BundleAtenderTransformer.class.getName()).log(Level.SEVERE, null, ex);
             throw new FHIRException(ex.getMessage());

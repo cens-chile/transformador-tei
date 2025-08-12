@@ -56,6 +56,10 @@ public class PatientTransformer {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.codigo", oo);
 
                 String valor = HapiFhirUtils.readStringValueFromJsonNode("valor", identificador);
+                boolean rutValido = HapiFhirUtils.validarRut(valor);
+                if (!rutValido && code.equals("01")){
+                    HapiFhirUtils.addErrorIssue("paciente.identificadores", "RUN no es válido", oo);
+                }
                 if (valor == null) {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.valor", oo);
                 }
@@ -103,8 +107,20 @@ public class PatientTransformer {
                 if (nombreCompleto.has("nombres")) {
                     HapiFhirUtils.validateArrayInJsonNode("paciente.nombreCompleto.nombres",
                             nombreCompleto.get("nombres"), oo, true);
+                    int i = 0;
                     for (JsonNode n : nombreCompleto.get("nombres")) {
-                        nombre.addGiven(n.asText());
+                        if (n != null && !n.isNull()) {
+                            String valor = n.asText();
+                            if (!valor.isEmpty()) {
+                                    if (!valor.isEmpty()) {
+                                        nombre.addGiven(valor);
+                                        i++;
+                                    }
+                                }
+                        }
+                    }
+                    if (i==0){
+                        HapiFhirUtils.addNotFoundIssue("paciente.nombre",oo);
                     }
                 }
                 if (nombreCompleto.has("primerApellido")) {
@@ -293,6 +309,7 @@ public class PatientTransformer {
                 Date fecha = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
                 patient.setBirthDate(fecha);
             } catch (ParseException e) {
+                HapiFhirUtils.addErrorIssue("paciente.fechaNacimiento", "Error al procesar paciente.fechaNacimiento",oo);
                 e.printStackTrace(); // Manejo simple de error
             }
         } else HapiFhirUtils.addNotFoundIssue("paciente.fechaNacimiento", oo);

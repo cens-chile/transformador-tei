@@ -7,6 +7,7 @@ package com.cens.minsal.tei.transformer;
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
+import com.cens.minsal.tei.utils.JsonUniqueKeyValidator;
 import com.cens.minsal.tei.valuesets.VSDerivadoParaEnum;
 import com.cens.minsal.tei.valuesets.VSModalidadAtencionEnum;
 import com.cens.minsal.tei.valuesets.VSEstadoInterconsultaEnum;
@@ -103,6 +104,7 @@ public class BundleIniciarTransformer {
 
         JsonNode node;
         try {
+            JsonUniqueKeyValidator.validateUniqueKeys(cmd, out);
             node = mapper.readTree(cmd);
 
         } catch (JsonProcessingException ex) {

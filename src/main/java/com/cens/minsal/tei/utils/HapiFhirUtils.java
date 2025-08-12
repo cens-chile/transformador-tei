@@ -338,9 +338,44 @@ public class HapiFhirUtils {
         return null;
     }
 
-    public static void addCodigoExtension(StringType cityElement, String extensionUrl, String system, JsonNode direccion, String s) {
+    /**
+     * Valida un RUT chileno (formato con o sin puntos y guión).
+     * @param rut RUT a validar, ejemplo: "12.345.678-5" o "12345678K"
+     * @return true si el RUT es válido, false si no.
+     */
+    public static boolean validarRut(String rut) {
+        if (rut == null) {
+            return false;
+        }
+
+        // Debe cumplir con el formato estricto: dígitos, guion, DV (0-9 o K/k)
+        if (!rut.matches("^\\d{1,8}-[\\dkK]$")) {
+            return false;
+        }
+
+        // Separar número y dígito verificador
+        String[] partes = rut.split("-");
+        int rutNum = Integer.parseInt(partes[0]);
+        char dvIngresado = partes[1].toUpperCase().charAt(0);
+
+        // Calcular DV esperado
+        char dvCalculado = calcularDV(rutNum);
+
+        return dvIngresado == dvCalculado;
     }
-    
+
+    /**
+     * Calcula el dígito verificador usando el algoritmo módulo 11.
+     */
+    private static char calcularDV(int rut) {
+        int m = 0, s = 1;
+        while (rut != 0) {
+            s = (s + rut % 10 * (9 - m++ % 6)) % 11;
+            rut /= 10;
+        }
+        return (char) (s != 0 ? s + 47 : 75); // 75 = 'K', 48 = '0'
+    }
+
     public static void addResourceToBundle(Bundle b, Resource r){
         String id = UUID.randomUUID().toString();
         String resourceType= r.getResourceType().name();
