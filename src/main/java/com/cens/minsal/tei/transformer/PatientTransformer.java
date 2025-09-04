@@ -56,10 +56,7 @@ public class PatientTransformer {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.codigo", oo);
 
                 String valor = HapiFhirUtils.readStringValueFromJsonNode("valor", identificador);
-                boolean rutValido = HapiFhirUtils.validarRut(valor);
-                if (!rutValido && code.equals("01")){
-                    HapiFhirUtils.addErrorIssue("paciente.identificadores", "RUN no es válido", oo);
-                }
+
                 if (valor == null) {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.valor", oo);
                 }
