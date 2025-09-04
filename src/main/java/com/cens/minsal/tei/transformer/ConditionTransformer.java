@@ -48,9 +48,6 @@ public class ConditionTransformer {
             cond.getCode().addCoding(codingCIE10);
             codigosDiag++;
         }
-        else {
-            HapiFhirUtils.addNotFoundIssue(parentPath+".codeCIE10", oo);
-        }
 
         String codeSNOMED = HapiFhirUtils.readStringValueFromJsonNode("codeSNOMED", node);
         if(codeSNOMED != null){
@@ -65,8 +62,6 @@ public class ConditionTransformer {
             cond.getCode().addCoding(codingSNOMED);
             codigosDiag++;
         }
-        else
-            HapiFhirUtils.addNotFoundIssue(parentPath+".codeSNOMED", oo);
 
         if(codigosDiag == 0){
             HapiFhirUtils.addErrorIssue("codeSNOMED o codeCIE10","Debe existir al menos un código de diagnostico", oo);
