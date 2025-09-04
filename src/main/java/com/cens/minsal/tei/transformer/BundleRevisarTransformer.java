@@ -195,13 +195,15 @@ public class BundleRevisarTransformer {
         
         HapiFhirUtils.addResourceToBundle(b,revisor);
         HapiFhirUtils.addResourceToBundle(b,resolutor);
-        
-        
-        for(ServiceRequest s : examenSolicitados){
-            HapiFhirUtils.addResourceToBundle(b, s);
-            s.setSubject(patRef);
-            s.getBasedOn().add(new Reference(sr));
-            s.setRequester(new Reference(practitioner));
+        if(examenSolicitados != null) {
+            if (!examenSolicitados.isEmpty()) {
+                for (ServiceRequest s : examenSolicitados) {
+                    HapiFhirUtils.addResourceToBundle(b, s);
+                    s.setSubject(patRef);
+                    s.getBasedOn().add(new Reference(sr));
+                    s.setRequester(new Reference(practitioner));
+                }
+            }
         }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
