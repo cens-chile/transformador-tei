@@ -35,6 +35,7 @@ public class ConditionTransformer {
         cond.getMeta().addProfile(profile);
         cond.getMeta().setLastUpdated(new Date());
 
+        int codigosDiag = 0;
         String codeCIE10 = HapiFhirUtils.readStringValueFromJsonNode("codeCIE10", node);
         if(codeCIE10 != null){
             Coding codingCIE10 = new Coding();
@@ -45,12 +46,15 @@ public class ConditionTransformer {
                 codingCIE10.setDisplay(glosaCIE10);
             }
             cond.getCode().addCoding(codingCIE10);
+            codigosDiag++;
         }
-        else
+        else {
             HapiFhirUtils.addNotFoundIssue(parentPath+".codeCIE10", oo);
+        }
 
         String codeSNOMED = HapiFhirUtils.readStringValueFromJsonNode("codeSNOMED", node);
         if(codeSNOMED != null){
+
             Coding codingSNOMED = new Coding();
             codingSNOMED.setSystem("http://snomed.info/sct");
             codingSNOMED.setCode(codeSNOMED);
@@ -59,9 +63,14 @@ public class ConditionTransformer {
                 codingSNOMED.setDisplay(glosaSNOMED);
             }
             cond.getCode().addCoding(codingSNOMED);
+            codigosDiag++;
         }
         else
             HapiFhirUtils.addNotFoundIssue(parentPath+".codeSNOMED", oo);
+
+        if(codigosDiag == 0){
+            HapiFhirUtils.addErrorIssue("codeSNOMED o codeCIE10","Debe existir al menos un código de diagnostico", oo);
+        }
 
         boolean valueSetSupported = validator.isValueSetSupported(codeVS);
 
