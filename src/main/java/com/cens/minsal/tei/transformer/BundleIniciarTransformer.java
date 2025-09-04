@@ -273,12 +273,14 @@ public class BundleIniciarTransformer {
         HapiFhirUtils.addResourceToBundle(b, motivoDerivacion);
         motivoDerivacion.setAuthor(new Reference(practitioner));
         motivoDerivacion.setSubject(new Reference(patient));
-          
-        for(ServiceRequest s : examenSolicitados){
-            HapiFhirUtils.addResourceToBundle(b, s);
-            s.setSubject(new Reference(patient));
-            s.getBasedOn().add(new Reference(sr));
-            s.setRequester(new Reference(practitioner));
+
+        if(examenSolicitados != null && examenSolicitados.size()>0) {
+            for (ServiceRequest s : examenSolicitados) {
+                HapiFhirUtils.addResourceToBundle(b, s);
+                s.setSubject(new Reference(patient));
+                s.getBasedOn().add(new Reference(sr));
+                s.setRequester(new Reference(practitioner));
+            }
         }
         
         res = HapiFhirUtils.resourceToString(b, fhirServerConfig.getFhirContext());
@@ -426,9 +428,11 @@ public class BundleIniciarTransformer {
         ser.getSupportingInfo().add(new Reference(cuidador));
         ser.getSupportingInfo().add(new Reference(dis));
         ser.getSupportingInfo().add(new Reference(motDer));
-        solExams.forEach(sol -> {
-            ser.getSupportingInfo().add(new Reference(sol));
-        });
+        if(solExams != null && solExams.size() > 0) {
+            solExams.forEach(sol -> {
+                ser.getSupportingInfo().add(new Reference(sol));
+            });
+        }
         
     }
     

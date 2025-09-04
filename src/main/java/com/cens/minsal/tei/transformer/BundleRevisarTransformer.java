@@ -227,11 +227,11 @@ public class BundleRevisarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
         
-        String iden = HapiFhirUtils.readStringValueFromJsonNode("idIntercosulta", node);
+        String iden = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
         if(iden!=null)
             sr.getIdentifierFirstRep().setValue(iden);
         else
-            HapiFhirUtils.addNotFoundIssue("solicitudIC.idIntencosulta", oo);
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.idInterconsulta", oo);
         
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
@@ -282,12 +282,13 @@ public class BundleRevisarTransformer {
             String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSDestinoReferenciaCodigo";
             String validateCode = validator.validateCode(cs, destinoAtencion, null, vs);
             if(validateCode!=null){
-                Coding c = new Coding(cs,modalidadAtencion,validateCode);
+                Coding c = new Coding(cs,destinoAtencion,validateCode);
                 sr.getLocationCodeFirstRep().addCoding(c);
             }
             else
                 HapiFhirUtils.addInvalidIssue("solicitudIC.destinoAtencion", oo);
-        }
+        }else
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.destinoAtencion", oo);
        
         Boolean atPreferente = HapiFhirUtils.readBooleanValueFromJsonNode("atencionPreferente", node);
         if(atPreferente!=null){

@@ -35,38 +35,46 @@ public class ConditionTransformer {
         cond.getMeta().addProfile(profile);
         cond.getMeta().setLastUpdated(new Date());
 
-        String code = HapiFhirUtils.readStringValueFromJsonNode("code", node);
-        cond.setCode(new CodeableConcept(new Coding()));
-        if(code!=null)
-            cond.getCode().getCodingFirstRep().setCode(code);
-        else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+".code", oo);
-        
-        
-        String system = HapiFhirUtils.readStringValueFromJsonNode("system", node);
-        if(system!=null)
-            cond.getCode().getCodingFirstRep().setSystem(system);
-        else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+".system", oo);
-        
+        String codeCIE10 = HapiFhirUtils.readStringValueFromJsonNode("codeCIE10", node);
+        if(codeCIE10 != null){
+            Coding codingCIE10 = new Coding();
+            codingCIE10.setSystem("http://hl7.org/fhir/sid/icd-10");
+            codingCIE10.setCode(codeCIE10);
+            String glosaCIE10 = HapiFhirUtils.readStringValueFromJsonNode("glosaCIE10", node);
+            if(glosaCIE10 != null) {
+                codingCIE10.setDisplay(glosaCIE10);
+            }
+            cond.getCode().addCoding(codingCIE10);
+        }
+        else
+            HapiFhirUtils.addNotFoundIssue(parentPath+".codeCIE10", oo);
+
+        String codeSNOMED = HapiFhirUtils.readStringValueFromJsonNode("codeSNOMED", node);
+        if(codeSNOMED != null){
+            Coding codingSNOMED = new Coding();
+            codingSNOMED.setSystem("http://snomed.info/sct");
+            codingSNOMED.setCode(codeSNOMED);
+            String glosaSNOMED = HapiFhirUtils.readStringValueFromJsonNode("glosaSNOMED", node);
+            if(glosaSNOMED != null) {
+                codingSNOMED.setDisplay(glosaSNOMED);
+            }
+            cond.getCode().addCoding(codingSNOMED);
+        }
+        else
+            HapiFhirUtils.addNotFoundIssue(parentPath+".codeSNOMED", oo);
+
         boolean valueSetSupported = validator.isValueSetSupported(codeVS);
 
-
-
-        String display = HapiFhirUtils.readStringValueFromJsonNode("glosa", node);
-        if(display!=null)
-            cond.getCode().getCodingFirstRep().setDisplay(display);
-        
         String text = HapiFhirUtils.readStringValueFromJsonNode("diagnosticoTexto", node);
-        if(text!=null)
+        if(text!=null) {
             cond.getCode().setText(text);
-        
+        }
         
         
         String estadoDiagCode = HapiFhirUtils.readStringValueFromJsonNode("estadoDiagnostico", node);
         if(estadoDiagCode!=null){
             String clinicalStatusVS = "http://hl7.org/fhir/ValueSet/condition-clinical";
-            system = "http://terminology.hl7.org/CodeSystem/condition-clinical";
+            String system = "http://terminology.hl7.org/CodeSystem/condition-clinical";
             String validateCode = validator.validateCode(system, estadoDiagCode, null, clinicalStatusVS);
             if(validateCode!=null){
                 cond.getClinicalStatus().getCodingFirstRep().setCode(estadoDiagCode);
@@ -82,7 +90,7 @@ public class ConditionTransformer {
         String clinicalVerStatus = HapiFhirUtils.readStringValueFromJsonNode("estadoVerificacion", node);
         if(clinicalVerStatus!=null){
             String verificationStatusVS = "http://hl7.org/fhir/ValueSet/condition-ver-status";
-            system = "http://terminology.hl7.org/CodeSystem/condition-ver-status";
+            String system = "http://terminology.hl7.org/CodeSystem/condition-ver-status";
             String validateCode = validator.validateCode(system, clinicalVerStatus, null, verificationStatusVS);
             if(validateCode!=null){
                 cond.getVerificationStatus().getCodingFirstRep().setCode(clinicalVerStatus);
@@ -97,7 +105,7 @@ public class ConditionTransformer {
         String category = HapiFhirUtils.readStringValueFromJsonNode("categoria", node);
         if(category!=null){
             String categoryVS = "http://hl7.org/fhir/ValueSet/condition-category";
-            system = "http://terminology.hl7.org/CodeSystem/condition-category";
+            String system = "http://terminology.hl7.org/CodeSystem/condition-category";
             String validateCode = validator.validateCode(system, category, null, categoryVS);
             if(validateCode!=null){
                 cond.getCategoryFirstRep().getCodingFirstRep().setCode(category);
@@ -112,7 +120,7 @@ public class ConditionTransformer {
         String severity = HapiFhirUtils.readStringValueFromJsonNode("severidad", node);
         if(severity!=null){
             String categoryVS = "http://hl7.org/fhir/ValueSet/condition-severity";
-            system = "http://snomed.info/sct";
+            String system = "http://snomed.info/sct";
             String validateCode = validator.validateCode(system, severity, "", categoryVS);
             //if(validateCode!=null){
             if(severity.equals("24484000") || severity.equals("6736007") || severity.equals("255604002")){

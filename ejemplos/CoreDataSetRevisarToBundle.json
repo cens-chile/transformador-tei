@@ -118,7 +118,7 @@
     },
     "solicitudIC": {
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
-        "idIntercosulta": "identificador", //identificador de la interconsulta asignado desde nivel central
+        "idInterconsulta": "identificador", //identificador de la interconsulta asignado desde nivel central
         "idLocalIC": "", //opcional,
         "modalidadAtencion": 2, //valor entero entre: 1,2 o 3
         "destinoAtencion": 4,

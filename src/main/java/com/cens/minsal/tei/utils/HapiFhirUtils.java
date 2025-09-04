@@ -227,7 +227,7 @@ public class HapiFhirUtils {
             String dateText = get.asText();
             ParseException lastException = null;
 
-            for (String pattern : new String[]{"dd-MM-yyyy HH:mm:ss", "dd-MM-yyyy", "yyyy-MM-dd"}) {
+            for (String pattern : new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"}) {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(pattern);
                     formatter.setLenient(false); // Para evitar que Java acepte fechas inválidas

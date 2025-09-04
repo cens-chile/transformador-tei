@@ -141,8 +141,8 @@ public class AppointmentTransformer {
 
         if (node.has("estadoActorPaciente")) {
             String eap = HapiFhirUtils.readStringValueFromJsonNode("estadoActorPaciente", node);
-            Reference pacienteRef = new Reference("Patient/"
-                    +HapiFhirUtils.readStringValueFromJsonNode("id",nodeOrigin.get("paciente")));
+            Reference pacienteRef = new Reference(
+                    HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente",nodeOrigin));
             String vs ="http://hl7.org/fhir/ValueSet/resource-types";
             String cs = "http://hl7.org/fhir/resource-types";
 
