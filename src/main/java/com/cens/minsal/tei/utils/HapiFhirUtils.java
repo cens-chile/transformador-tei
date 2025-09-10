@@ -122,12 +122,10 @@ public class HapiFhirUtils {
             return fechaOriginal;
         }
 
-        // Validar si ya está en formato yyyy-MM-dd
         if (fechaOriginal.matches("\\d{4}-\\d{2}-\\d{2}")) {
             return fechaOriginal;
         }
 
-        // Intentar transformar desde dd-MM-yyyy a yyyy-MM-dd
         SimpleDateFormat formatoEntrada = new SimpleDateFormat("dd-MM-yyyy");
         formatoEntrada.setLenient(false);
 
@@ -152,7 +150,6 @@ public class HapiFhirUtils {
                     Integer.parseInt(text); // O usar Long.parseLong(text) si esperas valores grandes
                     return text;
                 } catch (NumberFormatException e) {
-                    // No es un número válido, devolver null
                     return null;
                 }
             }
