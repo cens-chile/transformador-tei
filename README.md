@@ -132,7 +132,7 @@ FHIR ni leer Guías de Implementación.
 <!-- GETTING STARTED -->
 ## Como Empezar
 
-Inicialmente se necesita un servidor donde desplegar el componente de mensajería con acceso a internet
+Inicialmente se necesita un servidor donde desplegar el componente de transformación con acceso a internet
 
 ### Requisitos del sistema operativo
 
@@ -259,7 +259,7 @@ No olvides dar una estrella al proyecto! Gracias!
 ### Top contributors:
 
 <a href="https://github.com/cens-chile/transformador-tei/graphs/contributors">
-  <img src="https://img.shields.io/badge/TOP-CONTRIBUTORS-blue" />
+  <img src="https://contrib.rocks/image?repo=cens-chile/transformador-tei" />
 </a>
 
 <p align="right">(<a href="#readme-top">volver al inicio</a>)</p>
@@ -297,18 +297,18 @@ Link al Proyecto: [https://github.com/cens-chile/transformador-tei](https://gith
 
 
 
-<!-- MARKDOWN LINKS & IMAGES -->
+<!-- MARKDOWN LINKS & IMAGES -->https://github.com/cens-chile/transformador-tei
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/cens-chile/mensajeria-productor-tei.svg?style=for-the-badge
-[contributors-url]: https://github.com/cens-chile/mensajeria-productor-tei/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/cens-chile/mensajeria-productor-tei.svg?style=for-the-badge
-[forks-url]: https://github.com/cens-chile/mensajeria-productor-tei/network/members
-[stars-shield]: https://img.shields.io/github/stars/cens-chile/mensajeria-productor-tei.svg?style=for-the-badge
-[stars-url]: https://github.com/cens-chile/mensajeria-productor-tei/stargazers
-[issues-shield]: https://img.shields.io/github/issues/cens-chile/mensajeria-productor-tei.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+[contributors-shield]: https://img.shields.io/github/contributors/cens-chile/transformador-tei.svg?style=for-the-badge
+[contributors-url]: https://github.com/cens-chile/transformador-tei/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/cens-chile/transformador-tei.svg?style=for-the-badge
+[forks-url]: https://github.com/cens-chile/transformador-tei/network/members
+[stars-shield]: https://img.shields.io/github/stars/cens-chile/transformador-tei.svg?style=for-the-badge
+[stars-url]: https://github.com/cens-chile/transformador-tei/stargazers
+[issues-shield]: https://img.shields.io/github/issues/cens-chile/transformador-tei.svg?style=for-the-badge
+[issues-url]: https://github.com/cens-chile/transformador-tei/issues
 [license-shield]: https://img.shields.io/badge/Apache-LICENSE-as?style=for-the-badge&logo=apache
-[license-url]: https://github.com/cens-chile/mensajeria-productor-tei/blob/master/LICENSE.txt
+[license-url]: https://github.com/cens-chile/cens-chile/transformador-tei/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/cens-chile-red?style=for-the-badge&labelColor=blue
 [linkedin-url]: https://linkedin.com/in/othneildrew
 [Python-url]: https://www.python.org/
