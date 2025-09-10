@@ -126,7 +126,6 @@ public class ConditionTransformer {
             String categoryVS = "http://hl7.org/fhir/ValueSet/condition-severity";
             String system = "http://snomed.info/sct";
             String validateCode = validator.validateCode(system, severity, "", categoryVS);
-            //if(validateCode!=null){
             if(severity.equals("24484000") || severity.equals("6736007") || severity.equals("255604002")){
                 cond.getSeverity().getCodingFirstRep().setCode(severity);
                 cond.getSeverity().getCodingFirstRep().setSystem(system);

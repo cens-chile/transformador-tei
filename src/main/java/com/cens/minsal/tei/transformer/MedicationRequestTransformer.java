@@ -44,11 +44,9 @@ public class MedicationRequestTransformer {
         String codMed = HapiFhirUtils.readStringValueFromJsonNode("medicamento",node);
         String nombreMed= HapiFhirUtils.readStringValueFromJsonNode("nombreMedicamento",node);
         String valido = validator.validateCode(cs,codMed,"",vs);
-        //if(valido != null){
             Coding cod = new Coding(vs,codMed,nombreMed);
             CodeableConcept cc = new CodeableConcept(cod);
             mr.setMedication(cc);
-        //}
 
 
         if (node.has("indicacion")) {

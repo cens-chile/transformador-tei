@@ -50,12 +50,6 @@ public class OrganizationTransformer {
         else {
             HapiFhirUtils.addNotFoundIssue(parentPath+".establecimiento.codigoDEIS", oo);
         }
-        /*
-        String resValidacionDest = validator.validateCode(csDest, codigoDEIS,"",vsDest);
-
-        if (resValidacionDest == null){
-            HapiFhirUtils.addErrorIssue(codigoDEIS,"CodigoDEIS no valido", oo);
-        }*/
 
         return org;
     }

@@ -120,10 +120,6 @@ public class BundleRevisarTransformer {
 
         JsonNode paciente = node.get("paciente");
         
-        /*Patient patient = null;
-        if(paciente!=null){
-            patient = patientTr.transform(paciente, out);
-        }*/
         String refPatText = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         Reference patRef = null;
         if(refPatText!=null)
@@ -178,8 +174,6 @@ public class BundleRevisarTransformer {
         
         HapiFhirUtils.addResourceToBundle(b, messageHeader);
         setMessageHeaderReferences(messageHeader, new Reference(sr), new Reference(revisor));
-        
-        //HapiFhirUtils.addResourceToBundle(b, patient,HapiFhirUtils.getUrlBaseFullUrl()+"/"+refPatText);
         
         String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
         HapiFhirUtils.addResourceToBundle(b, sr,srFullUrl);

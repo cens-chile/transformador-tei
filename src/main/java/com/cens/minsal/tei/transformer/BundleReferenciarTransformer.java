@@ -120,11 +120,6 @@ public class BundleReferenciarTransformer {
         else
             HapiFhirUtils.addNotFoundIssue("datosSistema", out);
 
-        /*JsonNode paciente = node.get("paciente");
-        Patient patient = null;
-        if(paciente!=null)
-            patient = patientTr.transform(paciente, out);
-        */
         String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         if(refPat==null)
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);

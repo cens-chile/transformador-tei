@@ -36,17 +36,11 @@ public class EncounterTransformer {
         else
             encKey = "encuentroAtender";
             
-        
-        
         json = node.get(encKey);
         boolean validate = HapiFhirUtils.validateObjectInJsonNode(encKey, json, oo,true);
         if(!validate)
             return null;
-        
-            
-        
-        
-        
+
         Encounter encounter = new Encounter();
 
         ObjectMapper mapper = new ObjectMapper();

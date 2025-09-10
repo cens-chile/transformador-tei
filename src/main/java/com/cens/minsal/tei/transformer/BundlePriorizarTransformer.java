@@ -117,11 +117,6 @@ public class BundlePriorizarTransformer {
         PractitionerRole priorizador = null;
         priorizador = practitionerRoleTransformer.buildPractitionerRole("priorizador",organization, practitioner);
 
-        //Coding roleCode = new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSPractitionerTipoRolLE", "terminador", "Terminador");
-        //CodeableConcept cc = new CodeableConcept(roleCode);
-        //priorizador.addCode(cc);
-
-
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;

@@ -60,7 +60,6 @@ public class PatientTransformer {
                 if (valor == null) {
                     HapiFhirUtils.addNotFoundIssue("paciente.identificadores.valor", oo);
                 }
-                //String tipo = HapiFhirUtils.readStringValueFromJsonNode("tipo", identificador);
                 Identifier identifier = new Identifier();
                 cs = "https://hl7chile.cl/fhir/ig/clcore/CodeSystem/CSTipoIdentificador";
                 vs = "https://hl7chile.cl/fhir/ig/clcore/ValueSet/VSTipoIdentificador";
@@ -201,17 +200,7 @@ public class PatientTransformer {
                 patient.addExtension(religionExt);
             }
         }
-/*
-        if(node.has("sexoRegistral")){
-            vs = "http://hl7.org/fhir/ValueSet/administrative-gender";
-            cs = "http://hl7.org/fhir/administrative-gender";
-            String code = HapiFhirUtils.readStringValueFromJsonNode("sexoRegistral", node);
-             valido = validator.validateCode(cs,code,"",vs);
-            if(valido != null) {
-                    patient.setGender(Enumerations.AdministrativeGender.fromCode(code));
-            } else HapiFhirUtils.addNotFoundCodeIssue("paciente.sexoRegistral",oo);
-        }else HapiFhirUtils.addNotFoundIssue("paciente.sexoRegistral",oo);
-*/
+
         if (node.has("sexoBiologico")) {
             String sexoBiologico = HapiFhirUtils.readStringValueFromJsonNode("sexoBiologico",node);
              cs = "http://hl7.org/fhir/administrative-gender";
