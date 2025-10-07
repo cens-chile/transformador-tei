@@ -178,7 +178,10 @@ public class BundleIniciarTransformer {
         if(node.has("presentaDiscapacidad")) {
             if (!node.get("presentaDiscapacidad").isBoolean())
                 HapiFhirUtils.addInvalidIssue("resolutividadAPS", out);
-             discapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+            if(presentaDiscapacidad) {
+                discapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
+                discapacidad.setSubject(new Reference(patient));
+            }
         }
         
         Boolean cuidador = HapiFhirUtils.readBooleanValueFromJsonNode("cuidador", node);
@@ -232,9 +235,10 @@ public class BundleIniciarTransformer {
         HapiFhirUtils.addResourceToBundle(b,praRole);
         
         HapiFhirUtils.addResourceToBundle(b, sr);
-        setServiceRequestReferences(sr,patient,enc, praRole,cond,alergias,
-                indiceComorbilidad,cuidadorObservation,discapacidad,
-                motivoDerivacion,examenSolicitados);
+        setServiceRequestReferences(sr, patient, enc, praRole, cond, alergias,
+                    indiceComorbilidad, cuidadorObservation, discapacidad,
+                    motivoDerivacion, examenSolicitados);
+
         
         
         HapiFhirUtils.addResourceToBundle(b, enc);
@@ -426,6 +430,7 @@ public class BundleIniciarTransformer {
         });
         ser.getSupportingInfo().add(new Reference(indiceComorbilidad));
         ser.getSupportingInfo().add(new Reference(cuidador));
+
         ser.getSupportingInfo().add(new Reference(dis));
         ser.getSupportingInfo().add(new Reference(motDer));
         if(solExams != null && solExams.size() > 0) {

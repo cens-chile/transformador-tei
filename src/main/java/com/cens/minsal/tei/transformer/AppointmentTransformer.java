@@ -169,6 +169,9 @@ public class AppointmentTransformer {
                     appointment.addParticipant(new Appointment.AppointmentParticipantComponent()
                             .setActor(pacienteRef.setType(coding.getCode())).setStatus(Appointment.ParticipationStatus.NEEDSACTION));
                     break;
+                default:
+                    HapiFhirUtils.addErrorIssue("Cita.estadoActorPaciente","valor no válido. Solo es válido: accepted declined tentative needs-action.", oo);
+                    break;
             }
         } else HapiFhirUtils.addNotFoundIssue("Cita.estadoActorPaciente",oo);
 
