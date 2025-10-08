@@ -96,8 +96,8 @@ public class AppointmentTransformer {
         // Fechas
         if (node.has("fechaInicio") && node.has("fechaFin")) {
             try {
-                Date start = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", node, "dd-MM-yyyy HH:mm:ss");
-                Date end = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", node, "dd-MM-yyyy HH:mm:ss");
+                Date start = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", node, "yyyy-MM-dd HH:mm:ss");
+                Date end = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", node, "yyyy-MM-dd HH:mm:ss");
                 appointment.setStart(start);
                 appointment.setEnd(end);
             } catch (ParseException e) {

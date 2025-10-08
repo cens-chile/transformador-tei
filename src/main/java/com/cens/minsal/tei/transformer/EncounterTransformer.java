@@ -117,8 +117,8 @@ public class EncounterTransformer {
             if(periodoVal) {
                 try {
                     Period period = new Period();
-                    period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", periodo, "dd-MM-yyyy HH:mm:SS"));
-                    period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", periodo, "dd-MM-yyyy HH:mm:SS"));
+                    period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", periodo, "yyyy-MM-dd HH:mm:ss"));
+                    period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", periodo, "yyyy-MM-dd HH:mm:ss"));
                     encounter.setPeriod(period);
                 } catch (Exception e) {
                     HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);

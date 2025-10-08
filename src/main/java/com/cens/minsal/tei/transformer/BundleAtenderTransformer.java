@@ -128,11 +128,17 @@ public class BundleAtenderTransformer {
         //Construir Organización de origen
         Organization organization = null;
         try{
-            get = node.get("establecimiento").get("origen");
-            if(get!=null)
-                organization = organizationTransformer.transform(get, oo,"establecimiento.origen");
+            get = node.get("establecimiento");
+            boolean validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento", get, oo ,true);
+            if(validate){
+                get = get.get("destino");
+                validate = HapiFhirUtils.validateObjectInJsonNode("establecimiento.destino", get, oo ,true);
+                if(validate)
+                    organization = organizationTransformer.transform(get, oo,"establecimiento.destino");
+            }
+
         }catch(NullPointerException ex){
-            HapiFhirUtils.addNotFoundIssue("establecimiento.origen", oo);
+            HapiFhirUtils.addNotFoundIssue("establecimiento.destino", oo);
         }
 
 

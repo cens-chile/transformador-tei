@@ -330,6 +330,7 @@ public class HapiFhirUtils {
         JsonNode value = node.get(field);
         if (value != null && !value.asText().isBlank()) {
             SimpleDateFormat sdf = new SimpleDateFormat(format);
+            sdf.setLenient(false);
             return sdf.parse(value.asText());
         }
         return null;

@@ -291,8 +291,7 @@ public class PatientTransformer {
 
         if (node.has("fechaNacimiento")) {
             try {
-                String fechaStr = node.get("fechaNacimiento").asText();
-                Date fecha = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
+                Date fecha = HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node);
                 patient.setBirthDate(fecha);
             } catch (ParseException e) {
                 HapiFhirUtils.addErrorIssue("paciente.fechaNacimiento", "Error al procesar paciente.fechaNacimiento",oo);
