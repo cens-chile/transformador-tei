@@ -2,9 +2,8 @@
     "datosSistema": {
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
-   
     },
-    "paciente": {
+    "paciente": { // (Requerido)
         "identidadGenero": "1" //(Requerido) Código de valor que debe pertenecer a la tabla en el siguiente link:https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSIdentidaddeGenero.html
         /*"sexoBiologico": "female", // O */
         ,
@@ -44,7 +43,7 @@
         "fechaNacimiento": "2010-11-15", //(Requerido)  formato: yyyy-MM-dd
         "fallecimiento": { //(Requerido) 
             "fallecido": false, //(Requerido)  
-            "fechaFallecimiento":"15-05-2010" //  formato: yyyy-MM-dd
+            "fechaFallecimiento": "15-05-2010" //  formato: yyyy-MM-dd
         },
         "estadoCivil": "01", //(Opcional) Estado civil del paciente
         "direcciones": [ //(Opcional) se indica la dirección de contacto que entrega el paciente
@@ -72,7 +71,7 @@
         ]
         // pendiente>>> // contactoRelacionado, //lenguaje // Proveedor de Salud Principal // PersonaRelacionada
     },
-    "profesionalClinicoSolicita": {
+    "profesionalClinicoSolicita": { // (Requerido)
         "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
         "identificadores": { // (Requerido) Al menos debe contar con RUN.
             "RUN": "11111111-1", //(Requerido)
@@ -89,7 +88,7 @@
         "sexoRegistral": "male", //(Opcional)  https://hl7.org/fhir/R4/valueset-administrative-gender.html
         "nacionalidad": "056", // (Opcional) https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
         "contacto": [ // (Opcional)
-            { 
+            {
                 "tipoDeContacto": "phone", // (Si va el campo contacto, es requerido un "phone" o "email".
                 "valorContacto": "+56996794733" // (Requerido para cada contacto).
             },
@@ -174,18 +173,18 @@
             }
         ]
     },
-    "establecimiento": {
+    "establecimiento": { //(Requerido)
         "origen": {
-            "nombreLegal": "Hospital Z", //(Requerido) Nombre del establecimiento.
-            "codigoDEIS": "DEISprueba" //(Requerido) Código del establecimiento.
+            "nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
+            "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
         }
     },
-    "solicitudIC": {
+    "solicitudIC": { // (*Requerido)
         "idLocalIC": "", //opcional,
-        "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd hh:mm:ss
-        "modalidadAtencion": "2", //(Requerido) Valor entre: 1,2 o 3
-        "derivadoPara": "1", //(Requerido) Valor entre: 1,2,3,4 o 5
-        "prioridadIc": "routine", //(Requerido) Valor entre: routine o urgent
+        //"fechaSolicitudIC": "2025-01-01 10:20:22", //(Opcional) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd hh:mm:ss
+        "modalidadAtencion": "2", //(*Requerido) Valor entre: 1,2 o 3
+        "derivadoPara": "1", //(*Requerido) Valor entre: 1,2,3,4 o 5
+        "prioridadIc": "routine", //(*Requerido) Valor entre: routine o urgent
         "atencionPreferente": false, //(Opcional) Indica si corresponde a atención preferente.
         "resolutividadAPS": true, //(Opcional) Indica si corresponde aun problema se salud que es posible resolver por programa de      resolutividad en el nivel primario
         "fundamentoPriorizacion": "1" //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
@@ -202,10 +201,10 @@
     "presentaDiscapacidad": true, //(Opcional) true o false
     "cuidador": false, //(Opcional) true o false
     "diagnostico": { //(Requerido)
-       "codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10 
+        "codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10 
         "codeSNOMED": "codigoSNOMED", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
         "glosaCIE10": "CIE-10 Glosa", //(Requerido?)Corresponde a la glosa asociada al código  del diagnóstico según CIE-10
-        "glosaSNOMED": "SNOMED Glosa",//(Opcional) Corresponde a la glosa asociada al código del diagnóstico segun SNOMED
+        "glosaSNOMED": "SNOMED Glosa", //(Opcional) Corresponde a la glosa asociada al código del diagnóstico segun SNOMED
         "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
         "estadoDiagnostico": "active", //(Requerido) Estado clinico del diagnostico.
         "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico. 
