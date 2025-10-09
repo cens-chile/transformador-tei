@@ -177,7 +177,7 @@ public class PractitionerTransformer {
             if(validoS != null) {
                 practitioner.setGender(Enumerations.AdministrativeGender.fromCode(code));
             } else HapiFhirUtils.addNotFoundCodeIssue("prestador.sexoRegistral",oo);
-        }else HapiFhirUtils.addNotFoundIssue("prestador.sexoRegistral",oo);
+        }
 
 
 
