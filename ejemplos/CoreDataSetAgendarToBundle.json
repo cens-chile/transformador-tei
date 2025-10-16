@@ -6,7 +6,7 @@
     "referenciaPaciente": "Patient/id_paciente-ejemplo-001", // (Requerido)corresponde a "Patient/<id del paciente en sistema de Tiempos de Espera Interoperable>"
     "solicitudIC": { // (Requerido) Datos de la interconsulta
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato dd-MM-yyyy HH:mm:ss, dd-MM-yyyy o yyyy-MM-dd 
+        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd 
         "modalidadAtencion": "3" // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
     },
     "prestadorProfesional": {
@@ -54,12 +54,12 @@
                 "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
             }
         },
-        "fechaNacimiento": "01-01-1975", // (Requerido) fecha en formato dd-MM-YYYY
+        "fechaNacimiento": "1985-05-16", // (Requerido) fecha en formato yyyy-MM-dd
         "titulosProfesionales": [ // (Requerido)
             {
                 "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
-                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
@@ -68,7 +68,7 @@
             {
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "15-05-1982", // (Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1982-05-16", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
@@ -76,7 +76,7 @@
             {
                 "nombre": "ANESTESIOLOGÍA", //(Opcional)
                 "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "15-05-1983", //(Opcional)  fecha en formato dd-MM-YYYY
+                "fechaEmision": "1983-05-16", //(Opcional)  fecha en formato yyyy-MM-dd
                 "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
@@ -84,7 +84,7 @@
             {
                 "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
-                "fechaEmision": "15-05-1984", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1984-05-19", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -92,13 +92,13 @@
             {
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Salud Pública", //(Opcional) 
-                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1985-05-19", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Laboratorio Forense", //(Opcional)  
-                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1985-05-18", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -106,7 +106,7 @@
             {
                 "nombre": "Laboratorio Clínicooo", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
-                "fechaEmision": "15-05-1986", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1986-08-16", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
@@ -149,8 +149,8 @@
             "glosa": "Chequeo general",
             "sistema": "http://snomed.info/sct"
         },
-        "fechaInicio": "10-06-2025 09:00:00",
-        "fechaFin": "10-06-2025 09:30:00",
+        "fechaInicio": "2025-10-16 09:00:00", // (Requerido) yyyy-MM-dd hh:mm:ss
+        "fechaFin": "10-06-2025 09:30:00", // (Requerido) yyyy-MM-dd hh:mm:ss
         "estadoActorPaciente": "tentative", // accepted declined tentative needs-action.
         "medioDeContacto": "1", //  1 Correo 2 SMS 3 Llamada 4 Whatsapp 5 Presencial
         "motivoCancelacionCita": "pat",
@@ -201,12 +201,12 @@
                 "codigo": "132" //  //(Requerido) Del conjunto válido que se describe en https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
             }
         },
-        "fechaNacimiento": "01-01-1975", // (Opcional) Nacimiento del prestador
+        "fechaNacimiento": "1975-02-25", // (Opcional) Nacimiento del prestador yyyy-MM-dd
         "titulosProfesionales": [ // (Opcional) Título(s) del prestador 
             {
                 "nombre": "Associate of Artssadas", // (Opcional) Nombre de la profesión del prestador
                 "codigo": "sdfsdfAA", // (Requerido) Del conjunto válido que se describe en https://hl7.org/fhir/R4/v2/0360/2.7/index.html
-                "fechaEmision": "01-01-2000", // (Opcional) fehca en formato "dd-MM-YYYY o YYYY-MM-dd"
+                "fechaEmision": "2000-01-19", // (Opcional) fehca en formato "yyyy-MM-dd"
                 "institucion": "Universidad Católica" //(Opcional) Institucion que emite el certificado. Este campo se maneja como texto, sin validación.
             }
         ]
@@ -246,11 +246,11 @@
             }
         ],
         "sexoRegistral": "female", //(Requerido) Sexo del paciente al nacer.
-        "fechaNacimiento": "01-01-1970", //(Requerido) 
+        "fechaNacimiento": "1970-01-25", //(Requerido) yyyy-MM-dd hh:mm:ss
         
         "fallecimiento": {//(Requerido) 
             "fallecido": false/*, //(Requerido)  
-            "fechaFallecimiento":"15-05-2010"*/
+            "fechaFallecimiento":"2010-11-13"* // yyyy-MM-dd
         },
         "estadoCivil": "01",//(Opcional) Estado civil del paciente
         "direcciones": [ //(Opcional) se indica la dirección de contacto que entrega el paciente
