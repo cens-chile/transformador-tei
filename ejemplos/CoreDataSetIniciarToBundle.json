@@ -43,7 +43,7 @@
         "fechaNacimiento": "2010-11-15", //(Requerido)  formato: yyyy-MM-dd
         "fallecimiento": { //(Requerido) 
             "fallecido": false, //(Requerido)  
-            "fechaFallecimiento": "15-05-2010" //  formato: yyyy-MM-dd
+            "fechaFallecimiento": "2025-09-29" //  formato: yyyy-MM-dd
         },
         "estadoCivil": "01", //(Opcional) Estado civil del paciente
         "direcciones": [ //(Opcional) se indica la dirección de contacto que entrega el paciente
