@@ -157,7 +157,7 @@ public class BundleIniciarTransformer {
             if(validate)
                 org = orgTransformer.transform(get, out,"establecimiento.origen");      
         }
-        //Contruir Indice Comorbilidad
+        //Contruir Indice Comorbihttps://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-TipoDeObservacion.html
         Observation indiceComorbilidad  = null;
         if(node.get("indiceComorbilidad")!=null){
            indiceComorbilidad = ObservationTransformer.buildIndiceComporbilidad(node.get("indiceComorbilidad"),out); 
@@ -244,10 +244,12 @@ public class BundleIniciarTransformer {
         HapiFhirUtils.addResourceToBundle(b, enc);
         enc.setSubject(new Reference(patient));
         enc.getDiagnosisFirstRep().setCondition(new Reference(cond));
-        
-        HapiFhirUtils.addResourceToBundle(b, indiceComorbilidad);
-        indiceComorbilidad.setSubject(new Reference(patient));
-            
+
+        if(indiceComorbilidad != null) {
+            indiceComorbilidad.setSubject(new Reference(patient));
+            HapiFhirUtils.addResourceToBundle(b, indiceComorbilidad);
+        }
+
         HapiFhirUtils.addResourceToBundle(b, org);
             
             
