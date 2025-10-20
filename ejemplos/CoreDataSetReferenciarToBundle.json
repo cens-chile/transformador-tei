@@ -49,12 +49,12 @@
                 "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
             }
         },
-        "fechaNacimiento": "01-01-1975", // (Requerido) fecha en formato dd-MM-YYYY
+        "fechaNacimiento": "1977-02-02", // (Requerido) fecha en formato yyyy-MM-dd
         "titulosProfesionales": [ // (Requerido)
             {
                 "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
-                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
@@ -63,7 +63,7 @@
             {
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "15-05-1982", // (Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1982-02-15", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
@@ -71,7 +71,7 @@
             {
                 "nombre": "ANESTESIOLOGÍA", //(Opcional)
                 "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "15-05-1983", //(Opcional)  fecha en formato dd-MM-YYYY
+                "fechaEmision": "1983-02-06", //(Opcional)  fecha en formato yyyy-MM-dd
                 "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
@@ -79,7 +79,7 @@
             {
                 "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
-                "fechaEmision": "15-05-1984", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1984-02-16", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -87,13 +87,13 @@
             {
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Salud Pública", //(Opcional) 
-                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1985-02-06", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Laboratorio Forense", //(Opcional)  
-                "fechaEmision": "15-05-1985", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1985-06-05", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -101,7 +101,7 @@
             {
                 "nombre": "Laboratorio Clínicooo", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
-                "fechaEmision": "15-05-1986", //(Opcional) fecha en formato dd-MM-YYYY
+                "fechaEmision": "1986-11-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
