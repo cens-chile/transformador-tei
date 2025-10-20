@@ -50,11 +50,11 @@
         "identificadorConsultaEspecialidad": "id consulta especialidad", // con esto sacamos el ID y creamos un identifier************
         "pertinencia": false, // (Requerido) 	Pertinencia de la atención al ser evaluado por el profesional especialista , soporta true || false
         "codigoModalidadAtencion": "1", //(Requerido)  1=presencial 2=remota 3=Telemedicina
-        /*" ": "1", // (Opcional)
+        
         "motivoNoPertinencia": "defunción del paciente", // (Opcional)
         "identificador": "identificador e n sistema-del encuentro ", // (Opcional)
         "estado": { // (Opcional)
-            "codigoEstado": "planned", //(Requerido) 
+            "codigoEstado": "planned" //(Requerido) 
         },
         "codigoTipoConsulta": 1, //(Opcional) Tipo de consulta 1 = nueva 2=control 
         "tipoDeServicio": //(opcional)
@@ -63,7 +63,7 @@
         },
         "citaMedica": { //(Opcional)
             "referenciaACitaMedica": "Appointment/id_appointment" //(Requerido) referencia a la cita que generada en la Interconsulta.
-        },*/
+        },
         "periodo": { //(Requerido)
             "fechaInicio": "2023-01-10 09:00:00", // (Requerido) Momento de inicio de la atencion, en formato yyyy-MM-dd HH:mm:SS
             "fechaFin": "2023-02-11 10:00:00" // (Opcional) Momento de fin de la atencion, en formato yyyy-MM-dd HH:mm:SS
@@ -73,12 +73,12 @@
                 "codigoRazon": "109006", //SNOMED
                 "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason"
             }
-        ],
-        "diagnosticos": [
+        ]
+        /*"diagnosticos": [ // (Opcional)
             {
                 "referenciaDiagnostico": "Condition/id_condition"
             }
-        ]
+        ]*/
     },
     "diagnostico": { //(Requerido)
         //"codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10 
