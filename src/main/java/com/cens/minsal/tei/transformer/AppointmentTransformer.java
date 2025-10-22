@@ -27,6 +27,13 @@ public class AppointmentTransformer {
         appointment.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/AppointmentAgendarLE");
 
         JsonNode node = nodeOrigin.get("cita");
+
+        if (node.has("id")) {
+            IdType idType = new IdType();
+            idType.setValue(HapiFhirUtils.readStringValueFromJsonNode("id", node));
+            appointment.setId(idType);
+        }
+
         // Identificador
         if (node.has("identificador")) {
             Identifier identifier = new Identifier();
@@ -35,6 +42,8 @@ public class AppointmentTransformer {
         } else {
             HapiFhirUtils.addNotFoundIssue("identificador", oo);
         }
+
+
 
         //FechaCreacionCita
 

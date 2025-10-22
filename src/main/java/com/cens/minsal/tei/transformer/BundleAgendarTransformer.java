@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -172,7 +173,12 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addResourceToBundle(b,organization);
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAtendedor);
-            HapiFhirUtils.addResourceToBundle(b,appointment);
+            if(appointment.getId()== null) {
+                HapiFhirUtils.addResourceToBundle(b, appointment);
+            }else{
+                b.addEntry().setResource(appointment);
+            }
+
 
             // Set MessageHeader references
             setMessageHeaderReferences(messageHeader,
