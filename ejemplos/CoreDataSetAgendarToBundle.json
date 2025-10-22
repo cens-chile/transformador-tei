@@ -142,7 +142,8 @@
         "ID": "rol-Resolutor-001"
     },
     "cita": {
-        "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud.
+        "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud. Es distinto del "id" asignado para la interoperabilidad
+        "id": "id-citamedica-aaaa-bbbb-cccc-dddd", //(Opcional) Corresponde al id asignado a la cita al momento de agendar por primera vez. No se usa al momento de agendar, sino que cuando se actualiza la citación usando el evento agendar, por ejemplo, para cambiar el estado de la cita a No se presenta (noshow) usando el campo siguiente ("estado")
         "estado": "booked", // (Requerido)Indica el estado de la cita medica: pending=pendiente | booked=cita agendada | cancelled=cita cancelada | noshow=no presentación
         "motivo": {  //  (Opcional) Motivo de la consulta 
            "codigo": "409073007", //(Opcional) https://terminology.hl7.org/6.5.0/ValueSet-v2-0276.html
