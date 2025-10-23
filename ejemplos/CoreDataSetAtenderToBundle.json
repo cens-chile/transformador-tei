@@ -18,8 +18,8 @@
         }
     ],
     "solicitudIC": {
-        "idSolicitudServicio": "aaaa",
-        "idInterconsulta": "id inter consulta",
+        "idSolicitudServicio": "aaaa", // id asignado en la transacción de interop con Minsal
+        "idInterconsulta": "id inter consulta", // identificador de la interconsulta en sistema local.
         "fechaSolicitudIC": "2025-05-13 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: dd-MM-yyyy HH:mm:ss
         "modalidadAtencion": "2", //(Requerido) Valor entre: 1,2 o 3
         "derivadoPara": "1", //(Requerido) Valor entre: 1,2,3,4 o 5

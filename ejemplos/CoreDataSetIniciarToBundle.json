@@ -202,7 +202,7 @@
     "cuidador": false, //(Opcional) true o false
     "diagnostico": { //(Requerido)
         "codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10 
-        "codeSNOMED": "codigoSNOMED", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
+        //"codeSNOMED": "codigoSNOMED", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
         "glosaCIE10": "CIE-10 Glosa", //(Requerido?)Corresponde a la glosa asociada al código  del diagnóstico según CIE-10
         "glosaSNOMED": "SNOMED Glosa", //(Opcional) Corresponde a la glosa asociada al código del diagnóstico segun SNOMED
         "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
