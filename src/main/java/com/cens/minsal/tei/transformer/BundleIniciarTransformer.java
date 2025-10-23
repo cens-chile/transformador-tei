@@ -174,11 +174,12 @@ public class BundleIniciarTransformer {
         
         //agregar discapacidad
         Boolean presentaDiscapacidad = HapiFhirUtils.readBooleanValueFromJsonNode("presentaDiscapacidad", node);
-        Observation discapacidad = new Observation();
+        Observation discapacidad = null;
         if(node.has("presentaDiscapacidad")) {
             if (!node.get("presentaDiscapacidad").isBoolean())
                 HapiFhirUtils.addInvalidIssue("resolutividadAPS", out);
             if(presentaDiscapacidad) {
+                discapacidad = new Observation();
                 discapacidad = ObservationTransformer.buildDiscapacidad(presentaDiscapacidad);
                 discapacidad.setSubject(new Reference(patient));
             }
@@ -255,9 +256,11 @@ public class BundleIniciarTransformer {
             
         HapiFhirUtils.addResourceToBundle(b, cond);
         cond.setSubject(new Reference(patient));
-        
-        HapiFhirUtils.addResourceToBundle(b, discapacidad);
-        
+
+        if(discapacidad != null) {
+            HapiFhirUtils.addResourceToBundle(b, discapacidad);
+        }
+
         if(cuidadorObservation!=null){
             HapiFhirUtils.addResourceToBundle(b, cuidadorObservation);
             cuidadorObservation.setSubject(new Reference(patient));

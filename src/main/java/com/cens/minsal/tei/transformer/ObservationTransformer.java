@@ -46,7 +46,7 @@ public class ObservationTransformer {
             new Coding("http://terminology.hl7.org/CodeSystem/observation-category",
             "survey",""));
         
-        ob.getCode().addCoding((new Coding()).setCode("ECICEP")).setText("Indice Comorbilidad");
+        ob.getCode().addCoding((new Coding()).setCode("ECICEP").setSystem("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTipoObservacionMinsal")).setText("Indice Comorbilidad");
         
         
         VSIndiceComorbilidadValuexEnum fromCode = VSIndiceComorbilidadValuexEnum.fromCode(indice.asText());
