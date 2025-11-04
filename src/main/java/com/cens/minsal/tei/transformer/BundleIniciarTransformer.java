@@ -247,8 +247,8 @@ public class BundleIniciarTransformer {
         enc.getDiagnosisFirstRep().setCondition(new Reference(cond));
 
         if(indiceComorbilidad != null) {
-            indiceComorbilidad.setSubject(new Reference(patient));
             HapiFhirUtils.addResourceToBundle(b, indiceComorbilidad);
+            indiceComorbilidad.setSubject(new Reference(patient));
         }
 
         HapiFhirUtils.addResourceToBundle(b, org);
@@ -259,6 +259,7 @@ public class BundleIniciarTransformer {
 
         if(discapacidad != null) {
             HapiFhirUtils.addResourceToBundle(b, discapacidad);
+
         }
 
         if(cuidadorObservation!=null){

@@ -186,6 +186,13 @@ public class BundlePriorizarTransformer {
         Identifier identifierIC = new Identifier().setValue(idIC);
         sr.addIdentifier(identifierIC);
 
+        String id = HapiFhirUtils.readStringValueFromJsonNode("idSolicitudServicio", node);
+        if(id!=null)
+            sr.setId(id);
+        else
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
+
+
         //codigoEstadoIC
 
         String codigoEstadoIC = "4";
