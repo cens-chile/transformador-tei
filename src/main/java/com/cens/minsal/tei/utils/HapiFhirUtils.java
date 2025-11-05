@@ -375,14 +375,20 @@ public class HapiFhirUtils {
     }
 
     public static void addResourceToBundle(Bundle b, Resource r){
-        String id = UUID.randomUUID().toString();
+        String id = null;
+        if(r.getId() == null || r.getId().isEmpty()){
+            id = UUID.randomUUID().toString();
+            r.setId(id);
+        }else {
+            id = r.getId();
+        }
         String resourceType= r.getResourceType().name();
         String fullUrl = "urn:uuid:"+id;
         fullUrl=urlBaseFullUrl+"/"+resourceType+"/"+id;
-        r.setId(id);
         b.addEntry().setFullUrl(fullUrl)
                 .setResource(r);
     }
+
     public static void addResourceToBundle(Bundle b, Resource r,String fullUrl){
         
         b.addEntry().setFullUrl(fullUrl)
