@@ -158,7 +158,7 @@ public class HapiFhirUtils {
     }
 
 
-    public static String readStringValueFromJsonNode(String value, JsonNode node){
+    public static String readStringValueFromJsonNode(String value, JsonNode node    ){
         
         JsonNode get = node.get(value);
         if(get!=null && !get.asText().isBlank() && get.isTextual())

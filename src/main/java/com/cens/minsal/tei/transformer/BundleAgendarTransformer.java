@@ -173,11 +173,11 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addResourceToBundle(b,organization);
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAtendedor);
-            if(appointment.getId()== null) {
+            //if(appointment.getId()== null) {
                 HapiFhirUtils.addResourceToBundle(b, appointment);
-            }else{
-                b.addEntry().setResource(appointment);
-            }
+            //}else{
+            //    b.addEntry().setResource(appointment);
+            //}
 
 
             // Set MessageHeader references

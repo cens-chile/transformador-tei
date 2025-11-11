@@ -36,11 +36,17 @@ public class AppointmentTransformer {
 
         // Identificador
         if (node.has("identificador")) {
+            String identifString =HapiFhirUtils.readStringValueFromJsonNode("identificador", node);
+            if(identifString!=null){
             Identifier identifier = new Identifier();
-            identifier.setValue(HapiFhirUtils.readStringValueFromJsonNode("identificador", node));
+            identifier.setValue(identifString);
             appointment.addIdentifier(identifier);
+            }else{
+                HapiFhirUtils.addErrorIssue("cita.identificador","String vacío o no valido",oo);
+            }
+
         } else {
-            HapiFhirUtils.addNotFoundIssue("identificador", oo);
+            HapiFhirUtils.addNotFoundIssue("cita.identificador", oo);
         }
 
 
