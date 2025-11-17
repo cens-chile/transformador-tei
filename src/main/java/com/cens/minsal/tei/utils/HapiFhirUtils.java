@@ -223,15 +223,20 @@ public class HapiFhirUtils {
         if (get != null && !get.asText().isBlank()) {
             String dateText = get.asText();
 
+            ParseException parseException = null;
             for (String pattern : new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"}) {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-                    formatter.setLenient(false); // Para evitar que Java acepte fechas inválidas
-                    return formatter.parse(dateText);
+                    formatter.setLenient(false);
+                    Date d = formatter.parse(dateText);
+                    return d;
                 } catch (ParseException e) {
-                    // Si no se pudo parsear con ninguno de los formatos
-                    throw e;
+                    parseException = e; // guardar la excepción pero no lanzar aquí
                 }
+            }
+            // Si ninguno funcionó, lanzar la excepción capturada del último intento
+            if (parseException != null) {
+                throw parseException;
             }
         }
 
