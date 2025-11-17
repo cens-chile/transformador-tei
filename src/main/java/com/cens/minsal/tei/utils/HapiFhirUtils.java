@@ -97,7 +97,7 @@ public class HapiFhirUtils {
         OperationOutcome.OperationOutcomeIssueComponent issue;
         issue = new OperationOutcome.OperationOutcomeIssueComponent();
         issue.setCode(OperationOutcome.IssueType.INVALID);
-        issue.setDiagnostics("The code for variable "+value+" is invalid");
+        issue.setDiagnostics("The code for variable "+value+" is invalid or not found");
         out.getIssue().add(issue);
     }
     
@@ -222,7 +222,6 @@ public class HapiFhirUtils {
         JsonNode get = node.get(value);
         if (get != null && !get.asText().isBlank()) {
             String dateText = get.asText();
-            ParseException lastException = null;
 
             for (String pattern : new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"}) {
                 try {
@@ -230,12 +229,10 @@ public class HapiFhirUtils {
                     formatter.setLenient(false); // Para evitar que Java acepte fechas inválidas
                     return formatter.parse(dateText);
                 } catch (ParseException e) {
-                    lastException = e;
+                    // Si no se pudo parsear con ninguno de los formatos
+                    throw e;
                 }
             }
-
-            // Si no se pudo parsear con ninguno de los formatos
-            throw lastException;
         }
 
         return null;

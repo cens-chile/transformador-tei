@@ -182,17 +182,13 @@ public class PractitionerTransformer {
 
 
         try {
-            if (HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node) != null) {
-                try {
-                    practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
-                } catch (ParseException e) {
-                    HapiFhirUtils.addErrorIssue("Prestador.fechaNacimiento", "error de formato de fecha", oo);
-                    throw new RuntimeException(e);
-                }
+            Date fN = HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node); 
+            if (fN!=null) {
+                practitioner.setBirthDate(HapiFhirUtils.readDateValueFromJsonNode("fechaNacimiento", node));
+               
             } else HapiFhirUtils.addNotFoundIssue("prestador.fechaNacimiento", oo);
         } catch (ParseException e) {
             HapiFhirUtils.addErrorIssue("Prestador.fechaNacimiento", "error de formato de fecha", oo);
-            throw new RuntimeException(e);
         }
 
         // Contacto
@@ -324,7 +320,7 @@ public class PractitionerTransformer {
                 if(tipoPractitioner.equals("profesional")){
                     vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTituloProfesional";
                     cs= "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTituloProfesional";
-                    addQualifications(practitioner, tits, cs, vs,"cert",oo, true);
+                    addQualifications(practitioner, tits, cs, vs,"cert",oo, true,"titulosProfesionales");
 
                 }
                 if (tipoPractitioner.equals("administrativo")){
@@ -335,7 +331,7 @@ public class PractitionerTransformer {
                         if (codigo == null)
                             HapiFhirUtils.addNotFoundIssue("prestador.titulosProfesionales.codigo", oo);
                         //String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombre", tits.get(0));
-                        addQualifications(practitioner, tits, cs, vs,"cert",oo, false);
+                        addQualifications(practitioner, tits, cs, vs,"cert",oo, false,"titulosProfesionales");
                     }
                 }
             }
@@ -346,28 +342,28 @@ public class PractitionerTransformer {
                     addQualifications(practitioner, node.get("especialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                            "esp", oo,true);
+                            "esp", oo,true,"especialidadesMedicas");
                 }
                 if(node.has("subespecialidadesMedicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("subespecialidadesMedicas", node.get("subespecialidadesMedicas"), oo,false);
                     addQualifications(practitioner, node.get("subespecialidadesMedicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadMed",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadMed",
-                            "subesp", oo,true);
+                            "subesp", oo,true,"subespecialidadesMedicas");
                 }
                 if(node.has("especialidadesOdontologicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("especialidadesOdontologicas", node.get("especialidadesOdontologicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesOdontologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadOdont",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadOdont",
-                            "EspOdo", oo,true);
+                            "EspOdo", oo,true,"especialidadesOdontologicas");
                 }
                 if(node.has("especialidadesBioquimicas")) {
                     HapiFhirUtils.validateArrayInJsonNode("especialidadesBioquimicas", node.get("especialidadesBioquimicas"), oo,false);
                     addQualifications(practitioner, node.get("especialidadesBioquimicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadBioqca",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadBioqca",
-                            "EspBioQ", oo,true);
+                            "EspBioQ", oo,true,"especialidadesBioquimicas");
                 }
 
                 if(node.has("especialidadesFarmacologicas")) {
@@ -375,7 +371,7 @@ public class PractitionerTransformer {
                     addQualifications(practitioner, node.get("especialidadesFarmacologicas"),
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEspecialidadFarma",
                             "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEspecialidadFarma",
-                            "EspFarma", oo,true);
+                            "EspFarma", oo,true,"especialidadesFarmacologicas");
                 }
             }
         }
@@ -395,7 +391,7 @@ public class PractitionerTransformer {
         }
     }
 
-    private void addQualifications(Practitioner p, JsonNode node, String system, String vs, String identifierValue, OperationOutcome oo, boolean validateCode) {
+    private void addQualifications(Practitioner p, JsonNode node, String system, String vs, String identifierValue, OperationOutcome oo, boolean validateCode,String relativePath) {
         if (node != null && node.isArray()) {
             int i = 0;
             for (JsonNode q : node) {
@@ -428,9 +424,8 @@ public class PractitionerTransformer {
                             qual.setPeriod(period);
                         }
                     }catch (ParseException e){
-                        HapiFhirUtils.addErrorIssue("Prestador.Titulosprofesionales.fechaEmision",
+                        HapiFhirUtils.addErrorIssue("Prestador."+relativePath+"["+i+"].fechaEmision",
                                 "fechaEmision No valida",oo);
-                        throw new RuntimeException(e);
                     }
 
                     String issuer = HapiFhirUtils.readStringValueFromJsonNode("institucion", q);
@@ -446,7 +441,7 @@ public class PractitionerTransformer {
                     }
 
                     p.addQualification(qual);
-                } else HapiFhirUtils.addNotFoundCodeIssue("prestador.titulosProfesionales["+i+"].codigo",oo);
+                } else HapiFhirUtils.addNotFoundCodeIssue("prestador."+relativePath+"["+i+"].codigo",oo);
                 i++;
             }
         }

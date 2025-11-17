@@ -295,7 +295,7 @@ public class PatientTransformer {
                 patient.setBirthDate(fecha);
             } catch (ParseException e) {
                 HapiFhirUtils.addErrorIssue("paciente.fechaNacimiento", "Error al procesar paciente.fechaNacimiento",oo);
-                e.printStackTrace(); // Manejo simple de error
+                //e.printStackTrace(); // Manejo simple de error
             }
         } else HapiFhirUtils.addNotFoundIssue("paciente.fechaNacimiento", oo);
 
