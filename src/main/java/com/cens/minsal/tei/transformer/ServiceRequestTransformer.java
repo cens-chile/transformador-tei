@@ -78,7 +78,7 @@ public class ServiceRequestTransformer {
                 sr.setAuthoredOn(authoredOn);
             }
         } catch (ParseException e) {
-            HapiFhirUtils.addNotFoundIssue("fechaSolicitudIC inválida", oo);
+            HapiFhirUtils.addNotFoundIssue("fechaSolicitudIC", oo);
         }
 
         // Código (servicio requerido)

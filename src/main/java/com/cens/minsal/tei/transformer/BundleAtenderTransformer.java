@@ -147,6 +147,13 @@ public class BundleAtenderTransformer {
         if(patient == null){
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente",oo);
         }
+
+        String refAtendedorText = HapiFhirUtils.readStringValueFromJsonNode("IDRolAtendedor", node);
+
+        if(refAtendedorText ==null) {
+            HapiFhirUtils.addNotFoundIssue("IDRolAtendedor", oo);
+        }
+
         AllergyIntoleranceTransformer at = new AllergyIntoleranceTransformer(validator);
 
         List<AllergyIntolerance> alergias = new ArrayList();
@@ -174,6 +181,7 @@ public class BundleAtenderTransformer {
         PractitionerRole atendedor = null;
         if(organization != null && practitioner != null) {
             atendedor = practitionerRoleTransformer.buildPractitionerRole("atendedor", organization, practitioner);
+            atendedor.setId(refAtendedorText);
             sr.getPerformer().add(new Reference(atendedor));
         }
 

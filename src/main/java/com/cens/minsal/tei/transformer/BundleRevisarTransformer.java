@@ -126,7 +126,13 @@ public class BundleRevisarTransformer {
             patRef= new Reference(refPatText);   
         else
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente", out);
-            
+
+        //referenciaAtendedor
+        String refAtendedorText = HapiFhirUtils.readStringValueFromJsonNode("IDRolAtendedor", node);
+        if(refAtendedorText ==null) {
+            HapiFhirUtils.addNotFoundIssue("IDRolAtendedor", out);
+        }
+
         //Se construye Prestador
         get = node.get("prestadorRevisor");
         validate = HapiFhirUtils.validateObjectInJsonNode("prestadorRevisor", get, out,true);
@@ -178,8 +184,9 @@ public class BundleRevisarTransformer {
         String srFullUrl = HapiFhirUtils.getUrlBaseFullUrl()+"/ServiceRequest/"+sr.getId();
         HapiFhirUtils.addResourceToBundle(b, sr,srFullUrl);
         sr.setSubject(patRef);
+
         sr.getPerformer().add(new Reference(resolutor));
-        
+
         HapiFhirUtils.addResourceToBundle(b, practitioner);
         
         HapiFhirUtils.addResourceToBundle(b, org);
@@ -188,7 +195,9 @@ public class BundleRevisarTransformer {
         
         
         HapiFhirUtils.addResourceToBundle(b,revisor);
-        HapiFhirUtils.addResourceToBundle(b,resolutor);
+        resolutor.setId(refAtendedorText);
+        HapiFhirUtils.addResourceToBundle(b, resolutor);
+
         if(examenSolicitados != null) {
             if (!examenSolicitados.isEmpty()) {
                 for (ServiceRequest s : examenSolicitados) {

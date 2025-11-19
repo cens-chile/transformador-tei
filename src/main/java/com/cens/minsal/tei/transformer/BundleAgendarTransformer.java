@@ -79,6 +79,13 @@ public class BundleAgendarTransformer {
             messageHeader = messageHeaderTransformer.transform(datosSistema, oo);
         }
 
+        //referenciaAtendedor
+        String refAtendedorText = HapiFhirUtils.readStringValueFromJsonNode("IDRolAtendedor", node);
+        if(refAtendedorText ==null) {
+            HapiFhirUtils.addNotFoundIssue("IDRolAtendedor", oo);
+        }
+
+
         // ServiceRequest
         JsonNode solicitudIC = node.get("solicitudIC");
         ServiceRequest sr = null;
@@ -129,6 +136,7 @@ public class BundleAgendarTransformer {
     PractitionerRole practitionerRoleAtendedor = null;
     if (organization != null && practitionerProfesional != null){
            practitionerRoleAtendedor = practitionerRoleTransformer.buildPractitionerRole("atendedor", organization, practitionerProfesional);
+        practitionerRoleAtendedor.setId(refAtendedorText);
         } else {
             HapiFhirUtils.addNotFoundIssue("rolDelProfesionalResolutor", oo);
         }
@@ -172,6 +180,8 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addResourceToBundle(b,practitionerAdmin);
             HapiFhirUtils.addResourceToBundle(b,organization);
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAgendador);
+
+
             HapiFhirUtils.addResourceToBundle(b,practitionerRoleAtendedor);
             //if(appointment.getId()== null) {
                 HapiFhirUtils.addResourceToBundle(b, appointment);
@@ -237,12 +247,20 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addNotFoundIssue("idInterconsulta", oo);
         }
 
+        String id = HapiFhirUtils.readStringValueFromJsonNode("idSolicitudServicio", node);
+        if(id!=null)
+            sr.setId(id);
+        else
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
+
         String pacienteRef = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", nodeOrigin);
         if(pacienteRef != null) {
             sr.setSubject(new Reference(pacienteRef));
         } else {
             HapiFhirUtils.addNotFoundIssue("referenciaPaciente(para solicitudIC)", oo);
         }
+
+
 
         String codigoEstadoIC = "5";
 

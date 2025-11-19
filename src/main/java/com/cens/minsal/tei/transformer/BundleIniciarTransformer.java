@@ -316,7 +316,6 @@ public class BundleIniciarTransformer {
         try {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
             sr.setAuthoredOn(d);
-            //System.out.println("d = " + d.toString());
         } catch (ParseException ex) {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
