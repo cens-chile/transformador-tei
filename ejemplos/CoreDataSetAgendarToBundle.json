@@ -135,12 +135,8 @@
             }
         }*/
     },
-    "rolDelProfesionalAgendador": {
-        "ID": "rol-agendador-001"
-    },
-    "rolDelProfesionalResolutor": {
-        "ID": "rol-Resolutor-001"
-    },
+
+  "IDRolAtendedor": "rol-atendedor-001", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar. 
     "cita": {
         "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud. Es distinto del "id" asignado para la interoperabilidad
         "id": "id-citamedica-aaaa-bbbb-cccc-dddd", //(Opcional) Corresponde al id asignado a la cita al momento de agendar por primera vez. No se usa al momento de agendar, sino que cuando se actualiza la citación usando el evento agendar, por ejemplo, para cambiar el estado de la cita a No se presenta (noshow) usando el campo siguiente ("estado")
