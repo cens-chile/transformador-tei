@@ -4,6 +4,7 @@
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
     },
     "referenciaPaciente": "Patient/id_paciente-ejemplo-001", // (Requerido) Indica el paciente en de la solicitud de Interconsulta
+    "IDRolAtendedor": "rol-atendedor-001", //(Requerido) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
     "planDeAtencion": {
         "indicacionesMedicas": "Plan de atención para manejo de incluye uso de férula nocturna, recomendaciones ergonómicas y antinflamatoria más examen de electromiografía.",
         "requiereExamen": true
