@@ -223,6 +223,26 @@ public class BundleAgendarTransformer {
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
         }
 
+
+        String estadoICcodigo = HapiFhirUtils.readStringValueFromJsonNode("estadoICcodigo", node);
+        if(estadoICcodigo!=null) {
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoInterconsulta";
+            String validateCode = validator.validateCode(cs, estadoICcodigo, null, vs);
+            if(validateCode!=null){
+                Coding c = new Coding(cs,estadoICcodigo,validateCode);
+                String extUrl = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE";
+                Extension buildExtension = HapiFhirUtils.buildExtension(extUrl,new CodeableConcept(c));
+                sr.getExtension().add(buildExtension);
+            }
+            else
+                HapiFhirUtils.addInvalidIssue("solicitudIC.estadoICcodigo", oo);
+        }
+        else {
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.estadoICcodigo", oo);
+        }
+
+
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         if (modalidadAtencion != null) {
 

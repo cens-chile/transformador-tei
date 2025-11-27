@@ -231,13 +231,34 @@ public class BundleRevisarTransformer {
             sr.setId(id);
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
-        
+
+
+        String estadoICcodigo = HapiFhirUtils.readStringValueFromJsonNode("estadoICcodigo", node);
+        if(estadoICcodigo!=null) {
+            String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstadoInterconsulta";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstadoInterconsulta";
+            String validateCode = validator.validateCode(cs, estadoICcodigo, null, vs);
+            if(validateCode!=null){
+                Coding c = new Coding(cs,estadoICcodigo,validateCode);
+                String extUrl = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE";
+                Extension buildExtension = HapiFhirUtils.buildExtension(extUrl,new CodeableConcept(c));
+                sr.getExtension().add(buildExtension);
+            }
+            else
+                HapiFhirUtils.addInvalidIssue("solicitudIC.estadoICcodigo", oo);
+        }
+        else {
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.estadoICcodigo", oo);
+        }
+
         String iden = HapiFhirUtils.readStringValueFromJsonNode("idInterconsulta", node);
         if(iden!=null)
             sr.getIdentifierFirstRep().setValue(iden);
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idInterconsulta", oo);
-        
+
+
+
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
         
