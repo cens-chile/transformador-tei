@@ -4,7 +4,7 @@
         "endpoint": "miendpoint.cl" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
     },
     "referenciaPaciente": "Patient/id-paciente-ejemplo-001",
-     "IDRolAtendedor": "rol-atendedor-001", //(Requerido) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
+    "IDRolAtendedor": "rol-atendedor-001", //(Requerido) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
     "prestadorRevisor": {
         "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
         "identificadores": { // (Requerido) Al menos debe contar con RUN.
@@ -118,6 +118,7 @@
         }
     },
     "solicitudIC": {
+        "estadoICcodigo": "2", //(O
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
         "idInterconsulta": "identificador", //identificador de la interconsulta asignado desde nivel central
         "idLocalIC": "", //opcional,

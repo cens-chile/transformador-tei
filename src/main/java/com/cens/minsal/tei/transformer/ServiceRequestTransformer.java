@@ -179,7 +179,7 @@ public class ServiceRequestTransformer {
             ServiceRequest ser = new ServiceRequest();
             ser.getMeta().addProfile(profileExamen);
             String id = IdType.newRandomUuid().getValue();
-            id = id.replace(":","").replace("-","");
+            id = id.replace("urn:uuid:","");
             ser.setId(id);
             try {
                 Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);

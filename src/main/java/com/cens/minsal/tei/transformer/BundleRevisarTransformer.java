@@ -350,10 +350,12 @@ public class BundleRevisarTransformer {
         sr.addExtension(ext);
         
         
-        ext = HapiFhirUtils.buildExtension(
+        /*ext = HapiFhirUtils.buildExtension(
                 "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE", 
                 new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_PRIORIZACION.getCoding()));    
+        */
         sr.addExtension(ext);
+
         
         //EspecialidadMédicaDestinoCódigo
         JsonNode especialidad = node.get("especialidadMedicaDestino");

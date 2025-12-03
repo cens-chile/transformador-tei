@@ -8,7 +8,8 @@
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
         "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd 
-        "modalidadAtencion": "3" // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
+        "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
+        "estadoICcodigo": "4"
     },
     "prestadorProfesional": {
         "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
@@ -137,14 +138,14 @@
         }*/
     },
 
-  "IDRolAtendedor": "rol-atendedor-001", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar. 
+    "IDRolAtendedor": "rol-atendedor-001", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar.
     "cita": {
         "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud. Es distinto del "id" asignado para la interoperabilidad
         "id": "id-citamedica-aaaa-bbbb-cccc-dddd", //(Opcional) Corresponde al id asignado a la cita al momento de agendar por primera vez. No se usa al momento de agendar, sino que cuando se actualiza la citación usando el evento agendar, por ejemplo, para cambiar el estado de la cita a No se presenta (noshow) usando el campo siguiente ("estado")
         "estado": "booked", // (Requerido)Indica el estado de la cita medica: pending=pendiente | booked=cita agendada | cancelled=cita cancelada | noshow=no presentación
         "motivo": {  //  (Opcional) Motivo de la consulta 
-           "codigo": "409073007", //(Opcional) https://terminology.hl7.org/6.5.0/ValueSet-v2-0276.html
-           "glosa": "Chequeo general", // (Opcional)
+            "codigo": "409073007", //(Opcional) https://terminology.hl7.org/6.5.0/ValueSet-v2-0276.html
+            "glosa": "Chequeo general", // (Opcional)
             "sistema": "http://snomed.info/sct" //(Opcional) 
         },
         "fechaInicio": "2025-06-10 09:00:00",  //(Requerido) yyyy-MM-dd HH:mm:ss fecha y hora  de inicio de la cita
@@ -208,5 +209,5 @@
             }
         ]
     }
-    
+
 }

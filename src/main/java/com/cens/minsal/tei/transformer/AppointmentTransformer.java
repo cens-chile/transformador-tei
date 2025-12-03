@@ -81,7 +81,7 @@ public class AppointmentTransformer {
                         String cs = "http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason";
                         String code = HapiFhirUtils.readStringValueFromJsonNode("motivoCancelacionCita",node);
                         String valido = validator.validateCode(cs,code,"",vs);
-                        if(valido != null && valido.equalsIgnoreCase("pat") || valido.equalsIgnoreCase("prov") || valido.equalsIgnoreCase("other")) {
+                        if(valido != null && (valido.equalsIgnoreCase("Patient") || valido.equalsIgnoreCase("Provider") || valido.equalsIgnoreCase("Other"))){
                             Coding coding = new Coding(cs, estado, valido);
                             CodeableConcept cc = new CodeableConcept(coding);
                             appointment.setCancelationReason(cc);
@@ -141,7 +141,7 @@ public class AppointmentTransformer {
                             Extension mNCExt = new Extension("MotivoNoContactabilidad", cc);
                             contactadoLEExt.addExtension(mNCExt);
                         } else HapiFhirUtils.addNotFoundCodeIssue("Cita.ContactadoLE.motivoNoContactabilidad",oo);
-
+                        contactadoLEExt.addExtension(contactadoBExt);
                     }else HapiFhirUtils.addNotFoundIssue("Cita.ContactadoLE.motivoNoContactabilidad", oo);
                 } else{
                     contactadoLEExt.addExtension(contactadoBExt);

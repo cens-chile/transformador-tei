@@ -96,8 +96,10 @@ public class ObservationTransformer {
         
             Observation ob = new Observation();
 
+
+
             IdType obID = IdType.newRandomUuid();
-            ob.setId(obID.getIdPart());
+            ob.setId(obID.toString().replace("urn:uuid:", ""));
             ob.getMeta().addProfile(resultadoExProfile);
 
             ob.setStatus(Observation.ObservationStatus.REGISTERED);

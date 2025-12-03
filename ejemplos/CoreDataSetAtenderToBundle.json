@@ -51,7 +51,7 @@
         "identificadorConsultaEspecialidad": "id consulta especialidad", // con esto sacamos el ID y creamos un identifier************
         "pertinencia": false, // (Requerido) 	Pertinencia de la atención al ser evaluado por el profesional especialista , soporta true || false
         "codigoModalidadAtencion": "1", //(Requerido)  1=presencial 2=remota 3=Telemedicina
-        
+
         "motivoNoPertinencia": "defunción del paciente", // (Opcional)
         "identificador": "identificador e n sistema-del encuentro ", // (Opcional)
         "estado": { // (Opcional)
@@ -71,7 +71,7 @@
         },
         "codigoRazonDelEncuentro": [  //
             {
-                "codigoRazon": "109006", //SNOMED
+                "codigoRazon": "225391007", //SNOMED
                 "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason"
             }
         ]
@@ -82,14 +82,14 @@
         ]*/
     },
     "diagnostico": { //(Requerido)
-        //"codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10 
-        "codeSNOMED": "codigoSNOMED", ////(Requerido CIE10 o SNOMED) Código del diagnóstico SNOMED
+        //"codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10
+        "codeSNOMED": "6736007", ////(Requerido CIE10 o SNOMED) Código del diagnóstico SNOMED
         "glosa": "", //(Opcional)Corresponde a la glosa asociada al código  del diagnóstico según la terminología utilizada
         "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
         "estadoDiagnostico": "active", //(Requerido) Estado clinico del diagnostico.
-        "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico. 
-        "categoria": "encounter-diagnosis", //(Requerido) Categoría del diagnóstico de origen.
-        "severidad": "24484000" //(Opcional) Indica la severidad del diagnóstico Severo=2448400 Moderado =6736007 leve=255604002
+        "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico.
+        "categoria": "encounter-diagnosis" //(Requerido) Categoría del diagnóstico de origen.
+        //"severidad": "24484000" //(Opcional) Indica la severidad del diagnóstico Severo=2448400 Moderado =6736007 leve=255604002
     },
     "resultadoExamenes": [ //Opcional
         {

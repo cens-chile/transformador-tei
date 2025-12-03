@@ -237,10 +237,10 @@ public class BundleAgendarTransformer {
             }
             else
                 HapiFhirUtils.addInvalidIssue("solicitudIC.estadoICcodigo", oo);
-        }
-        else {
+        }else{
             HapiFhirUtils.addNotFoundIssue("solicitudIC.estadoICcodigo", oo);
         }
+
 
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
@@ -281,7 +281,7 @@ public class BundleAgendarTransformer {
         }
 
 
-
+/*
         String codigoEstadoIC = "5";
 
         if(codigoEstadoIC != null) {
@@ -303,7 +303,7 @@ public class BundleAgendarTransformer {
             sr.addExtension(extensionEstadoIC);
         } else {
             HapiFhirUtils.addNotFoundIssue("codigoEstadoIC", oo);
-        }
+        }*/
 
         return sr;
     }
