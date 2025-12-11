@@ -12,6 +12,8 @@ import com.cens.minsal.tei.valuesets.VSEstadoInterconsultaEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
+
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -225,7 +229,16 @@ public class BundleReferenciarTransformer {
             sr.getIdentifierFirstRep().setValue(iden);
         else
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idInterconsulta", oo);
-        
+
+        try {
+            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
+            sr.setAuthoredOn(d);
+        } catch (ParseException ex) {
+            Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
+            HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
+        }
+
+
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
         
