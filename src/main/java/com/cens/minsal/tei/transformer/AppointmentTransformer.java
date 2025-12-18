@@ -62,11 +62,15 @@ public class AppointmentTransformer {
             String cs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSMediodeContacto";
             String medioDeContacto = HapiFhirUtils.readStringValueFromJsonNode("medioDeContacto", node);
             String valido = validator.validateCode(cs,medioDeContacto,"",vs);
-            Coding mcCod = new Coding(cs,medioDeContacto,valido);
-            CodeableConcept cc = new CodeableConcept(mcCod);
-            Extension mcExt = new Extension(
-                    "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMediodeContacto", cc);
-            appointment.addExtension(mcExt);
+            if(valido!= null && !valido.isEmpty() && valido != "") {
+                Coding mcCod = new Coding(cs, medioDeContacto, valido);
+                CodeableConcept cc = new CodeableConcept(mcCod);
+                Extension mcExt = new Extension(
+                        "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionMediodeContacto", cc);
+                appointment.addExtension(mcExt);
+            } else {
+                HapiFhirUtils.addInvalidIssue("cita.medioDeContacto", oo);
+            }
 
         }else HapiFhirUtils.addNotFoundIssue("cita.medioDeContacto", oo);
 
