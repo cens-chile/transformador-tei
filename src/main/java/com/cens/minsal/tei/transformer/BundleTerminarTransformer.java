@@ -106,12 +106,16 @@ public class BundleTerminarTransformer {
         get = node.get("prestador");
         boolean prestadorValid = HapiFhirUtils.validateObjectInJsonNode("prestador", get,out,true);
         Practitioner practitioner = null;
+        Practitioner profesional = null;
         if(prestadorValid) {
             String tipoPrestador = HapiFhirUtils.readStringValueFromJsonNode("tipoPrestador", get);
-            if (!tipoPrestador.toLowerCase().equals("profesional") && !tipoPrestador.toLowerCase().equals("administrativo")) {
+            if (!tipoPrestador.equals("profesional") && !tipoPrestador.equals("administrativo")) {
                 HapiFhirUtils.addErrorIssue("prestador.tipoPrestador", "Dato no válido", out);
             }
             practitioner = practitionerTransformer.transform(tipoPrestador, get, out);
+            if (tipoPrestador.equals("profesional")){
+                profesional = practitioner;
+            }
         }
         else{
             HapiFhirUtils.addNotFoundIssue("Prestador", out);
@@ -146,7 +150,9 @@ public class BundleTerminarTransformer {
         String refPat = HapiFhirUtils.readStringValueFromJsonNode("referenciaPaciente", node);
         sr.getSubject().setReference(refPat);
 
-        sr.getPerformer().add(new Reference(terminador));
+        if(profesional!=null) {
+            sr.getPerformer().add(new Reference(profesional));
+        }
 
         HapiFhirUtils.addResourceToBundle(b,practitioner);
         HapiFhirUtils.addResourceToBundle(b,organization);
