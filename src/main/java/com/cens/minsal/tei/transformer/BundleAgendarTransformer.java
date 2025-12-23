@@ -135,9 +135,11 @@ public class BundleAgendarTransformer {
         // PractitionerRole (Resolutor)
     PractitionerRole practitionerRoleAtendedor = null;
     if (organization != null && practitionerProfesional != null){
-           practitionerRoleAtendedor = practitionerRoleTransformer.buildPractitionerRole("atendedor", organization, practitionerProfesional);
+        practitionerRoleAtendedor = practitionerRoleTransformer.buildPractitionerRole("atendedor", organization, practitionerProfesional);
         practitionerRoleAtendedor.setId(refAtendedorText);
-        } else {
+        sr.getPerformer().add(new Reference(practitionerRoleAtendedor));
+
+    } else {
             HapiFhirUtils.addNotFoundIssue("rolDelProfesionalResolutor", oo);
         }
 
