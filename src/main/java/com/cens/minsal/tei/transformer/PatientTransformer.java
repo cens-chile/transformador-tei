@@ -265,7 +265,7 @@ public class PatientTransformer {
                 if (valido != null) {
                     Coding coding = new Coding(cs, pueblosOriginarios, valido);
                     CodeableConcept cc = new CodeableConcept(coding);
-                    if(pueblosOriginarios.equals(10)){
+                    if(pueblosOriginarios.equals("10")){
                         if (node.has("otroPuebloOriginario")){
                             String otroPuebloOriginario = HapiFhirUtils.readStringValueFromJsonNode(
                                         "otroPuebloOriginario",node);

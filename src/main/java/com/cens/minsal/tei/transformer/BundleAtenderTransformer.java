@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.json.Json;
 import org.hl7.fhir.dstu3.model.codesystems.CarePlanActivityCategory;
+import org.hl7.fhir.dstu3.model.codesystems.CarePlanActivityStatus;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
@@ -159,7 +160,7 @@ public class BundleAtenderTransformer {
         List<AllergyIntolerance> alergias = new ArrayList();
         if(node.has("alergias")){
             JsonNode allergNode = node.get("alergias");
-            boolean allergValid = HapiFhirUtils.validateArrayInJsonNode("alergoas", allergNode, oo, false);
+            boolean allergValid = HapiFhirUtils.validateArrayInJsonNode("alergias", allergNode, oo, false);
             if(allergValid)
                 alergias = at.transform(allergNode, oo);
          }
@@ -168,7 +169,7 @@ public class BundleAtenderTransformer {
             a.setPatient(new Reference(patient));
         }
 
-        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, oo);
+
 
         List<Observation> examenes = new ArrayList();
         JsonNode resultados = node.get("resultadoExamenes");
@@ -216,6 +217,7 @@ public class BundleAtenderTransformer {
                 cond.setSubject(new Reference(patient));
                 if(encounter != null) {
                     encounter.addDiagnosis(new Encounter.DiagnosisComponent(new Reference(cond)));
+                    cond.setEncounter(new Reference(encounter));
                 }
             }else {
                 HapiFhirUtils.addInvalidIssue("diagnostico", oo);
@@ -266,36 +268,145 @@ public class BundleAtenderTransformer {
         MedicationRequestTransformer mrt = new MedicationRequestTransformer(validator);
         MedicationRequest medReq = null;
         if(node.has("solicitudMedicamento")){
-            JsonNode solMed = node.get("solicitudMedicamento");
-            boolean solMedValid = HapiFhirUtils.validateObjectInJsonNode("solicitudMedicamento", solMed,oo,false);
+            JsonNode solMeds = node.get("solicitudMedicamento");
+            boolean solMedValid = HapiFhirUtils.validateArrayInJsonNode("solicitudMedicamento",solMeds,oo,false);
             if (solMedValid) {
-                medReq = mrt.transform(solMed, oo);
-                if(patient != null) {
-                    medReq.setSubject(new Reference(patient));
+                for (JsonNode solmed : solMeds ) {
+                    medReq = mrt.transform(solmed, oo);
+                    if (patient != null) {
+                        medReq.setSubject(new Reference(patient));
+                    }
+                    if (encounter != null) {
+                        medReq.setEncounter(new Reference(encounter));
+                    }
+                    // ******* Agregar al Careplan *************
+
+                    if(medReq != null) {
+                        CarePlan.CarePlanActivityComponent cAP = new CarePlan.CarePlanActivityComponent();
+                        Reference medReqRef = new Reference(medReq);
+                        cAP.setReference(medReqRef);
+                        CarePlan.CarePlanActivityDetailComponent cAPDet = new CarePlan.CarePlanActivityDetailComponent();
+                        /*if (solmed.has("planEstado")) {
+                            String cs = "http://hl7.org/fhir/care-plan-activity-status";
+                            String vs = "http://hl7.org/fhir/ValueSet/care-plan-activity-status";
+                            // **** validar codigo del estado not-started | scheduled | in-progress | on-hold | completed | cancelled | stopped | unknown | entered-in-error
+                            String estadoPlan = HapiFhirUtils.readStringValueFromJsonNode("planEstado",solmed);
+                            String validEstadoPlan = validator.validateCode(cs,estadoPlan,"",vs);
+                            if(validEstadoPlan == null){
+                                HapiFhirUtils.addNotFoundCodeIssue("planEstado", oo);
+                            }
+                            validEstadoPlan = validEstadoPlan.toLowerCase();
+
+                            switch (validEstadoPlan){
+                                case ("not-started"):
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.NOTSTARTED);
+                                    break;
+                                case "scheduled":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.SCHEDULED);
+                                    break;
+                                case "in-progress":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.INPROGRESS);
+                                    break;
+                                case "on-hold":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.ONHOLD);
+                                    break;
+                                case "completed":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.COMPLETED);
+                                    break;
+                                case "cancelled":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.CANCELLED);
+                                    break;
+                                case "unknown":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.UNKNOWN);
+                                    break;
+                                case "entered-in-error":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.ENTEREDINERROR);
+                                    break;
+                            }
+                            cAP.setDetail(cAPDet);
+
+                        }*/
+                        assert careplan != null;
+                        if (careplan != null) {
+                            careplan.addActivity(cAP);
+                        }
+                    }
+
                 }
-                if (encounter != null) {
-                    medReq.setEncounter(new Reference(encounter));
+            }
+        }
+        List<ServiceRequest> examenSolicitados= new ArrayList();
+        if (node.has("solicitudExamen")){
+            {
+                JsonNode solicitudesExamenNode = node.get("solicitudExamen");
+
+                boolean validate = HapiFhirUtils.validateArrayInJsonNode("solicitudExamen", solicitudesExamenNode, oo, false);
+                if(!validate) {
+                    HapiFhirUtils.addErrorIssue("solicitudExamen", "si existe, debe ser un arreglo", oo);
                 }
+
+                    int i=0;
+
+                for(JsonNode solEx : solicitudesExamenNode){
+                    ServiceRequest ser = serTransformer.buildSolicitudExamen(solEx,i,oo);
+                    examenSolicitados.add(ser);
+                    i++;
+
+                    CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
+                    carePlanActivityComponent.setReference(new Reference(ser));
+                    if (careplan != null) {
+                        careplan.addActivity(carePlanActivityComponent);
+                    }
+                    //validar el código del planEstado
+
+                    CarePlan.CarePlanActivityDetailComponent cAPDet = new CarePlan.CarePlanActivityDetailComponent();
+
+                    /*if (solEx.has("planEstado")) {
+                        String cs = "http://hl7.org/fhir/care-plan-activity-status";
+                        String vs = "http://hl7.org/fhir/ValueSet/care-plan-activity-status";
+                        // **** validar codigo del estado not-started | scheduled | in-progress | on-hold | completed | cancelled | stopped | unknown | entered-in-error
+                        String estadoPlan = HapiFhirUtils.readStringValueFromJsonNode("planEstado",solEx);
+                        String validEstadoPlan = validator.validateCode(cs,estadoPlan,"",vs);
+                        if(validEstadoPlan == null){
+                            HapiFhirUtils.addNotFoundCodeIssue("solicitudExamen["+i+"].planEstado", oo);
+                        }
+                        else {
+                            validEstadoPlan = validEstadoPlan.toLowerCase();
+
+                            switch (validEstadoPlan) {
+                                case ("not-started"):
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.NOTSTARTED);
+                                    break;
+                                case "scheduled":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.SCHEDULED);
+                                    break;
+                                case "in-progress":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.INPROGRESS);
+                                    break;
+                                case "on-hold":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.ONHOLD);
+                                    break;
+                                case "completed":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.COMPLETED);
+                                    break;
+                                case "cancelled":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.CANCELLED);
+                                    break;
+                                case "unknown":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.UNKNOWN);
+                                    break;
+                                case "entered-in-error":
+                                    cAPDet.setStatus(CarePlan.CarePlanActivityStatus.ENTEREDINERROR);
+                                    break;
+                            }
+                            carePlanActivityComponent.setDetail(cAPDet);
+                        }
+                    }*/
+
+                }
+
             }
         }
-
-        if(medReq != null) {
-            CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
-            carePlanActivityComponent.setReference(new Reference(medReq));
-            assert careplan != null;
-            if (careplan != null) {
-                careplan.addActivity(carePlanActivityComponent);
-
-            }
-        }
-        if(examenSolicitados != null) {
-            for (ServiceRequest examenSolicitado : examenSolicitados) {
-                CarePlan.CarePlanActivityComponent carePlanActivityComponent = new CarePlan.CarePlanActivityComponent();
-                carePlanActivityComponent.setReference(new Reference(examenSolicitado));
-                if (careplan != null) careplan.addActivity(carePlanActivityComponent);
-            }
-        }
-
 
         if (!oo.getIssue().isEmpty()){
             res = HapiFhirUtils.resourceToString(oo,fhirServerConfig.getFhirContext());
@@ -313,6 +424,7 @@ public class BundleAtenderTransformer {
         if(anam != null)
             HapiFhirUtils.addResourceToBundle(b,anam);
         for(AllergyIntolerance aler : alergias){
+            sr.addSupportingInfo(new Reference(aler));
             HapiFhirUtils.addResourceToBundle(b,aler);
         }
         if(examenSolicitados != null) {
@@ -321,6 +433,7 @@ public class BundleAtenderTransformer {
                 s.getBasedOn().add(new Reference(sr));
                 s.setRequester(new Reference(practitioner));
                 HapiFhirUtils.addResourceToBundle(b, s);
+                sr.addSupportingInfo(new Reference(s));
                 s.addIdentifier(new Identifier().setValue(s.getIdPart()));
             }
         }

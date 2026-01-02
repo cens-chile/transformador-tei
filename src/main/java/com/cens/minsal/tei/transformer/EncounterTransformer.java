@@ -5,6 +5,7 @@
 package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.utils.HapiFhirUtils;
+import javolution.io.Struct;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
@@ -140,7 +141,7 @@ public class EncounterTransformer {
         
         if (evento.equals("atender")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterAtenderLE");
-            EncounterTransformer.atenderComplete(json, encounter, oo);
+            atenderComplete(json, encounter, oo);
         }
         if (evento.equals("iniciar")) {
             encounter.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/EncounterIniciarLE");
@@ -150,7 +151,7 @@ public class EncounterTransformer {
     }
 
 
-    private static void atenderComplete (JsonNode node, Encounter encounter, OperationOutcome oo){
+    private void atenderComplete(JsonNode node, Encounter encounter, OperationOutcome oo){
         
         
         // Identificador
@@ -174,6 +175,25 @@ public class EncounterTransformer {
                     new StringType(node.get("motivoNoPertinencia").asText()));
             encounter.addExtension(extMotivo);
         }
+        if(node.has("consecuenciaAtencion")){
+
+            String codConsecAtencion = HapiFhirUtils.readStringValueFromJsonNode("consecuenciaAtencion", node);
+            String consecSystem="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSConsecuenciaAtencionCodigo";
+            String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSConsecuenciaAtencionCodigo";
+            String valid = validator.validateCode(consecSystem,
+                    codConsecAtencion, "", vs);
+            if (valid == null){
+                HapiFhirUtils.addNotFoundCodeIssue("consecuenciaAtencion no valido",oo);
+            }
+            if (codConsecAtencion != null && valid != null){
+                Coding cod = new Coding(consecSystem,codConsecAtencion,valid);
+                CodeableConcept cc = new CodeableConcept(cod);
+                Extension ext =HapiFhirUtils.
+                        buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionConsecuenciaAtencionCodigo"
+                                , cc);
+                encounter.addExtension(ext);
+            }
+        }
 
     }
     
@@ -187,9 +207,10 @@ public class EncounterTransformer {
             HapiFhirUtils.addNotFoundIssue("identificacionConsultaAPS", oo);
         String consecSystem="https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSConsecuenciaAtencionCodigo";
         Coding cod = new Coding(consecSystem,"3","Derivación");
-        HapiFhirUtils.
+        CodeableConcept cc = new CodeableConcept(cod);
+        Extension ext =HapiFhirUtils.
                 buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionConsecuenciaAtencionCodigo"
-                        , cod);
-        
+                        , cc);
+        enc.addExtension(ext);
     }
 }

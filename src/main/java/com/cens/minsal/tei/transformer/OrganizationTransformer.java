@@ -35,10 +35,12 @@ public class OrganizationTransformer {
         
         String nombre = HapiFhirUtils.readStringValueFromJsonNode("nombreLegal", node);
 
-        if(nombre!=null)
+        if(nombre!=null) {
             org.setName(nombre);
-        else 
-            HapiFhirUtils.addNotFoundIssue(parentPath+".nombreLegal", oo);
+        }else {
+            HapiFhirUtils.addNotFoundIssue("Establecimiento.nombreLegal",oo);
+        }
+
 
         String csDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino";
         String vsDest = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSEstablecimientoDestino";

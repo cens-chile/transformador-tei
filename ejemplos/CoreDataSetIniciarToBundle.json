@@ -11,9 +11,12 @@
         "paisOrigen": "024", //(Requerido) Código del pais de naciemiento del paciente.
         //"religion": "8", //(Opcional) - Código de la religión que declara el paciente.
         "pueblosOriginariosPerteneciente": true, //(Requerido) Se indica si el paciente pertenece a un pueblo originario.
+        //"pueblosOriginarios": "10", //(Requerido) si pueblosOriginariosPerteneciente es true. https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-PueblosOriginariosVS.html -> 1 a 10, 10 significa "otros". Si "10" se puede agregar "otroPuebloOriginario"
+
         /*"puebloAfroPertenencia": true, //(Opcional) Se indica si el paciente pertenece al pueblo tribal afrodescendiente
-        "pueblosOriginarios": "04", //(Requerido) si pueblosOriginariosPerteneciente es true
-        */ "identificadores": [ //(Requerido) el identificador Run de código 01 es obligatorio.
+        */
+        "otroPuebloOriginario": "selknam", //(Opcional) Sólo se considera si "pueblosOriginariosPerteneciente" = true y "pueblosOriginarios" = "10".
+        "identificadores": [ //(Requerido) el identificador Run de código 01 es obligatorio.
             {
                 "valor": "17456321-5", //(Requerido) Número del documento (sin puntos(.), con guión (-))
                 "codigo": "01", //(Requerido) Código del tipo de documento.
@@ -121,7 +124,15 @@
             {
                 "nombre": "MÉDICO CIRUJANO", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
-                "fechaEmision": "1971-05-15", //(Opcional)fecha en formato yyyy-MM-dd
+                //"fechaEmision": "1971-05-15", //(Opcional)fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional)fecha en formato yyyy-MM-dd
+                "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
+                "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
+            },
+            {
+                "nombre": "MÉDICO CIRUJANOoo", //(Opcional)
+                "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
+                "fechaEmision": "1972-05-15", //(Opcional)fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
@@ -131,6 +142,7 @@
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
                 "fechaEmision": "1982-01-01", // (Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-01", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
@@ -139,6 +151,7 @@
                 "nombre": "ANESTESIOLOGÍA", //(Opcional)
                 "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
                 "fechaEmision": "1975-01-01", //(Opcional)  fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-02", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
@@ -147,6 +160,7 @@
                 "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-03", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -155,12 +169,14 @@
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Salud Pública", //(Opcional)
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-01", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Laboratorio Forense", //(Opcional)
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-01", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -169,6 +185,7 @@
                 "nombre": "Laboratorio Clínico", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1989-01-01", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
@@ -181,11 +198,12 @@
     },
     "solicitudIC": { // (*Requerido)
         "idLocalIC": "", //opcional,
-        //"fechaSolicitudIC": "2025-01-01 10:20:22", //(Opcional) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd hh:mm:ss
+        "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd hh:mm:ss
         "modalidadAtencion": "2", //(*Requerido) Valor entre: 1,2 o 3
         "derivadoPara": "1", //(*Requerido) Valor entre: 1,2,3,4 o 5
         "prioridadIc": "routine", //(*Requerido) Valor entre: routine o urgent
         "atencionPreferente": false, //(Opcional) Indica si corresponde a atención preferente.
+        "destinoAtencion": "1", //(opcional) valores  del 1 al 5 https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSDestinoReferenciaCodigo.html
         "resolutividadAPS": true, //(Opcional) Indica si corresponde aun problema se salud que es posible resolver por programa de      resolutividad en el nivel primario
         "fundamentoPriorizacion": "1" //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
     },
@@ -199,10 +217,11 @@
     },
     "indiceComorbilidad": "G0", //(Opcional) valor entre G0, G1, G2 y G3
     "presentaDiscapacidad": true, //(Opcional) true o false
-    "cuidador": false, //(Opcional) true o false
+    "cuidador": true, //(Opcional) true o false
+
     "diagnostico": { //(Requerido)
-        "codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10
-        //"codeSNOMED": "codigoSNOMED", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
+        //"codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10
+        "codeSNOMED": "23186000", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
         "glosaCIE10": "CIE-10 Glosa", //(Requerido?)Corresponde a la glosa asociada al código  del diagnóstico según CIE-10
         "glosaSNOMED": "SNOMED Glosa", //(Opcional) Corresponde a la glosa asociada al código del diagnóstico segun SNOMED
         "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
@@ -215,12 +234,12 @@
         {
             "codigo": "100010-8", //(Requerido) Código que identifica el exámen realizado
             "resultado": "ad", //(Requerido)Indica el resultado codificado de los exámenes realizados
-            "fechaExamen": "2025-01-01 10:20:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd hh:mm:ss
+            "fechaExamen": "2025-01-01 10:21:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd hh:mm:ss
         },
         {
             "codigo": "100010-8", // (requerido)
             "resultado": "asd", // (requerido)
-            "fechaExamen": "2025-01-01 10:20:22" // (requerido) fecha con formato: yyyy-MM-dd hh:mm:ss
+            "fechaExamen": "2025-01-01 10:21:22" // (requerido) fecha con formato: yyyy-MM-dd hh:mm:ss
         }
     ],
     "alergias": [ //(Opcional) puede ser más de uno.
@@ -236,7 +255,7 @@
     "motivoDerivacion": "motivo", //(Requerido) motivo de la derivación del paciente
     "solicitudExamen": [ //(Opcional)
         {
-            "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd hh:mm:ss
+            "fechaSolicitudIC": "2025-01-01 10:22:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd hh:mm:ss
             "razonSolicitud": "asddsadsadsa", //(Requerido) Indica la justificación para la solicitud de exámen
             "examenSolicitadoCodigo": "100003-3", //(Requerido) Indica el código de SNOMED para el exámen solicitado
             "examenSolicitadoGlosa": "sad" //(Opcional) Exámen solicitado en texto libre

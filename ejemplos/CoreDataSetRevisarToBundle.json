@@ -56,15 +56,17 @@
                 "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
                 "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
         ],
-        "especialidadesMedicas": [ // (Opcional) 
+        "especialidadesMedicas": [ // (Opcional)
             {
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
                 "fechaEmision": "1975-01-01", // (Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1982-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
@@ -73,6 +75,7 @@
                 "nombre": "ANESTESIOLOGÍA", //(Opcional)
                 "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
                 "fechaEmision": "1975-01-01", //(Opcional)  fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
@@ -81,20 +84,23 @@
                 "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
         "especialidadesBioquimicas": [ //(Opcional)
             {
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
-                "nombre": "Salud Pública", //(Opcional) 
+                "nombre": "Salud Pública", //(Opcional)
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
-                "nombre": "Laboratorio Forense", //(Opcional)  
+                "nombre": "Laboratorio Forense", //(Opcional)
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -103,6 +109,7 @@
                 "nombre": "Laboratorio Clínicooo", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
                 "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
@@ -113,17 +120,20 @@
             "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
         },
         "destino": {
-            "nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
-            "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
+            //"nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
+            "codigoDEIS": "23123" //(Requerido) Código del establecimiento.
         }
     },
     "solicitudIC": {
-        "estadoICcodigo": "2", //(O
-        "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
-        "idInterconsulta": "identificador", //identificador de la interconsulta asignado desde nivel central
+        "estadoICcodigo": "3", //(Requerido)
+        "idSolicitudServicio": "idrrr", //id del ServiceRequest asignado desde nivel central
+        "fechaSolicitudIC": "2025-05-06 10:20:22",
+        "idInterconsulta": "identificadorg", //identificador de la interconsulta asignado desde nivel central
         "idLocalIC": "", //opcional,
         "modalidadAtencion": 2, //valor entero entre: 1,2 o 3
         "destinoAtencion": "4",
+        "atencionPreferente": false, //(Opcional) Indica si corresponde a atención preferente.
+        "fundamentoPriorizacion": "1", //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
         "resolutividadAPS": true, //boolean (opcional)
         "especialidadMedicaDestino": {
             "codigo": "14",
@@ -135,7 +145,7 @@
         },
         "pertinenciaIC": {
             "codigo": "2",
-            "motivoNoPertinencia": "ads"
+            "motivoNoPertinencia": "adssssdds"
         }
     }
 }

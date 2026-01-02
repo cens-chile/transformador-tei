@@ -415,18 +415,24 @@ public class PractitionerTransformer {
                                     .setDisplay(valido)
                     ).setText(valido));
                     // Periodo
+                    Period period = new Period();
                     try {
                         Date start = HapiFhirUtils.readDateValueFromJsonNode("fechaEmision", q);
-
+                        Date end =  HapiFhirUtils.readDateValueFromJsonNode("fechaExpiracion", q);
                         if (start != null) {
-                            Period period = new Period();
                             period.setStartElement(new DateTimeType(start));
+                        }
+                        if (end != null) {
+                            period.setEndElement(new DateTimeType(end));
+                        }
+                        if (start != null || end != null) {
                             qual.setPeriod(period);
                         }
                     }catch (ParseException e){
-                        HapiFhirUtils.addErrorIssue("Prestador."+relativePath+"["+i+"].fechaEmision",
-                                "fechaEmision No valida",oo);
+                        HapiFhirUtils.addErrorIssue("Prestador."+relativePath+"["+i+"].fechaEmision o fechaExpiracion",
+                                "fechaEmision o fechaExpiracion No valida",oo);
                     }
+
 
                     String issuer = HapiFhirUtils.readStringValueFromJsonNode("institucion", q);
                     if (issuer != null) {

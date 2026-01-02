@@ -51,9 +51,10 @@
         "fechaNacimiento": "1975-01-09", // (Requerido) fecha en formato yyyy-MM-dd
         "titulosProfesionales": [ // (Requerido)
             {
-                "nombre": "MÉDICO CIRUJANO",  //(Opcional)
+                "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
                 "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
@@ -62,85 +63,73 @@
             {
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "1982-10-15", // (Opcional) fecha en formato yyyy-MM-dd
+                "fechaEmision": "1975-01-01", // (Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1982-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
-        "subespecialidadesMedicas": [  //(Opcional)
+        "subespecialidadesMedicas": [ //(Opcional)
             {
-                "nombre": "ANESTESIOLOGÍA",//(Opcional)
-                "codigo": "2",// (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "1983-05-15",//(Opcional)  fecha en formato yyyy-MM-dd
-                "institucion": "Sociedad Chilena de Cardiología"//(Opcional)  Emisor de la sub especialidad medica.
+                "nombre": "ANESTESIOLOGÍA", //(Opcional)
+                "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
+                "fechaEmision": "1975-01-01", //(Opcional)  fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
+                "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
-        "especialidadesOdontologicas": [    //(Opcional)
+        "especialidadesOdontologicas": [ //(Opcional)
             {
-                "nombre": "Odontopediatría",//(Opcional)
+                "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
-                "fechaEmision": "1989-05-15",//(Opcional) fecha en formato yyyy-MM-dd
-                "institucion": "Universidad de los Andes"//(Opcional)  Emisor de la especialidad medica.
+                "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
+                "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
-        "especialidadesBioquimicas": [//(Opcional)
+        "especialidadesBioquimicas": [ //(Opcional)
             {
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
-                "nombre": "Salud Pública",//(Opcional)
-                "fechaEmision": "1994-05-15",//(Opcional) fecha en formato yyyy-MM-dd
-                "institucion": "Universidad de Concepción"//(Opcional)  Emisor de la especialidad medica.
-            }
-        ,
+                "nombre": "Salud Pública", //(Opcional)
+                "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
+                "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
+            },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Laboratorio Forense", //(Opcional)
-                "fechaEmision": "1995-05-15",//(Opcional) fecha en formato yyyy-MM-dd
+                "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
-        "especialidadesFarmacologicas": [  //(Opcional)
+        "especialidadesFarmacologicas": [ //(Opcional)
             {
                 "nombre": "Laboratorio Clínicooo", //(Opcional)
-                "codigo": "3",  //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
-                "fechaEmision": "1986-05-15",//(Opcional) fecha en formato yyyy-MM-dd
+                "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
+                "fechaEmision": "1975-01-01", //(Opcional) fecha en formato yyyy-MM-dd
+                "fechaExpiracion": "1981-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
     },
     "solicitudIC": {
+        "estadoICcodigo": "3", //(Requerido)
         "idSolicitudServicio":"id-solicitud-servicio",
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd 
-        "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
-        //"codigoMotivoCierreIC": "2", // (Opcional) Extension.MotivocierreInterconsulta Atención Realizada (1) 
-        //"sistemaMotivoCierreIC": "https://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-VSMotivoCierreInterconsulta.html", // (Opcional)
-        //"idRecurso": "id_solicitud_agendar_001",// (Opcional)
-        //"derivadoPara": "2",// (Opcional)
-        "prioridadIc": "urgent"// (Requerido) Indica la prioridad de atención. Valores aceptados: routine || urgent
-        //"fundamentoPriorizacion": "este es el fundamento para dar urgencia a la atención del paciente",// (Opcional)
-        //"referenciaResolutor": "Referencia al resolutor PractitionerRole/ puede que venga, o no "// (Opcional)
+        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd
+        "modalidadAtencion": "3", // (Opcional) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
+        "codigoMotivoCierreIC": "2", // (Opcional) Extension.MotivocierreInterconsulta Atención Realizada (1)
+        "sistemaMotivoCierreIC": "https://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-VSMotivoCierreInterconsulta.html", // (Opcional)
+        "idRecurso": "id_solicitud_agendar_001",// (Opcional)
+        "derivadoPara": "2",// (Opcional)
+        "prioridadIc": "urgent",// (Requerido) Indica la prioridad de atención. Valores aceptados: routine || urgent
+        "fundamentoPriorizacion": "este es el fundamento para dar urgencia a la atención del paciente",// (Requerido)
+        "referenciaResolutor": "Referencia al resolutor PractitionerRole/ puede que venga, o no "// (Opcional)
     },
     "establecimiento": {
-        //"identificador": "est-001",
-        //"sistema": "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino",
-        //"valor": "123123123",
-        "nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
-        "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
-        //"tipo": "Hospital",
-        //"activo": true,
-        //"direccion": {
-        //    "linea": "Av. Central 123",
-        //    "comuna": {
-        //        "nombre": "Santiago",
-        //        "codigo": "13101"
-        //    },
-        //    "region": {
-        //        "nombre": "Región Metropolitana",
-        //        "codigo": "13"
-        //    },
-        //    "pais": {
-        //        "nombre": "Chile",
-        //        "codigo": "136"
-        //    }
+        //"nombreLegal": "ads", //(Opcional) Nombre del establecimiento.
+        "codigoDEIS": "ads-deis" //(Requerido) Código del establecimiento.
+
     }
 
 }

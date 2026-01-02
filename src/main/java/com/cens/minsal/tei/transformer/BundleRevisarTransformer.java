@@ -172,7 +172,7 @@ public class BundleRevisarTransformer {
         }
         
         //Se agrega exámen solicitado
-        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, out);
+        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamenList(node, out);
         
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
@@ -360,15 +360,7 @@ public class BundleRevisarTransformer {
                 "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionStringFundamentoPriorizacion"
                 , new StringType(fundamentoPri));
         sr.addExtension(ext);
-        
-        
-        /*ext = HapiFhirUtils.buildExtension(
-                "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE", 
-                new CodeableConcept(VSEstadoInterconsultaEnum.ESPERA_PRIORIZACION.getCoding()));    
-        */
-        sr.addExtension(ext);
 
-        
         //EspecialidadMédicaDestinoCódigo
         JsonNode especialidad = node.get("especialidadMedicaDestino");
         if(especialidad!=null){

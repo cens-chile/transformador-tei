@@ -4,7 +4,7 @@
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
     },
     "referenciaPaciente": "Patient/id_paciente-ejemplo-001", // (Requerido) Indica el paciente en de la solicitud de Interconsulta
-    "IDRolAtendedor": "rol-atendedor-001", //(Requerido) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
+    "IDRolAtendedor": "rol-atendedor-006", //(Requerido) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
     "planDeAtencion": {
         "indicacionesMedicas": "Plan de atención para manejo de incluye uso de férula nocturna, recomendaciones ergonómicas y antinflamatoria más examen de electromiografía.",
         "requiereExamen": true
@@ -16,12 +16,21 @@
             "examenSolicitadoCodigo": "100000-9", // código LOINC
             "examenSolicitadoGlosa": "sad", //(Opcional)Nombre del examen segun el estándar
             "examenSolicitadoDescripcion": "descripcion del examen solicitado en texto libre" //(Opcional)
+
+        },
+        {
+            "fechaSolicitudIC": "2026-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss
+            "razonSolicitud": "sospecha de lumbalgia", //Razón de la solicitud del exámen
+            "examenSolicitadoCodigo": "107271-9", // código LOINC
+            "examenSolicitadoGlosa": "lumba", //(Opcional)Nombre del examen segun el estándar
+            "examenSolicitadoDescripcion": "descripcion del examen solicitado en texto libre" //(Opcional)
+
         }
     ],
     "solicitudIC": {
         "idSolicitudServicio": "aaaa", // id asignado en la transacción de interop con Minsal
         "idInterconsulta": "id inter consulta", // identificador de la interconsulta en sistema local.
-        "fechaSolicitudIC": "2025-05-13 10:20:22", //(Opcional) Fecha de solicitud de interconsulta con formato: dd-MM-yyyy HH:mm:ss
+        "fechaSolicitudIC": "2025-05-13 10:20:22", //(opcional) Fecha de solicitud de interconsulta con formato: dd-MM-yyyy HH:mm:ss
         "modalidadAtencion": "2", //(Requerido) Valor entre: 1,2 o 3
         "derivadoPara": "1", //(Requerido) Valor entre: 1,2,3,4 o 5
         "prioridadIc": "routine", //(Requerido) Valor entre: routine o urgent
@@ -31,33 +40,34 @@
     },
     "alergias": [ //(Opcional) puede ser más de uno.
         {
-            "codigoSustancia": "186002", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia 
-            "descripcionAlergia": "frutilla", //(Requerido) Descripción en texto libre de la alergia del paciente 
+            "codigoSustancia": "186002", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia
+            "descripcionAlergia": "frutilla", //(Requerido) Descripción en texto libre de la alergia del paciente
             "glosaSustancia": "Uridyl diphosphate galactose" // (Opcional) Texto libre para describir la sustancia
         },
         {
-            "codigoSustancia": "187006", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia 
+            "codigoSustancia": "187006", //(Requerido) Código de la sustancia que genera alergia y/o intolerancia
             "descripcionAlergia": "asd", //(Requerido) Descripción en texto libre de la alergia del paciente
             "glosaSustancia": "Uridyl diphosphate galactose" // (Opcional) Texto libre para describir la sustancia
         }
     ],
     "establecimiento": {
         "destino": {
-            "nombreLegal": "Hospital Clínico Ejemplo", //(Requerido) Nombre del establecimiento de destino.
-            "codigoDEIS": "133558" //(Requerido) Código del establecimiento.
+            "nombreLegal": "Hospital Clínico Ejemplo", //(opcional) Nombre del establecimiento de destino.
+            "codigoDEIS": "133558" //(opcional) Código del establecimiento.
         }
     },
     "encuentroAtender": { // (Requerido) Describe la atención que recibió el paciente
-        "identificadorConsultaEspecialidad": "id consulta especialidad", // con esto sacamos el ID y creamos un identifier************
+        "identificadorConsultaEspecialidad": "id consulta especialidad", // Identificación local (del sistema de atención médica usado en APS o Secundaria) de la atención médica
         "pertinencia": false, // (Requerido) 	Pertinencia de la atención al ser evaluado por el profesional especialista , soporta true || false
+        "codigoTipoDeConsulta": "1", // (Opcional) 1 = nueva 2= Control
         "codigoModalidadAtencion": "1", //(Requerido)  1=presencial 2=remota 3=Telemedicina
-
+        "consecuenciaAtencion": "3", // (opcional) 1 = control, 2 = Alta , 3 = Derivación
         "motivoNoPertinencia": "defunción del paciente", // (Opcional)
-        "identificador": "identificador e n sistema-del encuentro ", // (Opcional)
+        "identificador": "identificador en sistema-del encuentro ", // (Opcional)
         "estado": { // (Opcional)
-            "codigoEstado": "planned" //(Requerido) 
+            "codigoEstado": "planned" //(Requerido)
         },
-        "codigoTipoConsulta": 1, //(Opcional) Tipo de consulta 1 = nueva 2=control 
+        "codigoTipoConsulta": 1, //(Opcional) Tipo de consulta 1 = nueva 2=control
         "tipoDeServicio": //(opcional)
         {
             "codigo": "nedINTA" //(requerido)  Tipo de servicio que se realiza en el Encuentro, como por ejemplo los listados en https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSTiposServicio.html
@@ -69,7 +79,7 @@
             "fechaInicio": "2023-01-10 09:00:00", // (Requerido) Momento de inicio de la atencion, en formato yyyy-MM-dd HH:mm:SS
             "fechaFin": "2023-02-11 10:00:00" // (Opcional) Momento de fin de la atencion, en formato yyyy-MM-dd HH:mm:SS
         },
-        "codigoRazonDelEncuentro": [  //
+        "codigoRazonDelEncuentro": [ //
             {
                 "codigoRazon": "225391007", //SNOMED
                 "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason"
@@ -88,21 +98,24 @@
         "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
         "estadoDiagnostico": "active", //(Requerido) Estado clinico del diagnostico.
         "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico.
-        "categoria": "encounter-diagnosis" //(Requerido) Categoría del diagnóstico de origen.
-        //"severidad": "24484000" //(Opcional) Indica la severidad del diagnóstico Severo=2448400 Moderado =6736007 leve=255604002
+        "categoria": "encounter-diagnosis", //(Requerido) Categoría del diagnóstico de origen.
+        "severidad": "24484000" //(Opcional) Indica la severidad del diagnóstico Severo=2448400 Moderado =6736007 leve=255604002
     },
     "resultadoExamenes": [ //Opcional
         {
-            "codigo": "100010-8", //(Requerido) Código que identifica el exámen realizado 
-            "resultado": "ad", //(Requerido)Indica el resultado codificado de los exámenes realizados 
-            "fechaExamen": "2025-05-13 10:20:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd HH:mm:ss   
+            "codigo": "100010-8", //(Requerido) Código que identifica el exámen realizado
+            "resultado": "ad-res-ex", //(Requerido)Indica el resultado codificado de los exámenes realizados
+            "fechaExamen": "2025-05-13 10:20:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd HH:mm:ss
         }
     ],
-    "solicitudMedicamento": { //(Opcional)
-        "medicamento": "261000", //(Requerido) Código de medicamento, según la terminología que defina el establecimiento, por ejemplo: https://hl7.org/fhir/R4/valueset-medication-codes.html
-        "nombreMedicamento": "aspirina", // (Opcional) Nombre del medicamento
-        "indicacion": "indicacion de uso en Solicitud de Medicamento" //(Requerido) describe cómo debe usarse el medicamento, frecuencia, dosis, etc.
-    },
+    "solicitudMedicamento": [
+        { //(Opcional)
+            "medicamento": "261000", //(Requerido) Código de medicamento, según la terminología que defina el establecimiento, por ejemplo: https://hl7.org/fhir/R4/valueset-medication-codes.html
+            "nombreMedicamento": "aspirina", // (Opcional) Nombre del medicamento
+            "indicacion": "indicacion de uso en Solicitud de Medicamento", //(Requerido) describe cómo debe usarse el medicamento, frecuencia, dosis, etc.
+            "planEstado": "scheduled" // (opcional) https://hl7.org/fhir/R4/valueset-care-plan-activity-status.html not-started | scheduled | in-progress | on-hold | completed | cancelled | stopped | unknown | entered-in-error
+        }
+    ],
     "anamnesis": { // (Opcional)
         "resultadoExamen": "resultado de exámen ----",
         "fechaExamen": "2025-05-13 10:20:22" // fecha y hora en formato yyyy-MM-dd HH:mm:ss
@@ -146,10 +159,6 @@
             "provincia": { //(Opcional)
                 "nombre": "Talagante", //(Opcional)
                 "codigo": "136" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-VSCodigosProvinciasCL.html
-            },
-            "pais": { // (Opcional)
-                "nombre": "Chile", //(Opcional)
-                "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
             }
         },
         "fechaNacimiento": "1971-05-15", // (Requerido) fecha en formato yyyy-MM-dd

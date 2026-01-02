@@ -137,6 +137,12 @@ public class BundleTerminarTransformer {
             terminador = practitionerRoleTransformer.buildPractitionerRole("terminador", organization, practitioner);
         }
 
+        String refAtendedorText = HapiFhirUtils.readStringValueFromJsonNode("IDRolAtendedor", node);
+
+        if(refAtendedorText != null) {
+            sr.getPerformer().add(new Reference("PractitionerRole/"+refAtendedorText));
+        }
+
         if (!out.getIssue().isEmpty()) {
             res = HapiFhirUtils.resourceToString(out,fhirServerConfig.getFhirContext());
             return res;
@@ -207,6 +213,8 @@ public class BundleTerminarTransformer {
             sr.addExtension(HapiFhirUtils.buildExtension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEstadoInterconsultaCodigoLE",
                     cc));
         }
+
+
 
 
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", nodeOrigin);

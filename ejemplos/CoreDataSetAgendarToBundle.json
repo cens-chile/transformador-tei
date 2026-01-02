@@ -7,7 +7,7 @@
     "solicitudIC": { // (Requerido) Datos de la interconsulta
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd 
+        "fechaSolicitudIC": "2000-01-01", // (Opcional) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd
         "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
         "estadoICcodigo": "4"
     },
@@ -56,21 +56,21 @@
                 "codigo": "132" //(Requerido)  https://hl7chile.cl/fhir/ig/clcore/1.9.2/ValueSet-CodPais.html
             }
         },
-        "fechaNacimiento": "1975-01-01", // (Requerido) fecha en formato yyyy-MM-dd 
+        "fechaNacimiento": "1975-01-01", // (Requerido) fecha en formato yyyy-MM-dd
         "titulosProfesionales": [ // (Requerido)
             {
                 "nombre": "MÉDICO CIRUJANOadsasd", //(Opcional)
                 "codigo": "1", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSTituloProfesional.html
-                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd 
+                "fechaEmision": "1971-05-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Chile", // (Opcional) Corresponde a un texto que identifica el nombre de la institucion.
                 "mencion": "mencion del titulo profesional" // (Opcional) mención como texto libre añadida al titulo profesional
             }
         ],
-        "especialidadesMedicas": [ // (Opcional) 
+        "especialidadesMedicas": [ // (Opcional)
             {
                 "nombre": "CARDIOLOGÍA", // (Opcional)
                 "codigo": "3", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "1982-05-05", // (Opcional) fecha en formato yyyy-MM-dd 
+                "fechaEmision": "1982-05-05", // (Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Colegio Médico de Chile" // (Opcional) Emisor de la especialidad medica.
             }
         ],
@@ -78,7 +78,7 @@
             {
                 "nombre": "ANESTESIOLOGÍA", //(Opcional)
                 "codigo": "2", // (Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadMed.html
-                "fechaEmision": "1983-12-31", //(Opcional)  fecha en formato yyyy-MM-dd 
+                "fechaEmision": "1983-12-31", //(Opcional)  fecha en formato yyyy-MM-dd
                 "institucion": "Sociedad Chilena de Cardiología" //(Opcional)  Emisor de la sub especialidad medica.
             }
         ],
@@ -86,21 +86,21 @@
             {
                 "nombre": "Odontopediatría", //(Opcional)
                 "codigo": "7", // (Requerido)   https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadOdont.html
-                "fechaEmision": "1984-12-12", //(Opcional) fecha en formato yyyy-MM-dd 
+                "fechaEmision": "1984-12-12", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de los Andes" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
         "especialidadesBioquimicas": [ //(Opcional)
             {
                 "codigo": "3", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
-                "nombre": "Salud Pública", //(Opcional) 
+                "nombre": "Salud Pública", //(Opcional)
                 "fechaEmision": "1985-12-12", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             },
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
-                "nombre": "Laboratorio Forense", //(Opcional)  
-                "fechaEmision": "1986-12-12", //(Opcional) fecha en formato yyyy-MM-dd 
+                "nombre": "Laboratorio Forense", //(Opcional)
+                "fechaEmision": "1986-12-12", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción" //(Opcional)  Emisor de la especialidad medica.
             }
         ],
@@ -108,7 +108,7 @@
             {
                 "nombre": "Laboratorio Clínicooo", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
-                "fechaEmision": "1987-12-13", //(Opcional) fecha en formato yyyy-MM-dd 
+                "fechaEmision": "1987-12-13", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.
             }
         ]
@@ -138,29 +138,31 @@
         }*/
     },
 
-    "IDRolAtendedor": "rol-atendedor-001", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar.
+    "IDRolAtendedor": "rol-atendedor-002", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar.
     "cita": {
         "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud. Es distinto del "id" asignado para la interoperabilidad
+        "fechaCreacion": "2025-12-29 10:00:00", //(requerido) Corresponde a la fecha en la que se crea la cita en el sistema de salud.
         "id": "id-citamedica-aaaa-bbbb-cccc-dddd", //(Opcional) Corresponde al id asignado a la cita al momento de agendar por primera vez. No se usa al momento de agendar, sino que cuando se actualiza la citación usando el evento agendar, por ejemplo, para cambiar el estado de la cita a No se presenta (noshow) usando el campo siguiente ("estado")
         "estado": "booked", // (Requerido)Indica el estado de la cita medica: pending=pendiente | booked=cita agendada | cancelled=cita cancelada | noshow=no presentación
-        "motivo": {  //  (Opcional) Motivo de la consulta 
+        "motivo": {  //  (Opcional) Motivo de la consulta
             "codigo": "409073007", //(Opcional) https://terminology.hl7.org/6.5.0/ValueSet-v2-0276.html
             "glosa": "Chequeo general", // (Opcional)
-            "sistema": "http://snomed.info/sct" //(Opcional) 
+            "sistema": "http://snomed.info/sct" //(Opcional)
         },
         "fechaInicio": "2025-06-10 09:00:00",  //(Requerido) yyyy-MM-dd HH:mm:ss fecha y hora  de inicio de la cita
         "fechaFin": "2025-06-10 09:30:00", //(Requerido) yyyy-MM-dd HH:mm:ss fecha y hora de fin de la cita
-        "estadoActorPaciente": "declined", //(Requerido) accepted declined tentative needs-action.
-        "medioDeContacto": "1", // (Requerido) 1 Correo 2 SMS 3 Llamada 4 Whatsapp 5 Presencial
+        "estadoActorPaciente": "accepted", //(Requerido) accepted declined tentative needs-action.
+        "medioDeContacto": "2" , // (Requerido) 1 Correo 2 SMS 3 Llamada 4 Whatsapp 5 Presencial
         "motivoCancelacionCita": "pat", //(Opcional) https://hl7.org/fhir/R4/valueset-appointment-cancellation-reason.html
-        "contactadoLE": { // (Requerido) Indica el estado de contacto con el paciente 
+        "contactadoLE": { // (Requerido) Indica el estado de contacto con el paciente
             "contactado": false, //(Requerido)
-            "motivoNoContactabilidad": "1" // (Requerido solo si "contactado" es false) aceptado de 1 a 4 --- https://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-VSMotivoNoContactabilidad.html
+            "motivoNoContactabilidad": "1", // (opcional- válido solo si "contactado" es false) aceptado de 1 a 4 --- https://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-VSMotivoNoContactabilidad.html
+            "otroMotivoNoContactabilidad": "descripción de otro motivo de no contactabilidad" //(opcional) solo válido si existe MotivoNocontactabilidad.
         }
     },
     "prestadorAdministrativo": { //(Requerido) Corresponde a quien está agendando la cita médica, no al profesional que atenderá al paciente.
         "identificadores": { // (Requerido) Al menos debe existir el RUN
-            "RUN": "11111111-1" // (Requerido) 
+            "RUN": "11111111-1" // (Requerido)
         },
         "nombreCompleto": { // (Requerido) Al menos debe contar con un nombre y primer apellido
             "nombres": [ // (Requerido) Nombres entre comillas separados por una ","
@@ -173,7 +175,7 @@
         "contacto": [ //(Opcional) Forma de contactar al prestador
             {
                 "tipoDeContacto": "email", // (Requerido) Acepta email y phone.
-                "valorContacto": "maria.lopezadministrativa@example.com" //(Requerido) 
+                "valorContacto": "maria.lopezadministrativa@example.com" //(Requerido)
             },
             {
                 "tipoDeContacto": "phone", // (Requerido) Acepta email y phone.
@@ -200,11 +202,11 @@
             }
         },
         "fechaNacimiento": "1975-12-12", // (Opcional) Nacimiento del prestador yyyy-MM-dd
-        "titulosProfesionales": [ // (Opcional) Título(s) del prestador 
+        "titulosProfesionales": [ // (Opcional) Título(s) del prestador
             {
                 "nombre": "Associate of Artssadas", // (Opcional) Nombre de la profesión del prestador
                 "codigo": "sdfsdfAA", // (Requerido) Del conjunto válido que se describe en https://hl7.org/fhir/R4/v2/0360/2.7/index.html
-                "fechaEmision": "2000-12-12", // (Opcional) fehca en formato yyyy-MM-dd 
+                "fechaEmision": "2000-12-12", // (Opcional) fehca en formato yyyy-MM-dd
                 "institucion": "Universidad Católica" //(Opcional) Institucion que emite el certificado. Este campo se maneja como texto, sin validación.
             }
         ]

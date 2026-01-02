@@ -238,6 +238,8 @@ public class BundlePriorizarTransformer {
             sr.addExtension(new Extension(
                     "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionStringFundamentoPriorizacion",
                     new StringType(fundamento)));
+        } else {
+            HapiFhirUtils.addNotFoundIssue("solicitudIC.fundamentoPriorizacion",oo);
         }
         if(node.has("especialidadMedicaDestinoCodigo")){
             Extension espMedExt = new Extension("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/ExtensionEspecialidadMedicaDestinoCodigo");
@@ -295,8 +297,6 @@ public class BundlePriorizarTransformer {
             } else
                 HapiFhirUtils.addNotFoundCodeIssue("solicitudIC.modalidadAtencion",oo);
 
-        } else {
-            HapiFhirUtils.addNotFoundIssue("modalidadAtencion", oo);
         }
         return sr;
     }

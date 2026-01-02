@@ -3,6 +3,8 @@
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
     },
+    "IDRolAtendedor": "rol-atendedor-001", //(opcional) ID del rol de atendedor entregado por el Sistema de Tiempos de Espera del Minsal en la transacción Referenciar.
+
     "prestador":{
         "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
         "identificadores": { // (Requerido) Al menos debe contar con RUN.
@@ -23,10 +25,10 @@
             "tipoDeContacto": "phone", // (Requerido para cada contacto) acepta "phone" e "email".
             "valorContacto": "+56996794733" // (Requerido para cada contacto).
         },
-        {
-            "tipoDeContacto": "email", // (Requerido para cada contacto) acepta "phone" e "email".
-            "valorContacto": "maria.lopez.profesional@example.com" // (Requerido para cada contacto).
-        }
+            {
+                "tipoDeContacto": "email", // (Requerido para cada contacto) acepta "phone" e "email".
+                "valorContacto": "maria.lopez.profesional@example.com" // (Requerido para cada contacto).
+            }
         ],
         "direccion": {  //(Opcional)
             "descripcion": "Calle Del prestador 456", //(Requerido)
@@ -88,7 +90,7 @@
                 "fechaEmision": "1982-05-15",//(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Concepción"//(Opcional)  Emisor de la especialidad medica.
             }
-            ,
+        ,
             {
                 "codigo": "2", //(Requerido) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadBioqca.html
                 "nombre": "Laboratorio Forense", //(Opcional)
@@ -108,17 +110,17 @@
     "solicitudIC":  { // (Requerido) Datos de la interconsulta
         "idSolicitudServicio": "id-solicitud", // (Requerido) corresponde al ID de sistema de la Interconsulta
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato dd-MM-yyyy HH:mm:ss, dd-MM-yyyy o yyyy-MM-dd 
+        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato dd-MM-yyyy HH:mm:ss, dd-MM-yyyy o yyyy-MM-dd
         "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
-    "codigoMotivoCierreIC": "1" //(Requerido) 1 a 18, desde https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSMotivoCierreInterconsulta.html
+        "codigoMotivoCierreIC": "1" //(Requerido) 1 a 18, desde https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSMotivoCierreInterconsulta.html
 
     },
     "referenciaPaciente": "Patient/id_paciente-ejemplo-001",
-        
+
     "establecimiento": {
-                    "nombreLegal": "ads", //(Requerido) Nombre del establecimiento.
-            "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
+        // "nombreLegal": "ads", //(Opcional) Nombre del establecimiento.
+        "codigoDEIS": "ads" //(Requerido) Código del establecimiento.
 
     }
-   
+
 }

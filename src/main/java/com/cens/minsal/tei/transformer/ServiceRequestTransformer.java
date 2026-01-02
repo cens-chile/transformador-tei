@@ -165,7 +165,7 @@ public class ServiceRequestTransformer {
     }
 
 
-    public List<ServiceRequest> buildSolicitudExamen(JsonNode solicitudes, OperationOutcome oo){
+    public List<ServiceRequest> buildSolicitudExamenList(JsonNode solicitudes, OperationOutcome oo){
         JsonNode solicitudesExamenNode = solicitudes.get("solicitudExamen");
         
         boolean validate = HapiFhirUtils.validateArrayInJsonNode("solicitudExamen", solicitudesExamenNode, oo, false);
@@ -174,9 +174,18 @@ public class ServiceRequestTransformer {
         
         List<ServiceRequest> sols= new ArrayList();
         int i=0;
-
         for(JsonNode node : solicitudesExamenNode){
-            ServiceRequest ser = new ServiceRequest();
+            ServiceRequest ser = buildSolicitudExamen(node,i,oo);
+            sols.add(ser);
+            i++;
+        }
+        return sols;
+        
+    }
+
+    public ServiceRequest buildSolicitudExamen(JsonNode node, int i, OperationOutcome oo){
+
+        ServiceRequest ser = new ServiceRequest();
             ser.getMeta().addProfile(profileExamen);
             String id = IdType.newRandomUuid().getValue();
             id = id.replace("urn:uuid:","");
@@ -221,14 +230,11 @@ public class ServiceRequestTransformer {
             if(examenSolicitadoDescripcion!=null){
                 code.setText(examenSolicitadoDescripcion);
             }
+        return ser;
 
-
-
-            sols.add(ser);
-        }
-        return sols;
-        
     }
+
+
     
 }
 

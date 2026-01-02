@@ -52,8 +52,17 @@ public class AppointmentTransformer {
 
 
         //FechaCreacionCita
+        if(node.has("fechaCreacion")) {
+            try {
+                Date fecha = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaCreacion", node, "yyyy-MM-dd HH:mm:ss");
+                appointment.setCreated(fecha);
+            } catch (ParseException e) {
+                HapiFhirUtils.addErrorIssue("Error al parsear fechaCreacion de la cita", "cita.fechaCreacion", oo);
+            }
+        }else {
+                HapiFhirUtils.addNotFoundIssue("cita.fechaCreacion", oo);
+            }
 
-        appointment.setCreated(new Date());
 
         //MediodeContacto
 
@@ -142,11 +151,17 @@ public class AppointmentTransformer {
                         if(valido != null) {
                             Coding cod = new Coding(cs, mnc, valido);
                             CodeableConcept cc = new CodeableConcept(cod);
+                            if(contactadoLE.has("otroMotivoNoContactabilidad")){
+                                String otroS = HapiFhirUtils.readStringValueFromJsonNode("otroMotivoNoContactabilidad", contactadoLE);
+                                if (otroS != null) {
+                                    cc.setText(otroS);
+                                }
+                            }
                             Extension mNCExt = new Extension("MotivoNoContactabilidad", cc);
                             contactadoLEExt.addExtension(mNCExt);
                         } else HapiFhirUtils.addNotFoundCodeIssue("Cita.ContactadoLE.motivoNoContactabilidad",oo);
                         contactadoLEExt.addExtension(contactadoBExt);
-                    }else HapiFhirUtils.addNotFoundIssue("Cita.ContactadoLE.motivoNoContactabilidad", oo);
+                    }
                 } else{
                     contactadoLEExt.addExtension(contactadoBExt);
                 }

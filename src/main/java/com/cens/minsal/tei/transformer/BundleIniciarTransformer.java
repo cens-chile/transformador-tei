@@ -215,7 +215,7 @@ public class BundleIniciarTransformer {
                 questTransformer.transform(node, out);
 
         //Se agrega exámen solicitado
-        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamen(node, out);
+        List<ServiceRequest> examenSolicitados= serTransformer.buildSolicitudExamenList(node, out);
        
         
         if (!out.getIssue().isEmpty()) {
@@ -315,7 +315,12 @@ public class BundleIniciarTransformer {
         
         try {
             Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
-            sr.setAuthoredOn(d);
+            if (d != null) {
+                sr.setAuthoredOn(d);
+            }
+            else {
+             HapiFhirUtils.addNotFoundIssue("solicitudIC.fechaSolicitudIC",oo);
+            }
         } catch (ParseException ex) {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
@@ -381,7 +386,17 @@ public class BundleIniciarTransformer {
             sr.addExtension(extAtPreferente);
             
         }
-        
+
+
+        String destinoAtencionS = HapiFhirUtils.readStringValueFromJsonNode("destinoAtencion", node);
+        if (destinoAtencionS != null) {
+            Coding destinoAtencionCod =
+                    new Coding("https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSDestinoReferenciaCodigo",
+                            destinoAtencionS, "");
+            CodeableConcept destinoAtencion = new CodeableConcept(destinoAtencionCod);
+            sr.addLocationCode(destinoAtencion);
+        }
+
         Boolean resolutividadAPS = HapiFhirUtils.readBooleanValueFromJsonNode("resolutividadAPS", node);
         if(resolutividadAPS!=null){
             if(!node.get("resolutividadAPS").isBoolean())
