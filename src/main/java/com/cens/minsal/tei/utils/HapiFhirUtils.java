@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -228,6 +229,7 @@ public class HapiFhirUtils {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(pattern);
                     formatter.setLenient(false);
+                    formatter.setTimeZone(TimeZone.getDefault()); // Zona horaria del servidor
                     Date d = formatter.parse(dateText);
                     return d;
                 } catch (ParseException e) {
