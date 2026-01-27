@@ -116,7 +116,7 @@
         "estadoICcodigo": "3", //(Requerido)
         "idSolicitudServicio":"id-solicitud-servicio",
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd
+        "fechaSolicitudIC": "2025-11-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss        
         "modalidadAtencion": "3", // (Opcional) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
         "codigoMotivoCierreIC": "2", // (Opcional) Extension.MotivocierreInterconsulta Atención Realizada (1)
         "sistemaMotivoCierreIC": "https://build.fhir.org/ig/Minsal-CL/SIGTEv2-IG/ValueSet-VSMotivoCierreInterconsulta.html", // (Opcional)
