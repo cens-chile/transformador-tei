@@ -7,7 +7,7 @@
     "solicitudIC": { // (Requerido) Datos de la interconsulta
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Opcional) fecha en que se solicita la Inteconsulta con formato yyyy-MM-dd
+        "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss
         "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
         "estadoICcodigo": "4"
     },
