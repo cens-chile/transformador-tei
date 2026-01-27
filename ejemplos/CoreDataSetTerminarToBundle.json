@@ -110,7 +110,7 @@
     "solicitudIC":  { // (Requerido) Datos de la interconsulta
         "idSolicitudServicio": "id-solicitud", // (Requerido) corresponde al ID de sistema de la Interconsulta
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2000-01-01", // (Requerido) fecha en que se solicita la Inteconsulta con formato dd-MM-yyyy HH:mm:ss, dd-MM-yyyy o yyyy-MM-dd
+        "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss        
         "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
         "codigoMotivoCierreIC": "1" //(Requerido) 1 a 18, desde https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSMotivoCierreInterconsulta.html
 
