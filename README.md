@@ -187,7 +187,9 @@ docker compose up -d
 <!-- USAGE EXAMPLES -->
 ## Uso
 
+=============================================================================================================================
 ==Para el caso de los DateTime, la zona horaria se determina de acuerdo a la zona del servidor que corre este transformador==
+=============================================================================================================================
 
 Docker compose disponibiliza una API en el servidor.
 La API soporta transformaciones para cada evento de tiempos de espera:
