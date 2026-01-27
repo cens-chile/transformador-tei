@@ -127,7 +127,7 @@
     "solicitudIC": {
         "estadoICcodigo": "3", //(Requerido)
         "idSolicitudServicio": "idrrr", //id del ServiceRequest asignado desde nivel central
-        "fechaSolicitudIC": "2025-05-06 10:20:22",
+        "fechaSolicitudIC": "2025-11-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss        
         "idInterconsulta": "identificadorg", //identificador de la interconsulta asignado desde nivel central
         "idLocalIC": "", //opcional,
         "modalidadAtencion": 2, //valor entero entre: 1,2 o 3
