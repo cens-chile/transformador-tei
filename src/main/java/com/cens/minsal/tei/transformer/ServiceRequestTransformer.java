@@ -73,9 +73,9 @@ public class ServiceRequestTransformer {
 
         // Fecha de solicitud
         try {
-            Date authoredOn = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", node, "dd-MM-yyyy HH:mm:ss");
+            String authoredOn = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", node);
             if (authoredOn != null) {
-                sr.setAuthoredOn(authoredOn);
+                sr.getAuthoredOnElement().setValueAsString(authoredOn);
             }
         } catch (ParseException e) {
             HapiFhirUtils.addNotFoundIssue("fechaSolicitudIC", oo);
@@ -191,10 +191,10 @@ public class ServiceRequestTransformer {
             id = id.replace("urn:uuid:","");
             ser.setId(id);
             try {
-                Date fechaSolicitud = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
+                String fechaSolicitud = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", node);
                 if(fechaSolicitud==null)
                     HapiFhirUtils.addNotFoundIssue("solicitudExamen["+i+"].fechaSolicitudIC", oo);
-                ser.setAuthoredOn(fechaSolicitud);
+                ser.getAuthoredOnElement().setValueAsString(fechaSolicitud);
             } catch (ParseException ex) {
                 HapiFhirUtils.addErrorIssue("solicitudExamen["+i+"].fechaSolicitudIC", ex.getMessage(), oo);
             }

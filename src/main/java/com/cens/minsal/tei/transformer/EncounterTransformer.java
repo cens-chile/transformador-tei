@@ -5,14 +5,11 @@
 package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import javolution.io.Struct;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -44,7 +41,6 @@ public class EncounterTransformer {
 
         Encounter encounter = new Encounter();
 
-        ObjectMapper mapper = new ObjectMapper();
 
         
 
@@ -118,8 +114,8 @@ public class EncounterTransformer {
             if(periodoVal) {
                 try {
                     Period period = new Period();
-                    period.setStart(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", periodo, "yyyy-MM-dd HH:mm:ss"));
-                    period.setEnd(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", periodo, "yyyy-MM-dd HH:mm:ss"));
+                    period.getStartElement().setValueAsString(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", periodo));
+                    period.getEndElement().setValueAsString(HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", periodo));
                     encounter.setPeriod(period);
                 } catch (Exception e) {
                     HapiFhirUtils.addErrorIssue("Error al parsear fechas del período.", "periodo", oo);

@@ -9,8 +9,14 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.text.ParseException;
+import java.text.ParsePosition;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -217,34 +223,92 @@ public class HapiFhirUtils {
         return res;
     }
 
+    public static boolean isValidDateFormat(String dateAsString) throws ParseException {
+        if (dateAsString == null || dateAsString.isBlank()) {
+            throw new ParseException("La fecha no puede ser nula o vacía", 0);
+        }
 
+        String dateText = dateAsString.trim();
+
+        // Intentar parsear con ISO 8601 con timezone usando java.time
+        try {
+            OffsetDateTime.parse(dateText, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return true;
+        } catch (DateTimeParseException e) {
+            // Continuar con otros formatos
+        }
+
+        // Patrones soportados: fecha-hora sin timezone, solo fecha
+        String[] patterns = {
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+                formatter.setLenient(false);
+
+                ParsePosition pos = new ParsePosition(0);
+                Date d = formatter.parse(dateText, pos);
+
+                // Verificar que se haya parseado toda la cadena
+                if (d != null && pos.getIndex() == dateText.length()) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Continuar con el siguiente patrón
+            }
+        }
+
+        // Si ningún formato funcionó, lanzar excepción
+        String errorMsg = String.format(
+                "Formato de fecha inválido. Valor recibido: '%s'. " +
+                        "Formatos aceptados: 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd'T'HH:mm:ssXXX' (ISO 8601 con timezone), 'yyyy-MM-dd'",
+                dateText
+        );
+        throw new ParseException(errorMsg, 0);
+    }
 
     public static Date readDateValueFromJsonNode(String value, JsonNode node) throws ParseException {
         JsonNode get = node.get(value);
         if (get != null && !get.asText().isBlank()) {
-            String dateText = get.asText();
+            String dateText = get.asText().trim();
+            // Patrones soportados: fecha-hora sin timezone, solo fecha
+            String[] patterns = {
+                    "yyyy-MM-dd HH:mm:ss",          // Sin timezone (usa hora local del servidor)
+                    "yyyy-MM-dd"                    // Solo fecha
+            };
 
-            ParseException parseException = null;
-            for (String pattern : new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"}) {
+            for (String pattern : patterns) {
                 try {
                     SimpleDateFormat formatter = new SimpleDateFormat(pattern);
                     formatter.setLenient(false);
                     formatter.setTimeZone(TimeZone.getDefault()); // Zona horaria del servidor
-                    Date d = formatter.parse(dateText);
-                    return d;
-                } catch (ParseException e) {
-                    parseException = e; // guardar la excepción pero no lanzar aquí
+                    ParsePosition pos = new ParsePosition(0);
+                    Date d = formatter.parse(dateText, pos);
+
+                    // Verificar que se haya parseado toda la cadena
+                    if (d != null && pos.getIndex() == dateText.length()) {
+                        return d;
+                    }
+                } catch (Exception e) {
+                    // Continuar con el siguiente patrón
                 }
             }
-            // Si ninguno funcionó, lanzar la excepción capturada del último intento
-            if (parseException != null) {
-                throw parseException;
-            }
+
+            // Si ningún formato funcionó, lanzar excepción con mensaje descriptivo
+            String errorMsg = String.format(
+                    "Formato de fecha inválido para '%s'. Valor recibido: '%s'. " +
+                            "Formatos aceptados: 'yyyy-MM-dd'T'HH:mm:ssXXX' (ISO 8601 con timezone), " +
+                            "'yyyy-MM-dd HH:mm:ss' (sin timezone), 'yyyy-MM-dd' (solo fecha)",
+                    value, dateText
+            );
+            throw new ParseException(errorMsg, 0);
         }
 
         return null;
     }
-
 
     public static Extension buildBooleanExt(String url,boolean value){
         Extension ex =  new Extension(url);
@@ -330,14 +394,53 @@ public class HapiFhirUtils {
     }
 
 
-    public static Date readDateTimeValueFromJsonNode(String field, JsonNode node, String format) throws ParseException {
-        JsonNode value = node.get(field);
-        if (value != null && !value.asText().isBlank()) {
-            SimpleDateFormat sdf = new SimpleDateFormat(format);
-            sdf.setLenient(false);
-            return sdf.parse(value.asText());
+    public static String readDateTimeValueFromJsonNode(String fieldName,JsonNode node ) throws ParseException {
+
+        String dateAsString = HapiFhirUtils.readStringValueFromJsonNode(fieldName, node);
+        if (dateAsString == null || dateAsString.isBlank()) {
+            throw new ParseException("La fecha no puede ser nula o vacía", 0);
         }
-        return null;
+
+        String dateText = dateAsString.trim();
+
+        // Intentar parsear con ISO 8601 con timezone
+        try {
+            OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateText, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            // Ya tiene timezone, retornar en formato ISO 8601
+            return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            // No tiene timezone, continuar con el siguiente formato
+        }
+
+        // Intentar parsear formato sin timezone: "yyyy-MM-dd HH:mm:ss"
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            formatter.setLenient(false);
+            formatter.setTimeZone(TimeZone.getDefault());
+
+            ParsePosition pos = new ParsePosition(0);
+            Date d = formatter.parse(dateText, pos);
+
+            // Verificar que se haya parseado toda la cadena
+            if (d != null && pos.getIndex() == dateText.length()) {
+                // Convertir a OffsetDateTime con timezone del sistema
+                OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(
+                        d.toInstant(),
+                        ZoneId.systemDefault()
+                );
+                // Retornar en formato ISO 8601 con timezone
+                return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            }
+        } catch (Exception e) {
+            // No es formato válido
+        }
+
+        String errorMsg = String.format(
+                "Formato de fecha inválido. Valor recibido: '%s'. " +
+                        "Formatos aceptados: 'yyyy-MM-dd HH:mm:ss', 'yyyy-MM-dd'T'HH:mm:ssXXX' (ISO 8601 con timezone)",
+                dateText
+        );
+        throw new ParseException(errorMsg, 0);
     }
 
     /**

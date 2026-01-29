@@ -4,6 +4,8 @@
  */
 package com.cens.minsal.tei.transformer;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import com.cens.minsal.tei.config.FhirServerConfig;
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
@@ -15,7 +17,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -312,19 +318,27 @@ public class BundleIniciarTransformer {
         
         sr.setStatus(ServiceRequest.ServiceRequestStatus.DRAFT);
         sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-        
-        try {
-            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
-            if (d != null) {
-                sr.setAuthoredOn(d);
+
+
+            JsonNode fechaNode = node.get("fechaSolicitudIC");
+            if(fechaNode != null){
+
+                try {
+                    String d = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", node);
+                    if (HapiFhirUtils.isValidDateFormat(d)){
+                        sr.getAuthoredOnElement().setValueAsString(d);
+                    }
+                } catch (ParseException ex) {
+                    HapiFhirUtils.addErrorIssue("fechaSolicitudIC","fechaSolicitudIC have errors in " +
+                            "definition [Formato de fecha inválido para 'fechaSolicitudIC'. " +
+                            "Formatos aceptados: 'yyyy-MM-dd'T'HH:mm:ssXXX' (ISO 8601 con timezone)," +
+                            " 'yyyy-MM-dd HH:mm:ss' (sin timezone), 'yyyy-MM-dd' (solo fecha)]",oo);
+                }
+
+            } else {
+                HapiFhirUtils.addNotFoundIssue("solicitudIC.fechaSolicitudIC", oo);
             }
-            else {
-             HapiFhirUtils.addNotFoundIssue("solicitudIC.fechaSolicitudIC",oo);
-            }
-        } catch (ParseException ex) {
-            Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
-            HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
-        }
+
         String modalidadAtencion = HapiFhirUtils.readStringValueFromJsonNode("modalidadAtencion", node);
         if(modalidadAtencion!=null){
             VSModalidadAtencionEnum fromCode = VSModalidadAtencionEnum.fromCode(modalidadAtencion);

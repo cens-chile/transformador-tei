@@ -6,11 +6,9 @@ package com.cens.minsal.tei.transformer;
 
 import com.cens.minsal.tei.services.ValueSetValidatorService;
 import com.cens.minsal.tei.utils.HapiFhirUtils;
-import com.cens.minsal.tei.valuesets.VSMessageHeaderEventEnum;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 
-import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.*;

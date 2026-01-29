@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Component
 public class AppointmentTransformer {
@@ -54,9 +55,17 @@ public class AppointmentTransformer {
         //FechaCreacionCita
         if(node.has("fechaCreacion")) {
             try {
-                Date fecha = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaCreacion", node, "yyyy-MM-dd HH:mm:ss");
-                appointment.setCreated(fecha);
-            } catch (ParseException e) {
+                    String dateAsString = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaCreacion", node);
+                    boolean isValid = HapiFhirUtils.isValidDateFormat(dateAsString);
+                    if (isValid) {
+                        try {
+                            appointment.getCreatedElement().setValueAsString(dateAsString);
+                        } catch (Exception ex) {
+                            HapiFhirUtils.addErrorIssue("Error al parsear fechaCreacion de la cita", "cita.fechaCreacion", oo);
+                        }
+                    }
+
+            }catch (Exception e) {
                 HapiFhirUtils.addErrorIssue("Error al parsear fechaCreacion de la cita", "cita.fechaCreacion", oo);
             }
         }else {
@@ -122,17 +131,35 @@ public class AppointmentTransformer {
         }
 
         // Fechas
-        if (node.has("fechaInicio") && node.has("fechaFin")) {
+
+        if (node.has("fechaInicio")) {
             try {
-                Date start = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", node, "yyyy-MM-dd HH:mm:ss");
-                Date end = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", node, "yyyy-MM-dd HH:mm:ss");
-                appointment.setStart(start);
-                appointment.setEnd(end);
+                String dateString = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaInicio", node);
+                if (HapiFhirUtils.isValidDateFormat(dateString)) {
+                    appointment.getStartElement().setValueAsString(dateString);
+                }
             } catch (ParseException e) {
-                HapiFhirUtils.addErrorIssue("Error al parsear fechas de la cita", "fechaInicio/fechaFin", oo);
-            }
+            HapiFhirUtils.addErrorIssue("Error al parsear fecha de inicio de la cita", "fechaInicio", oo);
+        }
+
+
         } else {
-            HapiFhirUtils.addNotFoundIssue("fechaInicio o fechaFin", oo);
+            HapiFhirUtils.addNotFoundIssue("fechaInicio", oo);
+        }
+
+        if (node.has("fechaFin") && node.has("fechaFin")) {
+            try {
+                String dateString = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaFin", node);
+                if (HapiFhirUtils.isValidDateFormat(dateString)) {
+                    appointment.getEndElement().setValueAsString(dateString);
+                }
+            } catch (ParseException e) {
+                HapiFhirUtils.addErrorIssue("Error al parsear fecha de fin de la cita", "fechaFin", oo);
+            }
+
+
+        } else {
+            HapiFhirUtils.addNotFoundIssue("Appointment.fechaFin", oo);
         }
 
 

@@ -187,8 +187,10 @@ public class BundleTerminarTransformer {
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idSolicitudServicio", oo);
 
         try {
-            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", nodeOrigin);
-            sr.setAuthoredOn(d);
+            String d = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", nodeOrigin);
+            if (HapiFhirUtils.isValidDateFormat(d)){
+                sr.getAuthoredOnElement().setValueAsString(d);
+            }
         } catch (ParseException ex) {
             Logger.getLogger(BundleTerminarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);

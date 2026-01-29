@@ -52,7 +52,7 @@ public class ObservationAnamnesisTransformer {
 
         if(node.has("fechaExamen")){
             try {
-                Date fechaExamen = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", node);
+                String fechaExamen = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaExamen", node);
                 DateTimeType dtt = new DateTimeType(fechaExamen);
                 obs.setEffective(dtt);
             }catch (Exception e){

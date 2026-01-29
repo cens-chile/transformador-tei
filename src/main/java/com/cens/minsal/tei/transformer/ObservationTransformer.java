@@ -124,7 +124,7 @@ public class ObservationTransformer {
             
             try {
                 if(resultadoEx.has("fechaExamen")) {
-                    Date date = HapiFhirUtils.readDateValueFromJsonNode("fechaExamen", resultadoEx);
+                    String date = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaExamen", resultadoEx);
                     ob.setEffective(new DateTimeType(date));
                 }else
                     HapiFhirUtils.addNotFoundIssue("resultadoExamenes.fechaExamen", oo);

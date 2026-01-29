@@ -44,10 +44,10 @@ public class PractitionerRoleTransformer {
         if (periodo != null) {
             Period period = new Period();
             try {
-                Date start = HapiFhirUtils.readDateTimeValueFromJsonNode("Inicio", periodo, "yyyy-MM-dd HH:mm:ss");
-                Date end = HapiFhirUtils.readDateTimeValueFromJsonNode("Fin", periodo, "yyyy-MM-dd HH:mm:ss");
-                if (start != null) period.setStart(start);
-                if (end != null) period.setEnd(end);
+                String start = HapiFhirUtils.readDateTimeValueFromJsonNode("Inicio", periodo);
+                String end = HapiFhirUtils.readDateTimeValueFromJsonNode("Fin", periodo);
+                if (start != null) period.getStartElement().setValueAsString(start);
+                if (end != null) period.getEndElement().setValueAsString(end);
 
             }catch (Exception e){
                 HapiFhirUtils.addErrorIssue("Rol de profesional.periodo.inicio o fin","Error en el formato de la fecha", oo);

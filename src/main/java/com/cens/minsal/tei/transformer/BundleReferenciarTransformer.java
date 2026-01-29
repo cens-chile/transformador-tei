@@ -231,8 +231,10 @@ public class BundleReferenciarTransformer {
             HapiFhirUtils.addNotFoundIssue("solicitudIC.idInterconsulta", oo);
 
         try {
-            Date d = HapiFhirUtils.readDateValueFromJsonNode("fechaSolicitudIC", node);
-            sr.setAuthoredOn(d);
+            String d = HapiFhirUtils.readDateTimeValueFromJsonNode("fechaSolicitudIC", node);
+            if (HapiFhirUtils.isValidDateFormat(d)){
+                sr.getAuthoredOnElement().setValueAsString(d);
+            }
         } catch (ParseException ex) {
             Logger.getLogger(BundleIniciarTransformer.class.getName()).log(Level.SEVERE, null, ex);
             HapiFhirUtils.addErrorIssue("fechaSolicitudIC", ex.getMessage(), oo);
