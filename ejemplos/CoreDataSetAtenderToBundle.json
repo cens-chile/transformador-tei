@@ -1,4 +1,5 @@
-{
+{ // Los datos que se representan como fecha y hora aceptan 2 formatos: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX
+    // ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
     "datosSistema": {
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
@@ -11,7 +12,7 @@
     },
     "solicitudExamen": [
         {
-            "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss
+            "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
             "razonSolicitud": "sospecha de escoliosis", //Razón de la solicitud del exámen
             "examenSolicitadoCodigo": "100000-9", // código LOINC
             "examenSolicitadoGlosa": "sad", //(Opcional)Nombre del examen segun el estándar
@@ -19,7 +20,7 @@
 
         },
         {
-            "fechaSolicitudIC": "2026-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss
+            "fechaSolicitudIC": "2026-01-01 10:20:22", //fecha con formato:yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
             "razonSolicitud": "sospecha de lumbalgia", //Razón de la solicitud del exámen
             "examenSolicitadoCodigo": "107271-9", // código LOINC
             "examenSolicitadoGlosa": "lumba", //(Opcional)Nombre del examen segun el estándar
@@ -30,7 +31,7 @@
     "solicitudIC": {
         "idSolicitudServicio": "aaaa", // id asignado en la transacción de interop con Minsal
         "idInterconsulta": "id inter consulta", // identificador de la interconsulta en sistema local.
-        "fechaSolicitudIC": "2025-05-13 10:20:22", //(opcional) Fecha de solicitud de interconsulta con formato: dd-MM-yyyy HH:mm:ss
+        "fechaSolicitudIC": "2025-05-13 10:20:22", //(opcional) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "modalidadAtencion": "2", //(Requerido) Valor entre: 1,2 o 3
         "derivadoPara": "1", //(Requerido) Valor entre: 1,2,3,4 o 5
         "prioridadIc": "routine", //(Requerido) Valor entre: routine o urgent
@@ -52,8 +53,8 @@
     ],
     "establecimiento": {
         "destino": {
-            "nombreLegal": "Hospital Clínico Ejemplo", //(opcional) Nombre del establecimiento de destino.
-            "codigoDEIS": "133558" //(opcional) Código del establecimiento.
+            "nombreLegal": "Hospital Clínico Ejemplo", //(Requerido) Nombre del establecimiento de destino.
+            "codigoDEIS": "133558" //(Requerido) Código del establecimiento.
         }
     },
     "encuentroAtender": { // (Requerido) Describe la atención que recibió el paciente
@@ -76,20 +77,16 @@
             "referenciaACitaMedica": "Appointment/id_appointment" //(Requerido) referencia a la cita que generada en la Interconsulta.
         },
         "periodo": { //(Requerido)
-            "fechaInicio": "2023-01-10 09:00:00", // (Requerido) Momento de inicio de la atencion, en formato yyyy-MM-dd HH:mm:SS
-            "fechaFin": "2023-02-11 10:00:00" // (Opcional) Momento de fin de la atencion, en formato yyyy-MM-dd HH:mm:SS
+            "fechaInicio": "2023-01-10 09:00:00", // (Requerido) Momento de inicio de la atencion, en formato yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+            "fechaFin": "2023-02-11 10:00:00" // (Opcional) Momento de fin de la atencion, en formato yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         },
-        "codigoRazonDelEncuentro": [ //
+        "codigoRazonDelEncuentro": [ // (Opcional)
             {
-                "codigoRazon": "225391007", //SNOMED
-                "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason"
+                "codigoRazon": "225391007", // (Obligatorio) SNOMED
+                "urlRazon": "http://hl7.org/fhir/ValueSet/encounter-reason" // (Oblogatorio)
             }
         ]
-        /*"diagnosticos": [ // (Opcional)
-            {
-                "referenciaDiagnostico": "Condition/id_condition"
-            }
-        ]*/
+
     },
     "diagnostico": { //(Requerido)
         //"codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10
@@ -105,7 +102,7 @@
         {
             "codigo": "100010-8", //(Requerido) Código que identifica el exámen realizado
             "resultado": "ad-res-ex", //(Requerido)Indica el resultado codificado de los exámenes realizados
-            "fechaExamen": "2025-05-13 10:20:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd HH:mm:ss
+            "fechaExamen": "2025-05-13 10:20:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         }
     ],
     "solicitudMedicamento": [
@@ -118,7 +115,7 @@
     ],
     "anamnesis": { // (Opcional)
         "resultadoExamen": "resultado de exámen ----",
-        "fechaExamen": "2025-05-13 10:20:22" // fecha y hora en formato yyyy-MM-dd HH:mm:ss
+        "fechaExamen": "2025-05-13 10:20:22" // fecha y hora en formato yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
     },
     "prestador": {
         "tipoPrestador": "profesional", // (Requerido) se acepta "profesional" y "administrativo", segun la transacción que se ejecuta.
@@ -211,7 +208,7 @@
         ],
         "especialidadesFarmacologicas": [ //(Opcional)
             {
-                "nombre": "Laboratorio Clínicooo", //(Opcional)
+                "nombre": "Laboratorio Clínico", //(Opcional)
                 "codigo": "3", //(Requerido)  https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSEspecialidadFarma.html
                 "fechaEmision": "1984-11-15", //(Opcional) fecha en formato yyyy-MM-dd
                 "institucion": "Universidad de Valparaíso" //(Opcional)  Emisor de la especialidad medica.

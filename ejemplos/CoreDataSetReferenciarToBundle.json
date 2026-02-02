@@ -1,4 +1,6 @@
-{
+{// *Los datos que se representan como fecha y hora aceptan 2 formatos: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX
+    // ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+
     "datosSistema": {
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
@@ -118,7 +120,7 @@
     },
     "solicitudIC": {
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
-        "fechaSolicitudIC": "2025-11-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss        
+        "fechaSolicitudIC": "2025-11-01 10:20:22", //fecha con formato:  yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "idInterconsulta": "identificador", //identificador de la interconsulta asignado desde nivel central
         "idLocalIC": "", //opcional,
         "modalidadAtencion": 2, //valor entero entre: 1,2 o 3

@@ -50,7 +50,7 @@ public class OrganizationTransformer {
             org.getIdentifierFirstRep().setSystem(csDest);
         }
         else {
-            HapiFhirUtils.addNotFoundIssue(parentPath+".establecimiento.codigoDEIS", oo);
+            HapiFhirUtils.addNotFoundIssue(parentPath+".codigoDEIS", oo);
         }
 
         return org;

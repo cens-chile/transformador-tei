@@ -127,10 +127,16 @@ public class EncounterTransformer {
         if (json.has("codigoRazonDelEncuentro")) {
             for (JsonNode razon : json.get("codigoRazonDelEncuentro")) {
                 CodeableConcept reason = new CodeableConcept();
-                reason.addCoding(new Coding()
-                        .setCode(razon.get("codigoRazon").asText())
-                        .setSystem(razon.get("urlRazon").asText()));
-                encounter.addReasonCode(reason);
+                if(HapiFhirUtils.readStringValueFromJsonNode("codigoRazon", razon) != null &&
+                        !HapiFhirUtils.readStringValueFromJsonNode("codigoRazon", razon).isEmpty() &&
+                        HapiFhirUtils.readStringValueFromJsonNode("urlRazon", razon) != null &&
+                        !HapiFhirUtils.readStringValueFromJsonNode("urlRazon", razon).isEmpty() ) {
+                    reason.addCoding(new Coding().setCode(razon.get("codigoRazon").asText())
+                            .setSystem(razon.get("urlRazon").asText()));
+                    encounter.addReasonCode(reason);
+                }else{
+                    HapiFhirUtils.addNotFoundIssue("codigoRazonDelEncuentro.codigoRazon o codigoRazonDelEncuentro.urlRazon vacío",oo);
+                }
             }
         }
 

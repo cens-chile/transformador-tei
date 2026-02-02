@@ -1,4 +1,5 @@
-{
+{ // Los datos que se representan como fecha y hora aceptan 2 formatos: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX
+    // ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
     "datosSistema": {
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa.org" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
@@ -7,7 +8,7 @@
     "solicitudIC": { // (Requerido) Datos de la interconsulta
         "idSolicitudServicio": "id", //id del ServiceRequest asignado desde nivel central
         "idInterconsulta": "id-interconsulta-aaaa-bbbb-cccc-dddd", // (Requerido) corresponde al ID de sistema de la Interconsulta
-        "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss
+        "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido)echa con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "modalidadAtencion": "3", // (Requerido) 1,2 o 3,según https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSModalidadAtencionCodigo.html
         "estadoICcodigo": "4"
     },
@@ -114,34 +115,15 @@
         ]
     },
     "establecimiento": {
-        //"identificador": "est-002",  //(Opcional) Corresponde al identificador de la organización en el sistema de TEI
-        //"sistema": "https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSEstablecimientoDestino",
-        //"valor": "456456456",
-        "nombreLegal": "Centro de Salud Familiar Ejemplo agendador",
-        "codigoDEIS": "133558"
-        //"tipo": "CESFAM",
-        //"activo": true,
-        /*"direccion": {
-            "linea": "Av. Salud 321",
-            "comuna": {
-                "nombre": "Providencia",
-                "codigo": "13114"
-            },
-            "region": {
-                "nombre": "Región Metropolitana",
-                "codigo": "13"
-            },
-            "pais": {
-                "nombre": "Chile",
-                "codigo": "132"
-            }
-        }*/
+        "nombreLegal": "Centro de Salud Familiar Ejemplo agendador", // (Requerido) Nombre del establecimiento
+        "codigoDEIS": "133558" // (Requerido) Código del establecimiento
+
     },
 
     "IDRolAtendedor": "rol-atendedor-002", // (requerido) Corresdponde al identificador asignado por el Sistema Tiempos de espera del Minsal en la transacción Referenciar.
     "cita": {
         "identificador": "cita-agendada-001", //(Requerido) identificador en el sistema de salud. Es distinto del "id" asignado para la interoperabilidad
-        "fechaCreacion": "2025-12-29 10:00:00", //(requerido) Corresponde a la fecha en la que se crea la cita en el sistema de salud.
+        "fechaCreacion": "2025-12-29 10:00:00", //(requerido) Corresponde a la fecha en la que se crea la cita en el sistema de salud.formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "id": "id-citamedica-aaaa-bbbb-cccc-dddd", //(Opcional) Corresponde al id asignado a la cita al momento de agendar por primera vez. No se usa al momento de agendar, sino que cuando se actualiza la citación usando el evento agendar, por ejemplo, para cambiar el estado de la cita a No se presenta (noshow) usando el campo siguiente ("estado")
         "estado": "booked", // (Requerido)Indica el estado de la cita medica: pending=pendiente | booked=cita agendada | cancelled=cita cancelada | noshow=no presentación
         "motivo": {  //  (Opcional) Motivo de la consulta
@@ -149,8 +131,8 @@
             "glosa": "Chequeo general", // (Opcional)
             "sistema": "http://snomed.info/sct" //(Opcional)
         },
-        "fechaInicio": "2025-06-10 09:00:00",  //(Requerido) yyyy-MM-dd HH:mm:ss fecha y hora  de inicio de la cita
-        "fechaFin": "2025-06-10 09:30:00", //(Requerido) yyyy-MM-dd HH:mm:ss fecha y hora de fin de la cita
+        "fechaInicio": "2025-06-10 09:00:00",  //(Requerido) fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+        "fechaFin": "2025-06-10 09:30:00", //(Requerido) fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "estadoActorPaciente": "accepted", //(Requerido) accepted declined tentative needs-action.
         "medioDeContacto": "2" , // (Requerido) 1 Correo 2 SMS 3 Llamada 4 Whatsapp 5 Presencial
         "motivoCancelacionCita": "pat", //(Opcional) https://hl7.org/fhir/R4/valueset-appointment-cancellation-reason.html

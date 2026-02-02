@@ -1,4 +1,5 @@
-{
+{// *Los datos que se representan como fecha y hora aceptan 2 formatos: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX
+    // ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
     "datosSistema": {
         "software": "conector-ñuble", //(Requerido)software: nombre del sistema que envia la información.
         "endpoint": "sadsadsa" //(Requerido) endpoint: Dirección de origen del mensaje real debe ser una URI.
@@ -198,7 +199,7 @@
     },
     "solicitudIC": { // (*Requerido)
         "idLocalIC": "", //opcional,
-        "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd hh:mm:ss
+        "fechaSolicitudIC": "2025-01-01 10:20:22", //(Requerido) Fecha de solicitud de interconsulta con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         "modalidadAtencion": "2", //(*Requerido) Valor entre: 1,2 o 3
         "derivadoPara": "1", //(*Requerido) Valor entre: 1,2,3,4 o 5
         "prioridadIc": "routine", //(*Requerido) Valor entre: routine o urgent
@@ -211,8 +212,8 @@
         "identificacionConsultaAPS": "identificador en sistema-del encuentro", //(Requerido) Corresponde al Identificador del encuentro de APS en sistema
         "codigoModalidadAtencion": "1", //(Requerido) 1=presencial 2=remota 3=Telemedicina
         "periodo": { // (Requerido)
-            "fechaInicio": "2023-01-01 09:00:00", // (Requerido) yyyy-MM-dd hh:mm:ss
-            "fechaFin": "2024-01-01 10:00:00" //(Requerido) yyyy-MM-dd hh:mm:ss
+            "fechaInicio": "2023-01-01 09:00:00", // (Requerido) yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+            "fechaFin": "2024-01-01 10:00:00" //(Requerido) yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         }
     },
     "indiceComorbilidad": "G0", //(Opcional) valor entre G0, G1, G2 y G3
@@ -234,12 +235,12 @@
         {
             "codigo": "100010-8", //(Requerido) Código que identifica el exámen realizado
             "resultado": "ad", //(Requerido)Indica el resultado codificado de los exámenes realizados
-            "fechaExamen": "2025-01-01 10:21:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd hh:mm:ss
+            "fechaExamen": "2025-01-01 10:21:22" //(Requerido) Indica cuando se tomó el examen, formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         },
         {
             "codigo": "100010-8", // (requerido)
             "resultado": "asd", // (requerido)
-            "fechaExamen": "2025-01-01 10:21:22" // (requerido) fecha con formato: yyyy-MM-dd hh:mm:ss
+            "fechaExamen": "2025-01-01 10:21:22" // (requerido) fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
         }
     ],
     "alergias": [ //(Opcional) puede ser más de uno.
@@ -255,7 +256,7 @@
     "motivoDerivacion": "motivo", //(Requerido) motivo de la derivación del paciente
     "solicitudExamen": [ //(Opcional)
         {
-            "fechaSolicitudIC": "2025-01-01 10:22:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd hh:mm:ss
+            "fechaSolicitudIC": "2025-01-01 10:22:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
             "razonSolicitud": "asddsadsadsa", //(Requerido) Indica la justificación para la solicitud de exámen
             "examenSolicitadoCodigo": "100003-3", //(Requerido) Indica el código de SNOMED para el exámen solicitado
             "examenSolicitadoGlosa": "sad" //(Opcional) Exámen solicitado en texto libre
