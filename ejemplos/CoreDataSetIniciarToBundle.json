@@ -223,9 +223,9 @@
     "diagnostico": { //(Requerido)
         //"codeCIE10": "A03", //(Requerido) Código del diagnóstico en SNOMED o CIE-10
         "codeSNOMED": "23186000", //(Requerido?) Código del diagnóstico en SNOMED o CIE-10
-        "glosaCIE10": "CIE-10 Glosa", //(Requerido?)Corresponde a la glosa asociada al código  del diagnóstico según CIE-10
+        //"glosaCIE10": "CIE-10 Glosa", //(Requerido?)Corresponde a la glosa asociada al código  del diagnóstico según CIE-10
         "glosaSNOMED": "SNOMED Glosa", //(Opcional) Corresponde a la glosa asociada al código del diagnóstico segun SNOMED
-        "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
+        "diagnosticoTexto": "texto diagnostico", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
         "estadoDiagnostico": "active", //(Requerido) Estado clinico del diagnostico.
         "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico.
         "categoria": "encounter-diagnosis", //(Requerido) Categoría del diagnóstico de origen.
