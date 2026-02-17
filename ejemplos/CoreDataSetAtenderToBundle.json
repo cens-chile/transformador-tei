@@ -89,10 +89,11 @@
 
     },
     "diagnostico": { //(Requerido)
-        //"codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10
-        "codeSNOMED": "6736007", ////(Requerido CIE10 o SNOMED) Código del diagnóstico SNOMED
-        "glosa": "", //(Opcional)Corresponde a la glosa asociada al código  del diagnóstico según la terminología utilizada
-        "texto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
+        "codeCIE10": "A03", //(Requerido CIE10 o SNOMED) Código del diagnóstico CIE-10
+        //"codeSNOMED": "6736007", ////(Requerido CIE10 o SNOMED) Código del diagnóstico SNOMED
+        //"glosaSNOMED": "glosaSNOMED", //(Opcional)Corresponde a la glosa asociada al código  del diagnóstico según la terminología utilizada
+        "glosaCIE10": "glosa CIE 10", //(Opcional)Corresponde a la glosa asociada al código  del diagnóstico según la terminología utilizada
+        "diagnosticoTexto": "asd", //(Opcional) Diagnóstico en texto libre ingresado por el profesional clínico
         "estadoDiagnostico": "active", //(Requerido) Estado clinico del diagnostico.
         "estadoVerificacion": "confirmed", //(Requerido) Estado de verificación del diagnóstico.
         "categoria": "encounter-diagnosis", //(Requerido) Categoría del diagnóstico de origen.
