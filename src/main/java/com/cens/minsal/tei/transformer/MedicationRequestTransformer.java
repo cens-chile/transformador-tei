@@ -34,7 +34,7 @@ public class MedicationRequestTransformer {
         MedicationRequest mr = new MedicationRequest();
 
         mr.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/MedicationRequestLE");
-        mr.getMeta().setLastUpdated(new Date());
+        //mr.getMeta().setLastUpdated(new Date());
 
         mr.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
         mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);

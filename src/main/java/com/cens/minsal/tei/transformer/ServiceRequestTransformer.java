@@ -33,7 +33,7 @@ public class ServiceRequestTransformer {
     public ServiceRequest transform(String profile, JsonNode node, OperationOutcome oo) {
         ServiceRequest sr = new ServiceRequest();
         sr.getMeta().addProfile(profile);
-        sr.getMeta().setLastUpdated(new Date());
+        //sr.getMeta().setLastUpdated(new Date());
 
         sr.setId(HapiFhirUtils.readStringValueFromJsonNode("ID", node));
 

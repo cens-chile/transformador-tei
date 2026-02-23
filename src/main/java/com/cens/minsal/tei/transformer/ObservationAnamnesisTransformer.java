@@ -34,7 +34,7 @@ public class ObservationAnamnesisTransformer {
         Observation obs = new Observation();
 
         obs.getMeta().addProfile(profile);
-        obs.getMeta().setLastUpdated(new Date());
+        //obs.getMeta().setLastUpdated(new Date());
 
         obs.setStatus(Observation.ObservationStatus.REGISTERED);
             String cs = "http://snomed.info/sct"; //"https://interoperabilidad.minsal.cl/fhir/ig/tei/CodeSystem/CSTipoObservacionMinsal";

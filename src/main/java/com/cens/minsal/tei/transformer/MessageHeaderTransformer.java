@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +37,8 @@ public class MessageHeaderTransformer {
         MessageHeader m = new MessageHeader();
         m.getMeta().addProfile(profile);
         m.getMeta().setLastUpdated(new Date());
+
+        m.getMeta().setLastUpdated(new Date((System.currentTimeMillis() / 1000) * 1000L));
         String tipoEvento = HapiFhirUtils.readStringValueFromJsonNode("tipoEvento",node);
         if(tipoEvento == null) HapiFhirUtils.addNotFoundIssue("tipoEvento", oo);
         String vs = "https://interoperabilidad.minsal.cl/fhir/ig/tei/ValueSet/VSTipoEventoLE";

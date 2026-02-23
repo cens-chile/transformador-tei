@@ -41,7 +41,7 @@ public class PatientTransformer {
 
         Patient patient = new Patient();
         patient.getMeta().addProfile(PROFILE);
-        patient.getMeta().setLastUpdated(new Date());
+        //patient.getMeta().setLastUpdated(new Date());
 
         String vs =""; String cs =""; String valido = "";
 

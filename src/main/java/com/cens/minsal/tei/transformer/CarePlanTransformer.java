@@ -38,7 +38,7 @@ public class CarePlanTransformer {
             carePlan.getMeta().addProfile("https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/CarePlanAtenderLE");
             carePlan.setStatus(CarePlan.CarePlanStatus.ACTIVE);
             carePlan.setIntent(CarePlan.CarePlanIntent.PLAN);
-            carePlan.getMeta().setLastUpdated(new Date());
+            //carePlan.getMeta().setLastUpdated(new Date());
 
             // title (extensión) - descripción del plan
             String descripcion = HapiFhirUtils.readStringValueFromJsonNode("indicacionesMedicas", node);

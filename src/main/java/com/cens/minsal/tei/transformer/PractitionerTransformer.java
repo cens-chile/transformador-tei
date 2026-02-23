@@ -35,7 +35,7 @@ public class PractitionerTransformer {
         String prestadorAdm = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/PractitionerAdministrativoLE";
 
         Practitioner practitioner = new Practitioner();
-        practitioner.getMeta().setLastUpdated(new Date());
+        //practitioner.getMeta().setLastUpdated(new Date());
 
         switch (tipoPractitioner){
         case "administrativo":

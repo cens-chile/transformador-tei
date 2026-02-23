@@ -33,7 +33,7 @@ public class ConditionTransformer {
         Condition cond = new Condition();
 
         cond.getMeta().addProfile(profile);
-        cond.getMeta().setLastUpdated(new Date());
+        //cond.getMeta().setLastUpdated(new Date());
 
         int codigosDiag = 0;
         String codeCIE10 = HapiFhirUtils.readStringValueFromJsonNode("codeCIE10", node);
