@@ -18,27 +18,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionnaireResponseTransformer {
     
-    private static String profile = "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/QuestionnaireResponseIniciarLE";
+    private static final String profile =
+            "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/QuestionnaireResponseIniciarLE";
+    
+    private static final String questionnaire =
+            "https://interoperabilidad.minsal.cl/fhir/ig/tei/Questionnaire/MotivoDerivacion";
     
     public QuestionnaireResponse transform(JsonNode node, OperationOutcome oo){
         String mot = HapiFhirUtils.readStringValueFromJsonNode("motivoDerivacion", node);
-        if(mot==null){
+        
+        if(mot == null){
             HapiFhirUtils.addNotFoundIssue("motivoDerivacion", oo);
             return null;
         }
+        
         QuestionnaireResponse quest = new QuestionnaireResponse();
         quest.getMeta().addProfile(profile);
+        quest.setQuestionnaire(questionnaire);
         quest.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
         
         QuestionnaireResponse.QuestionnaireResponseItemComponent item = quest.getItemFirstRep();
         item.setLinkId("MotivoDerivacion");
         item.setText("Motivo Derivación");
-        
-        
         item.getAnswerFirstRep().setValue(new StringType(mot));
-        
         
         return quest;
     }
-    
 }

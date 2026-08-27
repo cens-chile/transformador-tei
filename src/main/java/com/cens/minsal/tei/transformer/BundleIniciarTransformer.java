@@ -286,9 +286,10 @@ public class BundleIniciarTransformer {
         }
         
         
-        HapiFhirUtils.addResourceToBundle(b, motivoDerivacion);
         motivoDerivacion.setAuthor(new Reference(practitioner));
         motivoDerivacion.setSubject(new Reference(patient));
+        motivoDerivacion.setEncounter(new Reference(enc));
+        HapiFhirUtils.addResourceToBundle(b, motivoDerivacion);
 
         if(examenSolicitados != null && examenSolicitados.size()>0) {
             for (ServiceRequest s : examenSolicitados) {
