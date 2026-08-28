@@ -59,6 +59,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BundleIniciarTransformer {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BundleIniciarTransformer.class);
+    private static final String CORRESPONDE_GES_EXTENSION =
+            "https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/SospechaPatologiaGes";
     FhirServerConfig fhirServerConfig;
     static final String bundleProfile="https://interoperabilidad.minsal.cl/fhir/ig/tei/StructureDefinition/BundleIniciarLE";
     static final String snomedSystem = "http://snomed.info/sct";
@@ -400,6 +402,22 @@ public class BundleIniciarTransformer {
                  atPreferente);
             sr.addExtension(extAtPreferente);
             
+        }
+
+        JsonNode correspondeGesNode = node.get("correspondeGES");
+        if (correspondeGesNode != null && !correspondeGesNode.isNull()) {
+            boolean esBooleanoValido = correspondeGesNode.isBoolean()
+                    || (correspondeGesNode.isTextual()
+                    && ("true".equalsIgnoreCase(correspondeGesNode.asText().trim())
+                    || "false".equalsIgnoreCase(correspondeGesNode.asText().trim())));
+
+            if (esBooleanoValido) {
+                Boolean correspondeGes = HapiFhirUtils.readBooleanValueFromJsonNode("correspondeGES", node);
+                sr.addExtension(HapiFhirUtils.buildBooleanExt(
+                        CORRESPONDE_GES_EXTENSION, correspondeGes));
+            } else {
+                HapiFhirUtils.addInvalidIssue("correspondeGES", oo);
+            }
         }
 
 
