@@ -314,7 +314,7 @@ Link al Proyecto: [https://github.com/cens-chile/transformador-tei](https://gith
 [license-shield]: https://img.shields.io/badge/Apache-LICENSE-as?style=for-the-badge&logo=apache
 [license-url]: https://github.com/cens-chile/cens-chile/transformador-tei/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/cens-chile-red?style=for-the-badge&labelColor=blue
-[linkedin-url]: https://linkedin.com/in/othneildrew
+[linkedin-url]: https://www.linkedin.com/company/cens-chile
 [Python-url]: https://www.python.org/
 [Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Postgres.org]: https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white
