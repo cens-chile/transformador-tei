@@ -91,8 +91,9 @@ public class QuestionnaireResponseTransformer {
         }
         problemaItem.getAnswerFirstRep().setValue(coding);
 
-        String subProblema = HapiFhirUtils.readStringValueFromJsonNode(
-                "subProblemaSaludGES", solicitudIC);
+        
+        String subProblema = HapiFhirUtils.readStringValueFromJsonNode("subProblemaSaludGES", problemaGes);
+
         if (subProblema != null) {
             QuestionnaireResponse.QuestionnaireResponseItemComponent subProblemaItem = grupoGes.addItem();
             subProblemaItem.setLinkId("SubProblemadeSaludGES");
