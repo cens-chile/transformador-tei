@@ -14,8 +14,7 @@
         "pueblosOriginariosPerteneciente": true, //(Requerido) Se indica si el paciente pertenece a un pueblo originario.
         //"pueblosOriginarios": "10", //(Requerido) si pueblosOriginariosPerteneciente es true. https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-PueblosOriginariosVS.html -> 1 a 10, 10 significa "otros". Si "10" se puede agregar "otroPuebloOriginario"
 
-        /*"puebloAfroPertenencia": true, //(Opcional) Se indica si el paciente pertenece al pueblo tribal afrodescendiente
-        */
+        /*"puebloAfroPertenencia": true, //(Opcional) Se indica si el paciente pertenece al pueblo tribal afrodescendiente        */
         "otroPuebloOriginario": "selknam", //(Opcional) Sólo se considera si "pueblosOriginariosPerteneciente" = true y "pueblosOriginarios" = "10".
         "identificadores": [ //(Requerido) el identificador Run de código 01 es obligatorio.
             {
@@ -206,7 +205,13 @@
         "atencionPreferente": false, //(Opcional) Indica si corresponde a atención preferente.
         "destinoAtencion": "1", //(opcional) valores  del 1 al 5 https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.1/ValueSet-VSDestinoReferenciaCodigo.html
         "resolutividadAPS": true, //(Opcional) Indica si corresponde aun problema se salud que es posible resolver por programa de      resolutividad en el nivel primario
-        "fundamentoPriorizacion": "1" //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
+        "fundamentoPriorizacion": "1", //(Opcional) Texto de los fundamentos del porque se sugiere la prioridad indicada a esta Interconsulta
+        "correspondeGES": true,
+                "problemaSaludGES": {
+                    "codigo": "1931000325104", // (obligatorio si correspondeGES =true) https://interoperabilidad.minsal.cl/fhir/ig/tei/0.2.3/ValueSet-vs-problema-ges-tei.html
+                    "glosa": "ESQUIZOFRENIA", // (obligatorio si correspondeGES =true) texto con la glosa del problema salud GES.
+                    "subProblemaSaludGES": "texto libre con descripción subproblema"//(Opcional)
+                }    
     },
     "encuentroIniciarAPS": { // (Requerido)
         "identificacionConsultaAPS": "identificador en sistema-del encuentro", //(Requerido) Corresponde al Identificador del encuentro de APS en sistema
