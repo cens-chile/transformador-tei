@@ -256,7 +256,7 @@
     "motivoDerivacion": "motivo", //(Requerido) motivo de la derivación del paciente
     "solicitudExamen": [ //(Opcional)
         {
-            "fechaSolicitudIC": "2025-01-01 10:22:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+            "fechaSolicitudExamen": "2025-01-01 10:22:22", //(Requerido) Fecha-Hora de cuando ocurre la solicitud de exámen, formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
             "razonSolicitud": "asddsadsadsa", //(Requerido) Indica la justificación para la solicitud de exámen
             "examenSolicitadoCodigo": "100003-3", //(Requerido) Indica el código de SNOMED para el exámen solicitado
             "examenSolicitadoGlosa": "sad" //(Opcional) Exámen solicitado en texto libre
