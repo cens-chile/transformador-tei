@@ -12,7 +12,7 @@
     },
     "solicitudExamen": [
         {
-            "fechaSolicitudIC": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
+            "fechaSolicitudExamen": "2025-01-01 10:20:22", //fecha con formato: yyyy-MM-dd HH:mm:ss y yyyy-MM-ddTHH:mm:ss+XXX ejemplo: "2026-01-25 20:00:01", "2026-01-25T20:00:01-03:00"
             "razonSolicitud": "sospecha de escoliosis", //Razón de la solicitud del exámen
             "examenSolicitadoCodigo": "100000-9", // código LOINC
             "examenSolicitadoGlosa": "sad", //(Opcional)Nombre del examen segun el estándar
